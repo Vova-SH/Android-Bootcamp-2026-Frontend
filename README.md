@@ -223,6 +223,11 @@
   - a. Форма с полями: ФИО, отдел, логин
   - b. Смена пароля (старый пароль, новый, подтверждение)
   - c. Валидация: пароль ≥ 6 символов, совпадение новых паролей
+
+
+# Task 3
+
+https://www.figma.com/design/RhDynBggFpMdX3icXJ48H7/Untitled?node-id=0-1&p=f&t=cYEMWsG18LhaOcTW-0
 	
 
 
