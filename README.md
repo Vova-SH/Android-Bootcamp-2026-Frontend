@@ -1,4 +1,5 @@
 # Team: backend-raskrivaetsya-vesnoy
+# Макет: [https://www.figma.com/design/jSlwGQV1KjClIsVd4pjve5/Untitled?node-id=0-1&p=f&t=tIibcrBK5KgoET7g-0](https://www.figma.com/design/jSlwGQV1KjClIsVd4pjve5/Untitled?node-id=0-1&t=tIibcrBK5KgoET7g-1)
 
 # Техническое задание на разработку программного продукта для планирования встреч
 
