@@ -1377,3 +1377,5 @@
 - Настройка повтора (ежедневно, еженедельно, ежемесячно)
 - Указание количества повторов или конечной даты
 - Интеграция с `POST /api/meetings/recurring`
+
+# [Спроектированный Figma-макет будущего приложения](https://www.figma.com/design/WcFoS3d5ZzD5SnjgCMGN8w/WhiteKod-Android-Bootcamp-2026?node-id=0-1&t=Bu8tcRGZLN406gG6-1)
