@@ -1,6 +1,7 @@
 # ООПтимисты
 https://www.figma.com/design/xHFrPBwoc0EFBLOLNLfUXZ/Untitled?node-id=0-1&t=VOKbtC4LeiPNazL4-1
 
+
 # Техническое задание на разработку программного продукта для планирования встреч
 
 ## 1. Общие описание
