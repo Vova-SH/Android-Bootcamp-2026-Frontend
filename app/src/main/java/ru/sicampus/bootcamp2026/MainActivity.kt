@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import ru.sicampus.bootcamp2026.screens.AuthorizationScreen
+import ru.sicampus.bootcamp2026.screens.MainScreen
 import ru.sicampus.bootcamp2026.screens.RegistrationScreen
 import ru.sicampus.bootcamp2026.ui.theme.AndroidBootcamp2026FrontendTheme
 
@@ -21,7 +22,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AndroidBootcamp2026FrontendTheme {
-                AuthorizationScreen()
+                MainScreen()
             }
         }
     }
