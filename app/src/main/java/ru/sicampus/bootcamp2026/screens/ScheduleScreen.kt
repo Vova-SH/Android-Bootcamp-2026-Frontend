@@ -4,6 +4,7 @@ import android.R
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
@@ -42,7 +44,8 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun ScheduleScreen() {
-    val scrollState = rememberScrollState()
+    val scrollState1 = rememberScrollState()
+    val scrollState2 = rememberScrollState()
 
 
     Column(modifier = Modifier.fillMaxSize().background(White)) {
@@ -56,14 +59,17 @@ fun ScheduleScreen() {
         )
         {
             Text(text = "Jan, 2026",
-                fontSize = 20.sp,
+                fontSize = 30.sp,
                 color = Black,
                 fontFamily = FontFamily(androidx.
                 compose.ui.text.font.Font(ru.sicampus.bootcamp2026.R.font.montserrat_bold)),
                 modifier = Modifier.padding(horizontal = 24.dp)
                     .padding(top=60.dp)
             )
-            Row (modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(top=47.dp)){
+            Row (modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(top=47.dp)
+                .horizontalScroll(scrollState1)){
                 Column(modifier = Modifier
                     .clip(RoundedCornerShape(20.dp))
                     .background(Blue)
@@ -86,11 +92,109 @@ fun ScheduleScreen() {
                         modifier = Modifier
                             .padding(2.dp)
                             .align(Alignment.CenterHorizontally) )
-                    Spacer(modifier = Modifier.width(10.dp))
-
-
 
                 }
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.Transparent)
+                    .height(83.dp)
+                    .width(74.dp)
+                    .clip(RoundedCornerShape(30.dp))) {
+                    Text(text = "29",
+                        fontSize = 20.sp,
+                        color = Black,
+                        fontFamily = FontFamily(androidx.
+                        compose.ui.text.font.Font(ru.sicampus.bootcamp2026.R.font.montserrat_bold)),
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .align(Alignment.CenterHorizontally) )
+                    Text(text = "Чт",
+                        fontSize = 20.sp,
+                        color = Black,
+                        fontFamily = FontFamily(androidx.
+                        compose.ui.text.font.Font(ru.sicampus.bootcamp2026.R.font.montserrat_regular)),
+                        modifier = Modifier
+                            .padding(2.dp)
+                            .align(Alignment.CenterHorizontally) )
+
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.Transparent)
+                    .height(83.dp)
+                    .width(74.dp)
+                    .clip(RoundedCornerShape(30.dp))) {
+                    Text(text = "30",
+                        fontSize = 20.sp,
+                        color = Black,
+                        fontFamily = FontFamily(androidx.
+                        compose.ui.text.font.Font(ru.sicampus.bootcamp2026.R.font.montserrat_bold)),
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .align(Alignment.CenterHorizontally) )
+                    Text(text = "Пт",
+                        fontSize = 20.sp,
+                        color = Black,
+                        fontFamily = FontFamily(androidx.
+                        compose.ui.text.font.Font(ru.sicampus.bootcamp2026.R.font.montserrat_regular)),
+                        modifier = Modifier
+                            .padding(2.dp)
+                            .align(Alignment.CenterHorizontally) )
+
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.Transparent)
+                    .height(83.dp)
+                    .width(74.dp)
+                    .clip(RoundedCornerShape(30.dp))) {
+                    Text(text = "31",
+                        fontSize = 20.sp,
+                        color = Black,
+                        fontFamily = FontFamily(androidx.
+                        compose.ui.text.font.Font(ru.sicampus.bootcamp2026.R.font.montserrat_bold)),
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .align(Alignment.CenterHorizontally) )
+                    Text(text = "Сб",
+                        fontSize = 20.sp,
+                        color = Black,
+                        fontFamily = FontFamily(androidx.
+                        compose.ui.text.font.Font(ru.sicampus.bootcamp2026.R.font.montserrat_regular)),
+                        modifier = Modifier
+                            .padding(2.dp)
+                            .align(Alignment.CenterHorizontally) )
+
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.Transparent)
+                    .height(83.dp)
+                    .width(74.dp)
+                    .clip(RoundedCornerShape(30.dp))) {
+                    Text(text = "1",
+                        fontSize = 20.sp,
+                        color = Black,
+                        fontFamily = FontFamily(androidx.
+                        compose.ui.text.font.Font(ru.sicampus.bootcamp2026.R.font.montserrat_bold)),
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .align(Alignment.CenterHorizontally) )
+                    Text(text = "Вс",
+                        fontSize = 20.sp,
+                        color = Black,
+                        fontFamily = FontFamily(androidx.
+                        compose.ui.text.font.Font(ru.sicampus.bootcamp2026.R.font.montserrat_regular)),
+                        modifier = Modifier
+                            .padding(2.dp)
+                            .align(Alignment.CenterHorizontally) )
+
+                }
+                Spacer(modifier = Modifier.width(10.dp))
             }
         }
 
@@ -106,7 +210,7 @@ fun ScheduleScreen() {
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
-            .verticalScroll(scrollState)){
+            .verticalScroll(scrollState2)){
             MeetingField("Обсуждение 1", "18:00")
             Spacer(modifier = Modifier.height(30.dp))
             MeetingField("Обсуждение 2", "19:00")
@@ -114,10 +218,8 @@ fun ScheduleScreen() {
             MeetingField("Обсуждение 3", "20:00")
             Spacer(modifier = Modifier.height(30.dp))
             MeetingField("Обсуждение 4", "21:00")
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(130.dp))
         }
-        Spacer(modifier = Modifier.height(150.dp))
-
     }
 
 }
