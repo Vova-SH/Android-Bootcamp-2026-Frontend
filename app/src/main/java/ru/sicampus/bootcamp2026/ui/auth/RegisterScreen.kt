@@ -176,7 +176,7 @@ fun RegisterScreen(
                 )
             ) {
                 Text(
-                    text = "Sign in",
+                    text = "Sign up",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = MplusFontFamily)
