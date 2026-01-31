@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "ru.sicampus.bootcamp2026.app-mergeDebugResources-46:/values-v23/values-v23.xml",
+            "outputFile": "ru.sicampus.bootcamp2026.app-mergeDebugResources-48:/values-v23/values-v23.xml",
             "map": [
                 {
-                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/c90b2f9ea924f94c754b3e639eed1e27/transformed/appcompat-1.7.1/res/values-v23/values-v23.xml",
+                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/627991451a7da300c8b9b5221f57421c/transformed/appcompat-1.7.1/res/values-v23/values-v23.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,20,34,35,36,39,43,44,45,46",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4",

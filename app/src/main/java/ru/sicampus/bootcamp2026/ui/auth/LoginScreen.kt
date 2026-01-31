@@ -34,7 +34,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.sicampus.bootcamp2026.ui.components.AuthTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -43,6 +42,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import ru.sicampus.bootcamp2026.R
+import ru.sicampus.bootcamp2026.ui.components.AuthTextField
+
 
 // Цвета
 val LightGreen = Color(0xFFBBDBA6)
@@ -102,7 +103,7 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(48.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF2A2A2A).copy(alpha = 0.5f)
+                    containerColor = Color(0xFF2A2A2A).copy(alpha = 0.6f)
                 )
             ) {
                 Column(
@@ -147,12 +148,12 @@ fun LoginScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "Do not have account? ",
-                            color = Color.Gray,
+                            color = Color.White,
                             style = MaterialTheme.typography.bodySmall
                         )
                         Text(
                             text = "REGISTER",
-                            color = Color.White, // Белый цвет как на макете
+                            color = Color(0xFFBBDBA6), // Белый цвет как на макете
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.clickable { onRegisterClick() }

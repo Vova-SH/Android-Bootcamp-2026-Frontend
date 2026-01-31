@@ -1,82 +1,90 @@
 [
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/mipmap-xxhdpi/ic_launcher_round.webp"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/mipmap-anydpi-v26/ic_launcher_round.xml"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/mipmap-anydpi-v26_ic_launcher.xml.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/mipmap-anydpi-v26/ic_launcher.xml"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/drawable/ic_launcher_foreground.xml"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/drawable_ic_launcher_background.xml.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/drawable/ic_launcher_background.xml"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/drawable_green_gradient.jpg.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/drawable/green_gradient.jpg"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/layout_activity_main.xml.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/layout/activity_main.xml"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/layout_activity_main.xml.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/layout/activity_main.xml"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/xml_backup_rules.xml.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/xml/backup_rules.xml"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/mipmap-hdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/mipmap-mdpi_ic_launcher.webp.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/mipmap-mdpi/ic_launcher.webp"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/mipmap-mdpi/ic_launcher.webp"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/mipmap-xhdpi_ic_launcher_round.webp.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/mipmap-xhdpi/ic_launcher_round.webp"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/xml_data_extraction_rules.xml.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/xml/data_extraction_rules.xml"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/drawable_second_gradient.jpg.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/drawable/second_gradient.jpg"
+        "merged": "ru.sicampus.bootcamp2026.app-debug-50:/drawable_ic_filter.xml.flat",
+        "source": "ru.sicampus.bootcamp2026.app-main-52:/drawable/ic_filter.xml"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/mipmap-hdpi_ic_launcher.webp.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/mipmap-hdpi/ic_launcher.webp"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/font_auth_rounded_mplus_1c_bold.ttf.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/font/auth_rounded_mplus_1c_bold.ttf"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/mipmap-xxhdpi_ic_launcher.webp.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/mipmap-xxhdpi/ic_launcher.webp"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/drawable_ic_launcher_background.xml.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/drawable/ic_launcher_background.xml"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/mipmap-hdpi_ic_launcher_round.webp.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/mipmap-hdpi/ic_launcher_round.webp"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/mipmap-xhdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/mipmap-mdpi_ic_launcher_round.webp.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/mipmap-mdpi/ic_launcher_round.webp"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/mipmap-anydpi-v26/ic_launcher.xml"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/mipmap-anydpi-v26/ic_launcher_round.xml"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/drawable_ic_filter.xml.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/drawable/ic_filter.xml"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/mipmap-xxxhdpi_ic_launcher.webp.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/mipmap-xxxhdpi/ic_launcher.webp"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/mipmap-xxxhdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/drawable_ic_launcher_foreground.xml.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/drawable/ic_launcher_foreground.xml"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/xml_backup_rules.xml.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/xml/backup_rules.xml"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/mipmap-xhdpi_ic_launcher.webp.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/mipmap-xhdpi/ic_launcher.webp"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/mipmap-xxhdpi/ic_launcher.webp"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/xml_data_extraction_rules.xml.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/xml/data_extraction_rules.xml"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/mipmap-xxxhdpi/ic_launcher.webp"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/drawable_green_gradient.jpg.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/drawable/green_gradient.jpg"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/mipmap-mdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-48:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
-        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-50:/mipmap-xxxhdpi/ic_launcher_round.webp"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/mipmap-hdpi/ic_launcher.webp"
     },
     {
-        "merged": "ru.sicampus.bootcamp2026.app-debug-48:/font_auth_rounded_mplus_1c_bold.ttf.flat",
-        "source": "ru.sicampus.bootcamp2026.app-main-50:/font/auth_rounded_mplus_1c_bold.ttf"
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/drawable_second_gradient.jpg.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/drawable/second_gradient.jpg"
+    },
+    {
+        "merged": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-debug-50:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "/home/kov/.gradle/daemon/8.11.1/ru.sicampus.bootcamp2026.app-main-52:/mipmap-xxhdpi/ic_launcher_round.webp"
     }
 ]

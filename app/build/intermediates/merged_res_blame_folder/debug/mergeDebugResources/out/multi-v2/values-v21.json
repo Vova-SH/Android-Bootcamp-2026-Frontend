@@ -1,10 +1,29 @@
 {
     "logs": [
         {
-            "outputFile": "ru.sicampus.bootcamp2026.app-mergeDebugResources-46:/values-v21/values-v21.xml",
+            "outputFile": "ru.sicampus.bootcamp2026.app-mergeDebugResources-48:/values-v21/values-v21.xml",
             "map": [
                 {
-                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/c90b2f9ea924f94c754b3e639eed1e27/transformed/appcompat-1.7.1/res/values-v21/values-v21.xml",
+                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/38d7b640cd553f2e2e2ed345d4bb06da/transformed/core-1.5.0/res/values-v21/values.xml",
+                    "from": {
+                        "startLines": "4,13",
+                        "startColumns": "0,0",
+                        "startOffsets": "180,655",
+                        "endLines": "12,21",
+                        "endColumns": "8,8",
+                        "endOffsets": "654,1127"
+                    },
+                    "to": {
+                        "startLines": "268,277",
+                        "startColumns": "4,4",
+                        "startOffsets": "19151,19630",
+                        "endLines": "276,285",
+                        "endColumns": "8,8",
+                        "endOffsets": "19625,20102"
+                    }
+                },
+                {
+                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/627991451a7da300c8b9b5221f57421c/transformed/appcompat-1.7.1/res/values-v21/values-v21.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,17,19,20,21,22,24,26,27,28,29,30,32,34,36,38,40,42,43,48,50,52,53,54,56,58,59,60,61,62,63,106,109,152,155,158,160,162,164,167,171,174,175,176,179,180,181,182,183,184,187,188,190,192,194,196,200,202,203,204,205,207,211,213,215,216,217,218,219,220,222,223,224,234,235,236,248",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -23,7 +42,7 @@
                     }
                 },
                 {
-                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/40fc2e2ccb7caa607c668afd23ed3d83/transformed/core-1.16.0/res/values-v21/values-v21.xml",
+                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/884569d53af3526710a7e702714e7b67/transformed/core-1.16.0/res/values-v21/values-v21.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,13",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4",
@@ -33,12 +52,12 @@
                         "endOffsets": "168,232,299,363,479,605,731,859,1031,1383"
                     },
                     "to": {
-                        "startLines": "2,3,4,5,264,265,266,267,268,271",
+                        "startLines": "2,3,4,5,264,265,266,267,286,289",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,173,237,304,18655,18771,18897,19023,19151,19323",
-                        "endLines": "2,3,4,5,264,265,266,267,270,275",
+                        "startOffsets": "55,173,237,304,18655,18771,18897,19023,20107,20279",
+                        "endLines": "2,3,4,5,264,265,266,267,288,293",
                         "endColumns": "117,63,66,63,115,125,125,127,12,12",
-                        "endOffsets": "168,232,299,363,18766,18892,19018,19146,19318,19670"
+                        "endOffsets": "168,232,299,363,18766,18892,19018,19146,20274,20626"
                     }
                 }
             ]

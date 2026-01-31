@@ -1,27 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "ru.sicampus.bootcamp2026.app-mergeDebugResources-46:/values-zh-rHK/values-zh-rHK.xml",
+            "outputFile": "ru.sicampus.bootcamp2026.app-mergeDebugResources-48:/values-zh-rHK/values-zh-rHK.xml",
             "map": [
                 {
-                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/311a6106867d920746bbfe238b5fb9a4/transformed/ui/res/values-zh-rHK/values-zh-rHK.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "105,197,273,347,435,526,604,678,755,833,907,980,1055,1122,1203,1276,1346,1415,1490,1555",
-                        "endColumns": "91,75,73,87,90,77,73,76,77,73,72,74,66,80,72,69,68,74,64,115",
-                        "endOffsets": "192,268,342,430,521,599,673,750,828,902,975,1050,1117,1198,1271,1341,1410,1485,1550,1666"
-                    },
-                    "to": {
-                        "startLines": "30,38,39,40,41,42,43,44,111,112,113,114,116,117,118,119,120,122,123,124",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "2766,3519,3595,3669,3757,3848,3926,4000,10455,10533,10607,10680,10834,10901,10982,11055,11125,11295,11370,11435",
-                        "endColumns": "91,75,73,87,90,77,73,76,77,73,72,74,66,80,72,69,68,74,64,115",
-                        "endOffsets": "2853,3590,3664,3752,3843,3921,3995,4072,10528,10602,10675,10750,10896,10977,11050,11120,11189,11365,11430,11546"
-                    }
-                },
-                {
-                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/4c8a9f1d6425088dce8ea7b60a8f7693/transformed/material3/res/values-zh-rHK/values-zh-rHK.xml",
+                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/2e160054d4ab51f2af9f6fe45677677b/transformed/material3/res/values-zh-rHK/values-zh-rHK.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -38,7 +21,24 @@
                     }
                 },
                 {
-                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/40fc2e2ccb7caa607c668afd23ed3d83/transformed/core-1.16.0/res/values-zh-rHK/values-zh-rHK.xml",
+                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/ef7ad59a13feed8db7c160b83abf55e9/transformed/foundation/res/values-zh-rHK/values-zh-rHK.xml",
+                    "from": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,155,236",
+                        "endColumns": "99,80,76",
+                        "endOffsets": "150,231,308"
+                    },
+                    "to": {
+                        "startLines": "29,125,126",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "2666,11551,11632",
+                        "endColumns": "99,80,76",
+                        "endOffsets": "2761,11627,11704"
+                    }
+                },
+                {
+                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/884569d53af3526710a7e702714e7b67/transformed/core-1.16.0/res/values-zh-rHK/values-zh-rHK.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -55,7 +55,24 @@
                     }
                 },
                 {
-                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/c90b2f9ea924f94c754b3e639eed1e27/transformed/appcompat-1.7.1/res/values-zh-rHK/values-zh-rHK.xml",
+                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/4a77c910c1cee943cc61717e1b548d89/transformed/ui/res/values-zh-rHK/values-zh-rHK.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "105,197,273,347,435,526,604,678,755,833,907,980,1055,1122,1203,1276,1346,1415,1490,1555",
+                        "endColumns": "91,75,73,87,90,77,73,76,77,73,72,74,66,80,72,69,68,74,64,115",
+                        "endOffsets": "192,268,342,430,521,599,673,750,828,902,975,1050,1117,1198,1271,1341,1410,1485,1550,1666"
+                    },
+                    "to": {
+                        "startLines": "30,38,39,40,41,42,43,44,111,112,113,114,116,117,118,119,120,122,123,124",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "2766,3519,3595,3669,3757,3848,3926,4000,10455,10533,10607,10680,10834,10901,10982,11055,11125,11295,11370,11435",
+                        "endColumns": "91,75,73,87,90,77,73,76,77,73,72,74,66,80,72,69,68,74,64,115",
+                        "endOffsets": "2853,3590,3664,3752,3843,3921,3995,4072,10528,10602,10675,10750,10896,10977,11050,11120,11189,11365,11430,11546"
+                    }
+                },
+                {
+                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/627991451a7da300c8b9b5221f57421c/transformed/appcompat-1.7.1/res/values-zh-rHK/values-zh-rHK.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -69,23 +86,6 @@
                         "startOffsets": "105,200,293,393,475,572,680,757,832,924,1018,1109,1205,1300,1394,1490,1582,1674,1766,1844,1940,2035,2130,2227,2323,2421,2572,10755",
                         "endColumns": "94,92,99,81,96,107,76,74,91,93,90,95,94,93,95,91,91,91,77,95,94,94,96,95,97,150,93,78",
                         "endOffsets": "195,288,388,470,567,675,752,827,919,1013,1104,1200,1295,1389,1485,1577,1669,1761,1839,1935,2030,2125,2222,2318,2416,2567,2661,10829"
-                    }
-                },
-                {
-                    "source": "/home/kov/.gradle/caches/8.11.1/transforms/d1e40c342b69278ee1f4e83d7a5f1397/transformed/foundation/res/values-zh-rHK/values-zh-rHK.xml",
-                    "from": {
-                        "startLines": "2,3,4",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "55,155,236",
-                        "endColumns": "99,80,76",
-                        "endOffsets": "150,231,308"
-                    },
-                    "to": {
-                        "startLines": "29,125,126",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "2666,11551,11632",
-                        "endColumns": "99,80,76",
-                        "endOffsets": "2761,11627,11704"
                     }
                 }
             ]

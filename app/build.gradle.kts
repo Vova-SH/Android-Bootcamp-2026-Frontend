@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "ru.sicampus.bootcamp2026"
-        minSdk = 25
+        minSdk = 31
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -55,6 +55,8 @@ dependencies {
     // icons and ui-text
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.ui.text)
+    implementation(libs.androidx.compose.ui.test)
+    implementation(libs.androidx.foundation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -1,4 +1,5 @@
 package ru.sicampus.bootcamp2026.ui.theme
 
-class Color {
-}
+import androidx.compose.ui.graphics.Color
+
+val LightGreen = Color(0xFFBBDBA6)
