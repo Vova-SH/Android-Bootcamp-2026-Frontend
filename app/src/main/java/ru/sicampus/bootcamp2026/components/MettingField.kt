@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -34,6 +35,7 @@ import ru.sicampus.bootcamp2026.ui.theme.Black
 import ru.sicampus.bootcamp2026.ui.theme.Blue
 import ru.sicampus.bootcamp2026.ui.theme.DarkGrey
 import ru.sicampus.bootcamp2026.ui.theme.LightGrey
+import ru.sicampus.bootcamp2026.ui.theme.White
 
 @Composable
 fun MeetingField(
@@ -41,12 +43,14 @@ fun MeetingField(
     time: String
 ) {
 
-    Card(modifier = Modifier.fillMaxWidth().height(100.dp)
+    Card(colors = CardDefaults.cardColors(
+        containerColor = LightGrey
+    ),
+        modifier = Modifier.fillMaxWidth().height(100.dp)
         .clip(RoundedCornerShape(20.dp))) {
         Row(modifier = Modifier.fillMaxSize().padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically) {
-            Icon(painter = painterResource(R.drawable.meeting)
-                , contentDescription = "Обсуждение")
+            MeetIcon()
             Text(label, fontSize = 18.sp, fontFamily = FontFamily(androidx.
             compose.ui.text.font.Font(R.font.montserrat_bold)),
                 color = Black,
@@ -56,7 +60,7 @@ fun MeetingField(
             compose.ui.text.font.Font(R.font.montserrat_regular)),
                 color = DarkGrey,
                 modifier = Modifier
-                    .padding(start=24.dp))
+                    .padding(start=18.dp))
 
         }
     }

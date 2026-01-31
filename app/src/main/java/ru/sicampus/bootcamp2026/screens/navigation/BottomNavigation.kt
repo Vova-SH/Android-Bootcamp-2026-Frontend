@@ -31,7 +31,6 @@ fun BottomNavigation(
         BottomBarScreen.Profile
     )
     NavigationBar(
-        modifier = Modifier.background(Color.Transparent)
     ) {
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route
