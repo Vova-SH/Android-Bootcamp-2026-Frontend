@@ -1,6 +1,7 @@
-package ru.sicampus.bootcamp2026
+package ru.sicampus.bootcamp2026.ui.theme
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -19,15 +20,16 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistrationScreen(navController: NavController) {
+fun LoginScreen(navController: NavController) {
 
-    var name by remember { mutableStateOf("") }
-    var surname by remember { mutableStateOf("") }
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
+
 
     Box(
         modifier = Modifier
@@ -55,7 +57,7 @@ fun RegistrationScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Регистрация",
+                text = "Вход",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -63,7 +65,7 @@ fun RegistrationScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Создайте новый аккаунт",
+                text = "Войдите в свой аккаунт",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -74,31 +76,7 @@ fun RegistrationScreen(navController: NavController) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Имя") },
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true,
-                    shape = RoundedCornerShape(20.dp)
-                )
-
-                OutlinedTextField(
-                    value = surname,
-                    onValueChange = { surname = it },
-                    label = { Text("Фамилия") },
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true,
-                    shape = RoundedCornerShape(20.dp)
-                )
-            }
+            ) {}
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -131,32 +109,31 @@ fun RegistrationScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
-                label = { Text("Подтверждение пароля") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Done
-                ),
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                shape = RoundedCornerShape(20.dp)
-            )
 
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             Button(
                 onClick = {
-                    // TODO: Логика регистрации
+                    // TODO: Логика входа
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp),
                 shape = RoundedCornerShape(100.dp)
             ) {
-                Text("Зарегистрироваться")
+                Text("Войти")
             }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = "Нет аккаунта? Зарегистрироваться",
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable {
+                    navController.navigate("registration")
+                },
+                textAlign = TextAlign.Center
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -165,7 +142,7 @@ fun RegistrationScreen(navController: NavController) {
 
 @Preview
 @Composable
-fun PreviewRegistrationScreen() {
+fun PreviewLoginScreen() {
     val navController = rememberNavController()
-    RegistrationScreen(navController = navController)
+    LoginScreen(navController = navController)
 }

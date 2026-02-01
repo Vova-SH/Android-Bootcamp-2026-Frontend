@@ -1,6 +1,5 @@
 package ru.sicampus.bootcamp2026.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -17,12 +16,10 @@ private val BootcampLightColorScheme = lightColorScheme(
     onPrimary = OnPrimary,
     primaryContainer = PrimaryContainer,
     onPrimaryContainer = Color.Black,
-
     secondary = PurpleGrey40,
     onSecondary = Color.White,
     tertiary = Pink40,
     onTertiary = Color.White,
-
     background = Color(0xFFf8f9fa),
     onBackground = Color.Black,
     surface = Color.White,
@@ -39,12 +36,10 @@ private val BootcampDarkColorScheme = darkColorScheme(
     onPrimary = OnPrimaryDark,
     primaryContainer = PrimaryDark,
     onPrimaryContainer = PrimaryContainer,
-
     secondary = PurpleGrey80,
     onSecondary = Color.Black,
     tertiary = Pink80,
     onTertiary = Color.Black,
-
     background = Color(0xFF0d1117),
     onBackground = Color(0xFFe6edf3),
     surface = Color(0xFF161b22),
@@ -59,7 +54,7 @@ private val BootcampDarkColorScheme = darkColorScheme(
 @Composable
 fun AndroidBootcamp2026FrontendTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Changed to false to use custom colors
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
