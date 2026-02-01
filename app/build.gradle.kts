@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "ru.sicampus.bootcamp2026"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "ru.sicampus.bootcamp2026"
@@ -37,6 +37,10 @@ android {
     buildFeatures {
         compose = true
     }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.8"
+    }
 }
 
 dependencies {
@@ -49,6 +53,11 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.material3)
+    implementation("androidx.compose.material3:material3-window-size-class:1.2.0")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.0.0-alpha05")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
