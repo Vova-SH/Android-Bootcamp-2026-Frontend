@@ -41,8 +41,8 @@ import ru.sicampus.bootcamp2026.ui.components.AuthTextField
 
 @Composable
 fun RegisterScreen(
-
     state: RegisterUIState,
+    onUsernameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
@@ -100,6 +100,17 @@ fun RegisterScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    
+                    AuthTextField(
+                        value = state.username,
+                        onValueChange = onUsernameChange,
+                        label = "Username*",
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next
+                        )
+                    )
                     AuthTextField(
                         value = state.email,
                         onValueChange = onEmailChange,
@@ -188,6 +199,7 @@ fun RegisterScreen(
 fun RegisterPreview() {
     RegisterScreen(
         state = RegisterUIState(),
+        onUsernameChange = {},
         onEmailChange = {},
         onPasswordChange = {},
         onConfirmPasswordChange = {},

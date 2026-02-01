@@ -1,6 +1,7 @@
 package ru.sicampus.bootcamp2026.ui.auth
 
 data class RegisterUIState(
+    val username: String = "",
     val email: String = "",
     val password: String = "",
     val confirmPassword: String = "",

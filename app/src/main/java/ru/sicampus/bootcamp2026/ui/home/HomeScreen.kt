@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import ru.sicampus.bootcamp2026.ui.components.HomeBottomBar
 import ru.sicampus.bootcamp2026.ui.components.HomeMeetingCard
 import ru.sicampus.bootcamp2026.R
+import ru.sicampus.bootcamp2026.ui.components.HomeFilterDialog
 
 val GreenLight = Color(0xFFBBDBA6)
 
@@ -33,6 +34,7 @@ fun HomeScreen(
     currentTab: Int,
     onTabSelected: (Int) -> Unit
 ) {
+    var showFilterDialog by remember { mutableStateOf(false) }
     var isSortExpanded by remember { mutableStateOf(false) }
     var sortLabel by remember { mutableStateOf("Decreasing") }
     val sidePadding = 24.dp
@@ -53,7 +55,7 @@ fun HomeScreen(
             bottomBar = {
                 HomeBottomBar(currentTab = currentTab, onTabSelected = onTabSelected)
             }
-        ) { paddingValues -> // игнор
+        ) { paddingValues -> // игнор, АРТЕМ НЕ ТРОГАЙ ЭТО
 
             Column(
                 modifier = Modifier
@@ -75,11 +77,19 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("Good morning,", color = Color.White.copy(alpha = 0.7f))
+                        Text(
+                            text = "Good morning,",
+                            color = Color.White.copy(alpha = 0.7f),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 32.sp
+
+                        )
                         Text(
                             text = "Rodion",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
+                            fontSize = 32.sp,
                             color = GreenLight
                         )
                     }
@@ -117,7 +127,8 @@ fun HomeScreen(
                     text = "My invitations",
                     color = GreenLight,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = sidePadding)
+                    modifier = Modifier.padding(horizontal = sidePadding),
+                    fontSize = 24.sp,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -157,7 +168,7 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         FilledIconButton(
-                            onClick = { },
+                            onClick = { showFilterDialog = true },
                             colors = IconButtonDefaults.filledIconButtonColors(containerColor = GreenLight),
                             shape = RoundedCornerShape(24.dp),
                             modifier = Modifier.size(48.dp)
@@ -167,6 +178,8 @@ fun HomeScreen(
                                 contentDescription = null,
                                 tint = Color.Black,
                                 modifier = Modifier.size(24.dp)
+
+
                             )
                         }
 
@@ -196,6 +209,19 @@ fun HomeScreen(
                                     onClick = { sortLabel = "Decreasing"; isSortExpanded = false }
                                 )
                             }
+
+                            if (showFilterDialog) {
+                                HomeFilterDialog(
+                                    onDismiss = { showFilterDialog = false },
+                                    onApply = {
+                                        //TODO: логика применения фильтров
+                                        showFilterDialog = false
+                                    }
+                                )
+
+                            }
+
+
                         }
                     }
                 }
@@ -228,6 +254,7 @@ fun HomeScreen(
         }
     }
 }
+
 
 @Preview
 @Composable

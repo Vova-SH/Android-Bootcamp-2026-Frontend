@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
@@ -51,7 +53,7 @@ fun HomeBottomBar(
             ) {
                 // Список прошедших встреч (Слева)
                 BottomBarItem(
-                    icon = Icons.Default.Description,
+                    icon = Icons.Default.CalendarMonth,
                     isSelected = currentTab == 0,
                     onClick = { onTabSelected(0) }
                 )
