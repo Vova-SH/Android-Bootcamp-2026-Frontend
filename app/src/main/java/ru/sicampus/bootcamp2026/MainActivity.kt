@@ -9,6 +9,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ru.sicampus.bootcamp2026.ui.theme.AndroidBootcamp2026FrontendTheme
 import ru.sicampus.bootcamp2026.ui.theme.LoginScreen
+import ru.sicampus.bootcamp2026.ui.theme.MainHomeScreen
+import ru.sicampus.bootcamp2026.ui.theme.InviteScreen
+import ru.sicampus.bootcamp2026.ui.theme.ProfileScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +29,15 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("registration") {
                         RegistrationScreen(navController = navController)
+                    }
+                    composable("main") {
+                        MainHomeScreen(navController = navController)
+                    }
+                    composable("meetings") {
+                        InviteScreen(navController = navController)
+                    }
+                    composable("profile") {
+                        ProfileScreen(navController = navController)
                     }
                 }
             }
