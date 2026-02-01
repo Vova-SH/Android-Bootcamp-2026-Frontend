@@ -1,4 +1,7 @@
 package ru.sicampus.bootcamp2026.presentation.ui.screens.main.meets
 
-class MeetDetailedScreen {
+import androidx.compose.runtime.Composable
+
+@Composable
+fun MeetDetailedScreen() {
 }

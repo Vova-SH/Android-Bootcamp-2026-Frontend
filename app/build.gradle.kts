@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -63,5 +64,12 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.ktor3)
 
+    implementation(libs.androidx.compose.material3)
+    // nav
+    implementation(libs.androidx.navigation.compose)
+//    implementation("androidx.navigation:navigation-compose:2.8.5")
+//    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+
+    implementation(libs.androidx.compose.material.icons.extended)
 
 }
