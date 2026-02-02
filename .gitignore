@@ -57,6 +57,7 @@ out/
 *.jar
 *.war
 *.ear
+.dex
 
 # Navigation / DB / keys
 .navigation/
