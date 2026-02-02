@@ -33,7 +33,11 @@ import androidx.navigation.compose.rememberNavController
 import ru.sicampus.bootcamp2026.ui.utils.customDashedBorder
 
 @Composable
-fun MainScreen(onAddMeetingClicked: () -> Unit, onInvitesClicked: () -> Unit) {
+fun MainScreen(
+    onAddMeetingClicked: () -> Unit,
+    onInvitesClicked: () -> Unit,
+    onProfileClicked: () -> Unit
+) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = BackgroundColor,
@@ -55,8 +59,10 @@ fun MainScreen(onAddMeetingClicked: () -> Unit, onInvitesClicked: () -> Unit) {
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
-            HeaderSection(onInvitesClicked = onInvitesClicked)
-
+            HeaderSection(
+                onInvitesClicked = onInvitesClicked,
+                onProfileClicked = onProfileClicked
+            )
             Spacer(modifier = Modifier.height(16.dp))
             DaysSelectorSection()
             Spacer(modifier = Modifier.height(16.dp))
@@ -78,6 +84,9 @@ fun AppNavigation() {
                 },
                 onInvitesClicked = {
                     navController.navigate("invites_screen")
+                },
+                onProfileClicked = {
+                    navController.navigate("profile_screen")
                 }
             )
         }
@@ -97,12 +106,21 @@ fun AppNavigation() {
                 }
             )
         }
+
+        composable("profile_screen") {
+            ProfileScreen(
+                onBackClicked = {
+                    navController.popBackStack()
+                }
+            )
+        }
     }
 }
 
 @Composable
 fun HeaderSection(
-    onInvitesClicked: () -> Unit
+    onInvitesClicked: () -> Unit,
+    onProfileClicked: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -147,6 +165,7 @@ fun HeaderSection(
             modifier = Modifier
                 .size(50.dp)
                 .clip(CircleShape)
+                .clickable { onProfileClicked() }
                 .background(Color.LightGray),
             contentAlignment = Alignment.Center
         ) {
@@ -264,7 +283,6 @@ fun TimeSlotRow(time: String) {
                         .weight(1f)
                         .fillMaxHeight()
                 ) {
-
                 }
             }
         }
@@ -274,5 +292,9 @@ fun TimeSlotRow(time: String) {
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    MainScreen(onAddMeetingClicked = {}, onInvitesClicked = {})
+    MainScreen(
+        onAddMeetingClicked = {},
+        onInvitesClicked = {},
+        onProfileClicked = {}
+    )
 }

@@ -92,7 +92,7 @@ fun NewMeetingScreen(onBackClicked: () -> Unit) {
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -156,8 +156,8 @@ fun TopBar(onBackClicked: () -> Unit) {
             )
         },
         navigationIcon = {
-            IconButton(onClick = onBackClicked) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            IconButton(onClick = onBackClicked, modifier = Modifier.size(48.dp)) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back", modifier = Modifier.size(24.dp))
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -212,10 +212,20 @@ fun DashedFieldWithIcon(text: String, icon: androidx.compose.ui.graphics.vector.
             color = Color.Black.copy(alpha = 0.8f),
             fontWeight = FontWeight.Medium
         )
-        Icon(
-            icon,
-            contentDescription = null
-        )
+        Row(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .clickable { /* TODO */ },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                icon,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 }
 
@@ -272,11 +282,20 @@ fun SearchField() {
             fontSize = 14.sp,
             modifier = Modifier.weight(1f)
         )
-        Icon(
-            Icons.Outlined.Search,
-            modifier = Modifier.size(24.dp),
-            contentDescription = null
-        )
+        Row(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .clickable { /* TODO */ },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                Icons.Outlined.Search,
+                modifier = Modifier.size(24.dp),
+                contentDescription = null
+            )
+        }
     }
 }
 
@@ -314,6 +333,7 @@ fun ParticipantRow(
             participant.name,
             modifier = Modifier.weight(1f),
             fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
             lineHeight = 18.sp
         )
 
