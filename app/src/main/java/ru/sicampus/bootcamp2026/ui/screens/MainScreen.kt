@@ -17,11 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.SemiBold
 import androidx.compose.ui.text.style.TextAlign
@@ -29,18 +25,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.sicampus.bootcamp2026.ui.theme.BackgroundColor
-import ru.sicampus.bootcamp2026.ui.theme.BorderGray
 import ru.sicampus.bootcamp2026.ui.theme.PrimaryPurple
 import ru.sicampus.bootcamp2026.ui.theme.TextWhite
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import ru.sicampus.bootcamp2026.ui.utils.customDashedBorder
 
 @Composable
-fun MainScreen() {
+fun MainScreen(onAddMeetingClicked: () -> Unit) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = BackgroundColor,
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* TODO: Создание встречи */ },
+                onClick = onAddMeetingClicked,
                 containerColor = PrimaryPurple,
                 contentColor = TextWhite,
                 shape = RoundedCornerShape(12.dp),
@@ -69,6 +68,29 @@ fun MainScreen() {
     }
 }
 
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = "main_screen") {
+
+        composable("main_screen") {
+            MainScreen(
+                onAddMeetingClicked = {
+                    navController.navigate("new_meeting_screen")
+                }
+            )
+        }
+
+        composable("new_meeting_screen") {
+            NewMeetingScreen(
+                onBackClicked = {
+                    navController.popBackStack()
+                }
+            )
+        }
+    }
+}
 @Composable
 fun HeaderSection() {
     Row(
@@ -178,6 +200,8 @@ fun ScheduleGridSection() {
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        Spacer(modifier = Modifier.width(8.dp))
+
         for (hour in 9..21) {
             val time = String.format("%02d:00", hour)
             TimeSlotRow(time = time)
@@ -210,28 +234,9 @@ fun TimeSlotRow(time: String) {
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
+                .customDashedBorder()
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color.White)
-                .drawBehind {
-
-                    val strokeWidth = 3.dp.toPx()
-                    val dashWidth = 4.dp.toPx()
-                    val gapWidth = 3.dp.toPx()
-                    val cornerRadius = 12.dp.toPx()
-
-                    drawRoundRect(
-                        color = BorderGray,
-                        size = size,
-                        cornerRadius = CornerRadius(cornerRadius, cornerRadius),
-                        style = Stroke(
-                            width = strokeWidth,
-                            pathEffect = PathEffect.dashPathEffect(
-                                floatArrayOf(dashWidth, gapWidth),
-                                0f
-                            )
-                        )
-                    )
-                }
         ){
             Row(
                 modifier = Modifier
@@ -255,5 +260,5 @@ fun TimeSlotRow(time: String) {
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    MainScreen()
+    MainScreen(onAddMeetingClicked = {})
 }

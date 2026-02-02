@@ -1,27 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "ru.sicampus.bootcamp2026.app-mergeDebugResources-34:/values-vi/values-vi.xml",
+            "outputFile": "ru.sicampus.bootcamp2026.app-mergeDebugResources-2:/values-vi/values-vi.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\vachi\\.gradle\\caches\\8.13\\transforms\\1f867ffc410e73793037476c9aa5a14a\\transformed\\core-1.16.0\\res\\values-vi\\values-vi.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,152,254,353,453,556,669,785",
-                        "endColumns": "96,101,98,99,102,112,115,100",
-                        "endOffsets": "147,249,348,448,551,664,780,881"
-                    },
-                    "to": {
-                        "startLines": "3,4,5,6,7,8,9,83",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "184,281,383,482,582,685,798,8446",
-                        "endColumns": "96,101,98,99,102,112,115,100",
-                        "endOffsets": "276,378,477,577,680,793,909,8542"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\vachi\\.gradle\\caches\\8.13\\transforms\\84b00e045605007aa6d1b29c589372ed\\transformed\\material3-release\\res\\values-vi\\values-vi.xml",
+                    "source": "C:\\Users\\vachi\\Desktop\\S_app-var1\\caches\\8.13\\transforms\\cad9147ae869d93430570a4160c5d6e6\\transformed\\material3-release\\res\\values-vi\\values-vi.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -38,24 +21,24 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\vachi\\.gradle\\caches\\8.13\\transforms\\07d6eb8a7250773dcd731a49ec570d84\\transformed\\foundation-release\\res\\values-vi\\values-vi.xml",
+                    "source": "C:\\Users\\vachi\\Desktop\\S_app-var1\\caches\\8.13\\transforms\\803f6937add44c06a944c66389644061\\transformed\\core-1.16.0\\res\\values-vi\\values-vi.xml",
                     "from": {
-                        "startLines": "2,3,4",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "55,134,222",
-                        "endColumns": "78,87,86",
-                        "endOffsets": "129,217,304"
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,152,254,353,453,556,669,785",
+                        "endColumns": "96,101,98,99,102,112,115,100",
+                        "endOffsets": "147,249,348,448,551,664,780,881"
                     },
                     "to": {
-                        "startLines": "2,87,88",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "105,8804,8892",
-                        "endColumns": "78,87,86",
-                        "endOffsets": "179,8887,8974"
+                        "startLines": "3,4,5,6,7,8,9,83",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "184,281,383,482,582,685,798,8446",
+                        "endColumns": "96,101,98,99,102,112,115,100",
+                        "endOffsets": "276,378,477,577,680,793,909,8542"
                     }
                 },
                 {
-                    "source": "C:\\Users\\vachi\\.gradle\\caches\\8.13\\transforms\\2632ee23e382aff362671e007520c358\\transformed\\ui-release\\res\\values-vi\\values-vi.xml",
+                    "source": "C:\\Users\\vachi\\Desktop\\S_app-var1\\caches\\8.13\\transforms\\24a77823d835fa811a4242fa847d2ba1\\transformed\\ui-release\\res\\values-vi\\values-vi.xml",
                     "from": {
                         "startLines": "3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -69,6 +52,23 @@
                         "startOffsets": "914,1010,1096,1202,1302,1394,1479,7702,7796,7877,7967,8058,8130,8217,8293,8370,8547,8624,8690",
                         "endColumns": "95,85,105,99,91,84,92,93,80,89,90,71,86,75,76,75,76,65,113",
                         "endOffsets": "1005,1091,1197,1297,1389,1474,1567,7791,7872,7962,8053,8125,8212,8288,8365,8441,8619,8685,8799"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\vachi\\Desktop\\S_app-var1\\caches\\8.13\\transforms\\1b24c88c4971f10b73040f935c113dfe\\transformed\\foundation-release\\res\\values-vi\\values-vi.xml",
+                    "from": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,134,222",
+                        "endColumns": "78,87,86",
+                        "endOffsets": "129,217,304"
+                    },
+                    "to": {
+                        "startLines": "2,87,88",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "105,8804,8892",
+                        "endColumns": "78,87,86",
+                        "endOffsets": "179,8887,8974"
                     }
                 }
             ]
