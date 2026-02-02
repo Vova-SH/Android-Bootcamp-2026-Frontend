@@ -1,12 +1,10 @@
 package ru.sicampus.bootcamp2026.data
 
-import kotlinx.serialization.SerialName
 import ru.sicampus.bootcamp2026.data.dto.CreateMeetingDTO
-import ru.sicampus.bootcamp2026.data.source.MeetingInfoDataSource
 import ru.sicampus.bootcamp2026.domain.entities.MeetingEntity
 
 class MeetingRepository(
-    private val meetingInfoDataSource: MeetingInfoDataSource,
+    private val meetingInfoDataSource: CreateMeetingDTO.Companion,
 ) {
     suspend fun getMeetings(): Result<List<MeetingEntity>> {
         return meetingInfoDataSource.getMeeting().map { listDto ->

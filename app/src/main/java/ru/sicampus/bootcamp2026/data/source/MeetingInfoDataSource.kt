@@ -24,8 +24,15 @@ class MeetingInfoDataSource {
         }
     }
 
-    suspend fun createMeeting(meeting: CreateMeetingDTO): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend fun createMeeting(
+        name: String?,
+        startTime: Byte?,
+        endTime: Byte?,
+        date: String?,
+        participants: List<Int>?
+        ): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
+            val meeting = CreateMeetingDTO(name, startTime, endTime, date, participants)
             val result = Network.client.post("${Network.HOST}/api/meeting") {
                 contentType(ContentType.Application.Json)
                 setBody(meeting)
