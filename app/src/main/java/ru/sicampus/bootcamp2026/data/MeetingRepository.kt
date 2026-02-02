@@ -1,10 +1,11 @@
 package ru.sicampus.bootcamp2026.data
 
 import ru.sicampus.bootcamp2026.data.dto.CreateMeetingDTO
+import ru.sicampus.bootcamp2026.data.source.MeetingInfoDataSource
 import ru.sicampus.bootcamp2026.domain.entities.MeetingEntity
 
 class MeetingRepository(
-    private val meetingInfoDataSource: CreateMeetingDTO.Companion,
+    private val meetingInfoDataSource: MeetingInfoDataSource,
 ) {
     suspend fun getMeetings(): Result<List<MeetingEntity>> {
         return meetingInfoDataSource.getMeeting().map { listDto ->
@@ -40,8 +41,8 @@ class MeetingRepository(
         date: String?,
         participants: List<Int>?,
     ): Result<Unit> {
-        return meetingInfoDataSource.createMeeting(CreateMeetingDTO(name,
-            startTime, endTime, date, participants)).map {
+        return meetingInfoDataSource.createMeeting(name,
+            startTime, endTime, date, participants).map {
 
         }
     }
