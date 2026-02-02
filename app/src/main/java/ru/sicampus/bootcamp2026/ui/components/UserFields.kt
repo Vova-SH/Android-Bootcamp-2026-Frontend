@@ -36,14 +36,18 @@ fun UserField(
 ) {
     var text by remember {mutableStateOf(value)}
 
-    Text(label, fontSize = 14.sp, fontFamily = FontFamily(Font(R.font.montserrat_regular)), color = Blue, modifier = Modifier
+    Text(label, fontSize = 14.sp,
+        fontFamily = FontFamily(Font(R.font.montserrat_regular)),
+        color = Blue, modifier = Modifier
         .padding(start=24.dp))
     OutlinedTextField(
         value = text,
         onValueChange = {text = it},
         label = {},
         placeholder = {
-            Text(hint, fontSize = 14.sp, fontFamily = FontFamily(Font(R.font.montserrat_regular)), color = DarkGrey)
+            Text(hint, fontSize = 14.sp,
+                fontFamily = FontFamily(Font(R.font.montserrat_regular)),
+                color = DarkGrey)
         },
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier

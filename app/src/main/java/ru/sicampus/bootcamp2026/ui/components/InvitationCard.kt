@@ -21,7 +21,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.sicampus.bootcamp2026.R
@@ -30,13 +29,20 @@ import ru.sicampus.bootcamp2026.ui.theme.Blue
 import ru.sicampus.bootcamp2026.ui.theme.DarkGrey
 
 @Composable
-fun InvitationCard(name: String) {
+fun InvitationCard(
+    name: String,
+    startTime: Byte,
+    endTime: Byte,
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 12.dp),
 
-        colors = CardColors(Color(0xFFDDDDDD), Color(0xFFDDDDDD), Color(0xFFDDDDDD), Color(0xFFDDDDDD))
+        colors = CardColors(Color(0xFFDDDDDD),
+            Color(0xFFDDDDDD),
+            Color(0xFFDDDDDD),
+            Color(0xFFDDDDDD))
     ) {
         Column(
             modifier = Modifier
@@ -67,13 +73,13 @@ fun InvitationCard(name: String) {
                 }
 
                 Text(
-                    text = name.ifEmpty { "Приглашение" },
+                    text = name,
                     color = Black,
                     fontFamily = FontFamily(Font(R.font.montserrat_semibold)),
                 )
 
                 Text(
-                    text = name.ifEmpty { "18:00 - 18:30" },
+                    text = "$startTime:$endTime",
                     color = DarkGrey,
                     fontFamily = FontFamily(Font(R.font.montserrat_regular)),
                     modifier = Modifier
@@ -117,10 +123,4 @@ fun InvitationCard(name: String) {
         }
 
     }
-}
-
-@Preview
-@Composable
-fun Preview() {
-    InvitationCard("")
 }

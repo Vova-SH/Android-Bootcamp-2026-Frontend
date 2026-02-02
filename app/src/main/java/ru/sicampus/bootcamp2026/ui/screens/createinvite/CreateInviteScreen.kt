@@ -1,4 +1,4 @@
-package ru.sicampus.bootcamp2026.ui.screens
+package ru.sicampus.bootcamp2026.ui.screens.createinvite
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

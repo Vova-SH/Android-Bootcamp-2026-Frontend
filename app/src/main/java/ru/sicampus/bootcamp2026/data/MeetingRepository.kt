@@ -1,10 +1,12 @@
 package ru.sicampus.bootcamp2026.data
 
+import kotlinx.serialization.SerialName
+import ru.sicampus.bootcamp2026.data.dto.CreateMeetingDTO
 import ru.sicampus.bootcamp2026.data.source.MeetingInfoDataSource
 import ru.sicampus.bootcamp2026.domain.entities.MeetingEntity
 
 class MeetingRepository(
-    private val meetingInfoDataSource: MeetingInfoDataSource
+    private val meetingInfoDataSource: MeetingInfoDataSource,
 ) {
     suspend fun getMeetings(): Result<List<MeetingEntity>> {
         return meetingInfoDataSource.getMeeting().map { listDto ->
@@ -14,7 +16,6 @@ class MeetingRepository(
                     startTime = meetingDto.startTime ?: return@mapNotNull null,
                     endTime = meetingDto.endTime ?: return@mapNotNull null,
                     name = meetingDto.name ?: return@mapNotNull null,
-                    location = meetingDto.location ?: return@mapNotNull null,
                     date = meetingDto.date ?: return@mapNotNull null,
                     participants = meetingDto.participants ?: return@mapNotNull null
                 )
@@ -31,6 +32,19 @@ class MeetingRepository(
     suspend fun getInvitedMeetings(UserId: Int): Result<List<MeetingEntity>> {
         return getMeetings().map { listDto ->
             listDto.filter { it.participants.contains(UserId) }.sortedBy { it.id }.map { it }
+        }
+    }
+
+    suspend fun createMeeting(
+        name: String?,
+        startTime: Byte?,
+        endTime: Byte?,
+        date: String?,
+        participants: List<Int>?,
+    ): Result<Unit> {
+        return meetingInfoDataSource.createMeeting(CreateMeetingDTO(name,
+            startTime, endTime, date, participants)).map {
+
         }
     }
 }

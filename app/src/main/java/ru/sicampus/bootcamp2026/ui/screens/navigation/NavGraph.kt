@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import ru.sicampus.bootcamp2026.ui.screens.CreateInviteScreen
-import ru.sicampus.bootcamp2026.ui.screens.InvitesScreen
+import ru.sicampus.bootcamp2026.ui.screens.createinvite.CreateInviteScreen
+import ru.sicampus.bootcamp2026.ui.screens.invites.InvitesScreen
 import ru.sicampus.bootcamp2026.ui.screens.profile.ProfileScreen
-import ru.sicampus.bootcamp2026.ui.screens.ScheduleScreen
+import ru.sicampus.bootcamp2026.ui.screens.schedule.ScheduleScreen
 
 @Composable
 fun NavGraph(navHostController: NavHostController) {

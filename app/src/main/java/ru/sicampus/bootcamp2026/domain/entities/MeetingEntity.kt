@@ -5,7 +5,6 @@ data class MeetingEntity(
     val startTime: Byte,
     val endTime: Byte,
     val name: String,
-    val location: String,
     val date: String,
     val participants: List<Int>,
 )

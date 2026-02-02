@@ -1,8 +1,10 @@
 package ru.sicampus.bootcamp2026.ui.screens.profile
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -71,9 +73,11 @@ fun ProfileScreen(
                 ) {
                     Text(text = currentState.reason)
                     Button(
-                        onClick = { viewModel.getData() }
+                        onClick = { viewModel.getData() },
+                        modifier = Modifier.background(Blue)
+                            .clip(RoundedCornerShape(20.dp))
                     ) {
-                        Text("Refresh")
+                        Text("Обновить")
                     }
                 }
             }
@@ -194,7 +198,7 @@ fun ProfileContent(
                     ProfileField("Информация", info, isEditable = isEditable)
                 }
             }
-
+            Spacer(modifier = Modifier.height(20.dp))
             Button(modifier = Modifier.height(63.dp).width(216.dp)
                 , onClick = {
                     viewModel.updateData(
