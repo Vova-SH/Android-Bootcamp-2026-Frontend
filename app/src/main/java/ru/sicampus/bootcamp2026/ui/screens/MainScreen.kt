@@ -33,7 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import ru.sicampus.bootcamp2026.ui.utils.customDashedBorder
 
 @Composable
-fun MainScreen(onAddMeetingClicked: () -> Unit) {
+fun MainScreen(onAddMeetingClicked: () -> Unit, onInvitesClicked: () -> Unit) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = BackgroundColor,
@@ -55,14 +55,11 @@ fun MainScreen(onAddMeetingClicked: () -> Unit) {
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
-            HeaderSection()
+            HeaderSection(onInvitesClicked = onInvitesClicked)
 
             Spacer(modifier = Modifier.height(16.dp))
-
             DaysSelectorSection()
-
             Spacer(modifier = Modifier.height(16.dp))
-
             ScheduleGridSection()
         }
     }
@@ -78,6 +75,9 @@ fun AppNavigation() {
             MainScreen(
                 onAddMeetingClicked = {
                     navController.navigate("new_meeting_screen")
+                },
+                onInvitesClicked = {
+                    navController.navigate("invites_screen")
                 }
             )
         }
@@ -89,10 +89,21 @@ fun AppNavigation() {
                 }
             )
         }
+
+        composable("invites_screen") {
+            InvitesScreen(
+                onBackClicked = {
+                    navController.popBackStack()
+                }
+            )
+        }
     }
 }
+
 @Composable
-fun HeaderSection() {
+fun HeaderSection(
+    onInvitesClicked: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -113,17 +124,20 @@ fun HeaderSection() {
                 fontWeight = FontWeight.SemiBold,
                 color = Color.Black
             )
+
             Row(
-                Modifier.height(50.dp).width(50.dp),
+                modifier = Modifier
+                    .height(50.dp)
+                    .width(50.dp)
+                    .clip(CircleShape)
+                    .clickable { onInvitesClicked() },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Notifications,
                     contentDescription = "Notifications",
-                    modifier = Modifier
-                        .size(24.dp)
-                        .align(Alignment.CenterVertically),
+                    modifier = Modifier.size(24.dp),
                     tint = Color.Black
                 )
             }
@@ -260,5 +274,5 @@ fun TimeSlotRow(time: String) {
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    MainScreen(onAddMeetingClicked = {})
+    MainScreen(onAddMeetingClicked = {}, onInvitesClicked = {})
 }

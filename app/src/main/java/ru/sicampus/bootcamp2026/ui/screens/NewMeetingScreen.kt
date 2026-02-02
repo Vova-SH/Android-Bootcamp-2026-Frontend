@@ -55,6 +55,9 @@ fun NewMeetingScreen(onBackClicked: () -> Unit) {
 
     Scaffold(
         containerColor = BackgroundColor,
+        topBar = {
+            TopBar(onBackClicked)
+        },
         bottomBar = {
             Box(
                 modifier = Modifier
@@ -91,8 +94,7 @@ fun NewMeetingScreen(onBackClicked: () -> Unit) {
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
-            TopBar(onBackClicked)
+            Spacer(modifier = Modifier.height(8.dp))
 
             FieldLabel("Тема")
             DashedField("Общий дневной созвон")
@@ -142,26 +144,26 @@ fun NewMeetingScreen(onBackClicked: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(onBackClicked: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 12.dp, bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onBackClicked) {
-            Icon(Icons.Default.ArrowBack, contentDescription = null)
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            "Новая встреча",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                "Новая встреча",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 24.sp
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onBackClicked) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            }
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = BackgroundColor
         )
-    }
+    )
 }
 
 @Composable
@@ -222,13 +224,15 @@ fun TimeSelector(selected: String, onSelect: (String) -> Unit) {
     val times = listOf(
         "09:00 - 10:00", "10:00 - 11:00", "11:00 - 12:00", "12:00 - 13:00",
         "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00",
-        "17:00 - 18:00", "18:00 - 19:00", "19:00 - 20:00", "20:00 - 21:00"
+        "17:00 - 18:00", "18:00 - 19:00", "19:00 - 20:00", "20:00 - 21:00", "21:00 - 22:00"
     )
 
     Row(
         modifier = Modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        Spacer(modifier = Modifier.width(3.dp))
+
         times.forEach { time ->
             val isSelected = time == selected
             Box(
