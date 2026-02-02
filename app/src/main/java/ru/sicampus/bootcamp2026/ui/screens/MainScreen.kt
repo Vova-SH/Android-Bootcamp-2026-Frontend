@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,9 +27,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import ru.sicampus.bootcamp2026.data.model.AuthViewModel
 import ru.sicampus.bootcamp2026.ui.theme.BackgroundColor
 import ru.sicampus.bootcamp2026.ui.theme.PrimaryPurple
 import ru.sicampus.bootcamp2026.ui.theme.TextWhite
@@ -55,47 +58,58 @@ fun MainScreen(
     )
 }
 
+private object Routes {
+    const val AUTH = "auth"
+    const val MAIN = "main_screen"
+    const val NEW_MEETING = "new_meeting_screen"
+    const val INVITES = "invites_screen"
+    const val PROFILE = "profile_screen"
+}
+
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val authVm: AuthViewModel = viewModel()
+    val state by authVm.state.collectAsState()
 
-    NavHost(navController = navController, startDestination = "main_screen") {
+    LaunchedEffect(state.isAuthed) {
+        val target = if (state.isAuthed) Routes.MAIN else Routes.AUTH
+        navController.navigate(target) {
+            popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+            launchSingleTop = true
+        }
+    }
 
-        composable("main_screen") {
+    NavHost(navController = navController, startDestination = Routes.AUTH) {
+
+        composable(Routes.AUTH) {
+            AuthScreen(
+                state = state,
+                onRegister = { fullName, email, pass -> authVm.register(fullName, email, pass) },
+                onLogin = { email, pass -> authVm.login(email, pass) }
+            )
+        }
+
+        composable(Routes.MAIN) {
             MainScreen(
-                onAddMeetingClicked = {
-                    navController.navigate("new_meeting_screen")
-                },
-                onInvitesClicked = {
-                    navController.navigate("invites_screen")
-                },
-                onProfileClicked = {
-                    navController.navigate("profile_screen")
-                }
+                onAddMeetingClicked = { navController.navigate(Routes.NEW_MEETING) },
+                onInvitesClicked = { navController.navigate(Routes.INVITES) },
+                onProfileClicked = { navController.navigate(Routes.PROFILE) }
             )
         }
 
-        composable("new_meeting_screen") {
-            NewMeetingScreen(
-                onBackClicked = {
-                    navController.popBackStack()
-                }
-            )
+        composable(Routes.NEW_MEETING) {
+            NewMeetingScreen(onBackClicked = { navController.popBackStack() })
         }
 
-        composable("invites_screen") {
-            InvitesScreen(
-                onBackClicked = {
-                    navController.popBackStack()
-                }
-            )
+        composable(Routes.INVITES) {
+            InvitesScreen(onBackClicked = { navController.popBackStack() })
         }
 
-        composable("profile_screen") {
+        composable(Routes.PROFILE) {
             ProfileScreen(
-                onBackClicked = {
-                    navController.popBackStack()
-                }
+                onBackClicked = { navController.popBackStack() },
+                onLogoutClicked = { authVm.logout() }
             )
         }
     }

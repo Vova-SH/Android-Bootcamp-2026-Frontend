@@ -25,7 +25,7 @@ import ru.sicampus.bootcamp2026.ui.utils.customDashedBorder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(onBackClicked: () -> Unit) {
+fun ProfileScreen(onBackClicked: () -> Unit, onLogoutClicked: () -> Unit) {
     Scaffold(
         containerColor = BackgroundColor,
         topBar = {
@@ -110,7 +110,7 @@ fun ProfileScreen(onBackClicked: () -> Unit) {
             Spacer(modifier = Modifier.height(48.dp))
 
             Button(
-                onClick = { /* TODO: Logout */ },
+                onClick = onLogoutClicked,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFFFE5E5),
                     contentColor = Color.Black
@@ -182,5 +182,5 @@ fun ProfileField(title: String, value: String) {
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
-    ProfileScreen(onBackClicked = {})
+    ProfileScreen(onBackClicked = {}, onLogoutClicked = {})
 }
