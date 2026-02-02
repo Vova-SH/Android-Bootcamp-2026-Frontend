@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import ru.sicampus.bootcamp2026.ui.screens.AuthScreen
+import ru.sicampus.bootcamp2026.ui.screen.meetings.MeetingsScreen
 import ru.sicampus.bootcamp2026.ui.theme.AndroidBootcamp2026FrontendTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,10 +18,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidBootcamp2026FrontendTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // NavigationHost тута надо но мне чота впадлу пока что
-                    androidx.compose.foundation.layout.Box(modifier = Modifier.padding(innerPadding)) {
-                        AuthScreen(onLoginClick = {}, onRegisterClick = {})
-                    }
+                    MeetingsScreen(
+                        modifier = Modifier.padding(innerPadding)
+                    )
                 }
             }
         }
