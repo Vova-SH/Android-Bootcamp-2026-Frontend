@@ -109,7 +109,7 @@ fun CreateInviteScreen() {
                 Spacer(modifier = Modifier.height(30.dp))
 
                 Button(
-                    onClick = { },
+                    onClick = {},
                     shape = RoundedCornerShape(32),
                     modifier = Modifier
                         .fillMaxWidth()

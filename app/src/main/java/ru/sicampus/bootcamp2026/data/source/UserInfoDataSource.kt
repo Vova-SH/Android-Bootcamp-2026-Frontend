@@ -26,7 +26,7 @@ class UserInfoDataSource {
 
     suspend fun getCurrentUser(): Result<UserDto> = withContext(Dispatchers.IO) {
         runCatching {
-            val result = Network.client.get("${Network.HOST}/api/current_user")
+            val result = Network.client.get("${Network.HOST}/api/person")
             if (result.status != HttpStatusCode.OK) {
                 error("Status: ${result.status}")
             }
@@ -44,7 +44,7 @@ class UserInfoDataSource {
     {
         runCatching {
             val userUpdates = UserDto(name, phone, email, info, photoUrl)
-            val result = Network.client.post("${Network.HOST}/api/current_user") {
+            val result = Network.client.post("${Network.HOST}/api/person") {
                 contentType(ContentType.Application.Json)
                 setBody(userUpdates)
             }
