@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "ru.sicampus.bootcamp2026"
-        minSdk = 25
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -58,18 +58,14 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-//    implementation(libs.androidx.compose.material3) // ?
     implementation(libs.coil.compose)
     implementation(libs.coil.network.ktor3)
-
     implementation(libs.androidx.compose.material3)
-    // nav
     implementation(libs.androidx.navigation.compose)
-//    implementation("androidx.navigation:navigation-compose:2.8.5")
-//    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
 
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.bundles.ktor)
 
 }
