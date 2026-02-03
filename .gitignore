@@ -26,6 +26,11 @@ local.properties
 # Build outputs
 **/build/
 build/
+**/intermediates/
+**/outputs/
+**/generated/
+**/tmp/
+**/kotlin/
 *.apk
 *.ap_
 *.aab
@@ -57,7 +62,12 @@ out/
 *.jar
 *.war
 *.ear
-.dex
+*.dex
+*.len
+*.tab
+*.tab_i
+*.s
+*.at
 
 # Navigation / DB / keys
 .navigation/

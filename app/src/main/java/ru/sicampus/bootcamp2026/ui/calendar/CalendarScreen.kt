@@ -1,6 +1,8 @@
 package ru.sicampus.bootcamp2026.ui.calendar
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -51,6 +53,8 @@ fun CalendarScreen() {
         listOf(
             MockMeeting("Meeting A", today, "10:00"),
             MockMeeting("Project B", today, "14:00"),
+            MockMeeting("Meeting C", today, "15:00"),
+            MockMeeting("Project D", today, "16:00"),
             MockMeeting("Design Review", today.plusDays(1), "11:00")
         )
     }
@@ -83,7 +87,7 @@ fun CalendarScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
-                    .clickable { isCalendarExpanded = true } // Клик открывает календарь
+                    .clickable { isCalendarExpanded = true }
             ) {
                 Row(
                     modifier = Modifier
@@ -121,13 +125,25 @@ fun CalendarScreen() {
         //Календарь (Виден, когда РАЗВЕРНУТ)
         AnimatedVisibility(
             visible = isCalendarExpanded,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
+            //Плавное открытие (разворачивание сверху вниз + прозрачность)
+            enter = expandVertically(
+                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+                expandFrom = Alignment.Top
+            ) + fadeIn(
+                animationSpec = tween(durationMillis = 500)
+            ),
+            //Плавное закрытие (сворачивание вверх + исчезновение)
+            exit = shrinkVertically(
+                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+                shrinkTowards = Alignment.Top
+            ) + fadeOut(
+                animationSpec = tween(durationMillis = 450)
+            )
         ) {
             Surface(
                 color = Color(0xFF1E1E1E),
-                shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
-                modifier = Modifier.fillMaxWidth()
+                shape = RoundedCornerShape(48.dp),
+                modifier = Modifier.width(420.dp).padding(16.dp).align(Alignment.CenterHorizontally)
             ) {
                 Column {
                     MaterialTheme(
@@ -178,12 +194,14 @@ fun CalendarScreen() {
         ) {
             if (selectedDate == null) {
                 if (!isCalendarExpanded) {
-                    Text("Please select a date above", color = Color.Gray)
+                    Text("Please select a date above", color = Color.White,
+                        modifier = Modifier
+                            .align (Alignment.Center))
                 }
             } else if (filteredMeetings.isEmpty()) {
                 Text(
                     text = "No meetings found",
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = Color.White,
                     style = MaterialTheme.typography.bodyLarge
                 )
             } else {
