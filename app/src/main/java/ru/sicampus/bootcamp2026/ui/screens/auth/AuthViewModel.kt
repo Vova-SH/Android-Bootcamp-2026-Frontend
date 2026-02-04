@@ -1,8 +1,5 @@
 package ru.sicampus.bootcamp2026.ui.screens.auth
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,7 +14,7 @@ import ru.sicampus.bootcamp2026.data.source.AuthLocalDataSource
 import ru.sicampus.bootcamp2026.data.source.AuthNetworkDataSource
 import ru.sicampus.bootcamp2026.domain.auth.CheckAndSaveAuthUseCase
 import ru.sicampus.bootcamp2026.domain.auth.CheckAuthFormatUseCase
-import ru.sicampus.bootcamp2026.ui.screens.navigation.AuthNavigation
+import ru.sicampus.bootcamp2026.ui.screens.navigation.authnav.AuthNavigation
 
 class AuthViewModel : ViewModel() {
     private val checkAuthFormatUseCase by lazy { CheckAuthFormatUseCase() }

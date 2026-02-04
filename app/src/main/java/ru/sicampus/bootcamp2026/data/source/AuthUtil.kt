@@ -4,7 +4,7 @@ import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessageBuilder
 
-fun HttpMessageBuilder.addAuthHeader() {
-    val token = AuthLocalDataSource.token ?: return
+suspend fun HttpMessageBuilder.addAuthHeader() {
+    val token = AuthLocalDataSource.getToken() ?: return
     header(HttpHeaders.Authorization, token)
 }

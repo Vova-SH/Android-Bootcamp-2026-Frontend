@@ -6,9 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import ru.sicampus.bootcamp2026.ui.screens.auth.AuthorizationScreen
-import ru.sicampus.bootcamp2026.ui.screens.navigation.AuthNavGraph
-import ru.sicampus.bootcamp2026.ui.screens.navigation.AuthNavigation
+import ru.sicampus.bootcamp2026.ui.screens.navigation.authnav.AuthNavGraph
 import ru.sicampus.bootcamp2026.ui.screens.navigation.BottomNavigation
 import ru.sicampus.bootcamp2026.ui.screens.navigation.NavGraph
 

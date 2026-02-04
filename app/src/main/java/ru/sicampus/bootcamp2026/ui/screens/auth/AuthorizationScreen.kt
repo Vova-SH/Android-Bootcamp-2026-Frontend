@@ -1,14 +1,14 @@
 package ru.sicampus.bootcamp2026.ui.screens.auth
 
+import android.view.WindowManager
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,22 +38,17 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import ru.sicampus.bootcamp2026.R
-import ru.sicampus.bootcamp2026.ui.components.UserField
-import ru.sicampus.bootcamp2026.ui.screens.navigation.AuthNavigation
-import ru.sicampus.bootcamp2026.ui.screens.profile.ProfileScreen
 import ru.sicampus.bootcamp2026.ui.theme.Black
 import ru.sicampus.bootcamp2026.ui.theme.Blue
 import ru.sicampus.bootcamp2026.ui.theme.DarkGrey
@@ -65,6 +60,7 @@ fun AuthorizationScreen(
     viewModel: AuthViewModel = viewModel(),
     navController: NavController
 ) {
+    SecureScreen()
     val state by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
 
@@ -224,5 +220,21 @@ fun Content(
             style = MaterialTheme.typography.bodyMedium,
             color = Color.Red,
         )
+    }
+}
+
+@Composable
+fun SecureScreen() {
+    val activity = LocalActivity.current
+    LifecycleStartEffect(Unit) {
+        activity?.window?.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
+        onStopOrDispose {
+            activity?.window?.clearFlags(
+                WindowManager.LayoutParams.FLAG_SECURE
+            )
+        }
     }
 }
