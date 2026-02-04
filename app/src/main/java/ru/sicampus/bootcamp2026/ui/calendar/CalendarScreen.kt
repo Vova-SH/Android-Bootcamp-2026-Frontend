@@ -165,7 +165,7 @@ fun CalendarScreen() {
                                 subheadContentColor = Color.White,
                                 yearContentColor = GreenLight,
                                 currentYearContentColor = Color.White,
-                                selectedYearContentColor = Color.Black,
+                                selectedYearContentColor = GreenLight,
                                 selectedYearContainerColor = GreenLight,
                                 dayContentColor = Color.White,
                                 selectedDayContainerColor = GreenLight,
