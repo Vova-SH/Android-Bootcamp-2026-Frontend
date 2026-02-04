@@ -7,8 +7,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.sicampus.bootcamp2026.data.dto.UserDto
 
-class UserInfoDataSource {
-    suspend fun getUser(): Result <List<UserDto>> = withContext(Dispatchers.IO){
+open class UserInfoDataSource {
+    open suspend fun getUser(): Result <List<UserDto>> = withContext(Dispatchers.IO){
         runCatching {
             val result = Network.client.get("${Network.HOST}/api/person")
             if (result.status != HttpStatusCode.OK) {

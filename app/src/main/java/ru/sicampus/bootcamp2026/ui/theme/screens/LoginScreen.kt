@@ -1,11 +1,9 @@
-package ru.sicampus.bootcamp2026.ui.theme
+package ru.sicampus.bootcamp2026.ui.theme.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +24,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,16 +38,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-
+import ru.sicampus.bootcamp2026.data.UserRepository
+import ru.sicampus.bootcamp2026.data.dto.UserDto
+import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController) {
-
+fun LoginScreen(
+    navController: NavController,
+    userRepository: UserRepository
+) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    LaunchedEffect(Unit) {
+        userRepository.getUsers()
+    }
 
     Box(
         modifier = Modifier
@@ -77,8 +83,7 @@ fun LoginScreen(navController: NavController) {
 
             Text(
                 text = "Вход",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground
+                style = MaterialTheme.typography.titleLarge
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -92,21 +97,12 @@ fun LoginScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {}
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next
-                ),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 singleLine = true,
                 shape = RoundedCornerShape(20.dp)
             )
@@ -118,16 +114,11 @@ fun LoginScreen(navController: NavController) {
                 onValueChange = { password = it },
                 label = { Text("Пароль") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next
-                ),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 shape = RoundedCornerShape(20.dp)
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -163,9 +154,23 @@ fun LoginScreen(navController: NavController) {
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PreviewLoginScreen() {
     val navController = rememberNavController()
-    LoginScreen(navController = navController)
+
+    val fakeDataSource = object : UserInfoDataSource() {
+        override suspend fun getUser(): Result<List<UserDto>> {
+            return Result.success(emptyList())
+        }
+    }
+
+    val userRepository = UserRepository(
+        userInfoDataSource = fakeDataSource
+    )
+
+    LoginScreen(
+        navController = navController,
+        userRepository = userRepository
+    )
 }

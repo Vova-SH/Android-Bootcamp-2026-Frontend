@@ -7,11 +7,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import ru.sicampus.bootcamp2026.data.UserRepository
+import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
 import ru.sicampus.bootcamp2026.ui.theme.AndroidBootcamp2026FrontendTheme
-import ru.sicampus.bootcamp2026.ui.theme.LoginScreen
-import ru.sicampus.bootcamp2026.ui.theme.MainHomeScreen
-import ru.sicampus.bootcamp2026.ui.theme.InviteScreen
-import ru.sicampus.bootcamp2026.ui.theme.ProfileScreen
+import ru.sicampus.bootcamp2026.ui.theme.screens.LoginScreen
+import ru.sicampus.bootcamp2026.ui.theme.screens.MainHomeScreen
+import ru.sicampus.bootcamp2026.ui.theme.screens.InviteScreen
+import ru.sicampus.bootcamp2026.ui.theme.screens.ProfileScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,16 +21,18 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AndroidBootcamp2026FrontendTheme {
+                val userInfoDataSource = UserInfoDataSource()
+                val userRepository = UserRepository(userInfoDataSource)
                 val navController = rememberNavController()
                 NavHost(
                     navController = navController,
                     startDestination = "login"
                 ) {
                     composable("login") {
-                        LoginScreen(navController = navController)
+                        LoginScreen(navController = navController, userRepository = userRepository)
                     }
                     composable("registration") {
-                        RegistrationScreen(navController = navController)
+                        RegistrationScreen(navController = navController, userRepository = userRepository)
                     }
                     composable("main") {
                         MainHomeScreen(navController = navController)

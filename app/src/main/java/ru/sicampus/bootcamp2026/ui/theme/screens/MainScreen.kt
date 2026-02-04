@@ -1,4 +1,4 @@
-package ru.sicampus.bootcamp2026.ui.theme
+package ru.sicampus.bootcamp2026.ui.theme.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -223,7 +223,7 @@ fun BottomNavigationBar(navController: NavController) {
 @Preview(showBackground = true, widthDp = 360, heightDp = 640)
 @Composable
 fun MainHomePreview() {
-    AndroidBootcamp2026FrontendTheme {
+    _root_ide_package_.ru.sicampus.bootcamp2026.ui.theme.AndroidBootcamp2026FrontendTheme {
         val navController = rememberNavController()
         MainHomeScreen(navController)
     }

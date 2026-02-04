@@ -47,10 +47,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import ru.sicampus.bootcamp2026.data.UserRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistrationScreen(navController: NavController) {
+fun RegistrationScreen(navController: NavController, userRepository: UserRepository) {
 
     var name by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
@@ -206,7 +207,7 @@ fun RegistrationScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    navController.navigate("main")
+                    userRepository.getUsers()
                 },
                 modifier = Modifier
                     .fillMaxWidth()

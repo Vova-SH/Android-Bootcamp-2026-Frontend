@@ -1,4 +1,4 @@
-package ru.sicampus.bootcamp2026.ui.theme
+package ru.sicampus.bootcamp2026.ui.theme.screens
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil3.compose.AsyncImage
 
 @Composable
 fun ProfileScreen(navController: NavController) {
@@ -192,15 +193,6 @@ fun ProfileHeader(
 }
 
 @Composable
-fun AsyncImage(
-    model: Uri,
-    contentDescription: String,
-    modifier: Modifier,
-    contentScale: ContentScale
-) {
-}
-
-@Composable
 fun ProfileInputField(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
@@ -283,7 +275,7 @@ fun ProfileBottomBar(navController: NavController) {
 @Composable
 fun ProfilePreview() {
     val navController = rememberNavController()
-    AndroidBootcamp2026FrontendTheme {
+    _root_ide_package_.ru.sicampus.bootcamp2026.ui.theme.AndroidBootcamp2026FrontendTheme {
         ProfileScreen(navController)
     }
 }
