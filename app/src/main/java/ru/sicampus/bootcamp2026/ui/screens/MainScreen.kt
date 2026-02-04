@@ -3,7 +3,12 @@ package ru.sicampus.bootcamp2026.ui.screens
 import android.annotation.SuppressLint
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import ru.sicampus.bootcamp2026.ui.screens.auth.AuthorizationScreen
+import ru.sicampus.bootcamp2026.ui.screens.navigation.AuthNavGraph
+import ru.sicampus.bootcamp2026.ui.screens.navigation.AuthNavigation
 import ru.sicampus.bootcamp2026.ui.screens.navigation.BottomNavigation
 import ru.sicampus.bootcamp2026.ui.screens.navigation.NavGraph
 
@@ -11,12 +16,27 @@ import ru.sicampus.bootcamp2026.ui.screens.navigation.NavGraph
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    Scaffold(
-        bottomBar = {
-            BottomNavigation(navController = navController)
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
+
+    val isBottomBar = currentRoute in listOf(
+        "ProfileScreen",
+        "InvitesScreen",
+        "CreateInviteScreen",
+        "ScheduleScreen"
+    )
+    if (isBottomBar) {
+        Scaffold(
+            bottomBar = {
+                BottomNavigation(navController = navController)
+            }
+        ) {
+            NavGraph(navHostController = navController)
         }
-    ) {
-        NavGraph(navHostController = navController)
+    } else {
+        Scaffold {
+            AuthNavGraph()
+        }
     }
 
 }

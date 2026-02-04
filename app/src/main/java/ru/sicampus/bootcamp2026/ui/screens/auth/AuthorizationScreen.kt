@@ -8,9 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -18,8 +21,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,24 +35,46 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import ru.sicampus.bootcamp2026.R
 import ru.sicampus.bootcamp2026.ui.components.UserField
+import ru.sicampus.bootcamp2026.ui.screens.navigation.AuthNavigation
+import ru.sicampus.bootcamp2026.ui.screens.profile.ProfileScreen
+import ru.sicampus.bootcamp2026.ui.theme.Black
 import ru.sicampus.bootcamp2026.ui.theme.Blue
+import ru.sicampus.bootcamp2026.ui.theme.DarkGrey
+import ru.sicampus.bootcamp2026.ui.theme.LightGrey
 import ru.sicampus.bootcamp2026.ui.theme.White
 
 @Composable
 fun AuthorizationScreen(
-    viewModel: AuthViewModel = viewModel()
+    viewModel: AuthViewModel = viewModel(),
+    navController: NavController
 ) {
     val state by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
+
+    LaunchedEffect(Unit) {
+        viewModel.actionFlow.collect { action ->
+            when(action) {
+                is AuthAction.OpenScreen -> navController.navigate(action.route)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -98,36 +127,84 @@ fun Content(
     var login by remember {mutableStateOf("")}
     var password by remember {mutableStateOf("")}
     val focusPasswordRequester = remember { FocusRequester() }
-    var isEditable by remember { mutableStateOf(true) }
 
-    UserField(
-        "Email","Введите email", login, isEditable = isEditable,
-        R.drawable.email
+    TextField(
+        modifier = Modifier.fillMaxWidth(),
+        value = login,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                focusPasswordRequester.requestFocus()
+            }
+        ),
+        onValueChange = {
+            login = it
+            viewModel.onIntent(AuthIntent.TextInput(login, password))
+        },
+        colors = TextFieldDefaults.colors(
+            focusedTextColor = Black ,
+            unfocusedTextColor = Black,
+            disabledTextColor = Black,
+            focusedContainerColor = LightGrey,
+            unfocusedContainerColor = LightGrey,
+            cursorColor = Black
+        ),
+        shape = RoundedCornerShape(20.dp),
+        label = { Text("Введите email",fontSize = 14.sp,
+            fontFamily = FontFamily(Font(R.font.montserrat_regular)),
+            color = Blue) },
+        leadingIcon = { Icon(
+            painter = painterResource(id = R.drawable.email), contentDescription = "Иконка",
+            tint = DarkGrey,
+            modifier = Modifier.padding(end=5.dp))}
     )
-
     Spacer(modifier = Modifier.height(20.dp))
-
-    UserField(
-        "Пароль","Введите пароль", password, isEditable = isEditable,
-        R.drawable.password
+    TextField(
+        modifier = Modifier.focusRequester(focusPasswordRequester).fillMaxWidth(),
+        value = password,
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                viewModel.onIntent(AuthIntent.Send(login, password))
+            }
+        ),
+        onValueChange = {
+            password = it
+            viewModel.onIntent(AuthIntent.TextInput(login, password))
+        },
+        colors = TextFieldDefaults.colors(
+            focusedTextColor = Black ,
+            unfocusedTextColor = Black,
+            disabledTextColor = Black,
+            focusedContainerColor = LightGrey,
+            unfocusedContainerColor = LightGrey,
+            cursorColor = Black
+        ),
+        shape = RoundedCornerShape(20.dp),
+        label = { Text("Введите пароль", fontSize = 14.sp,
+            fontFamily = FontFamily(Font(R.font.montserrat_regular)),
+            color = Blue) },
+        leadingIcon = { Icon(
+            painter = painterResource(id = R.drawable.password), contentDescription = "Иконка",
+            tint = DarkGrey,
+            modifier = Modifier.padding(end=5.dp))}
     )
-    Text(
-        text = "Забыли пароль",
-        color = Blue,
-        fontSize = 14.sp,
-        fontFamily = FontFamily(Font(R.font.montserrat_semibold))
-        ,modifier = Modifier.padding(24.dp)
-    )
-
-    Spacer(modifier = Modifier.height(70.dp))
-    Button(onClick = {},
+    Spacer(modifier = Modifier.height(50.dp))
+    Button(
         modifier = Modifier
             .height(63.dp)
-            .width(270.dp)
-            .clickable(
-                onClick = {},
-            ),
-
+            .width(270.dp),
+        onClick = {
+            viewModel.onIntent(AuthIntent.Send(login, password))
+        },
+        enabled = state.isEnabledSend,
         shape = RoundedCornerShape(20.dp),
         colors = ButtonDefaults.buttonColors(Blue)
     ) {
@@ -140,6 +217,12 @@ fun Content(
             tint = White,
             modifier = Modifier.padding(start=6.dp))
     }
+    if (state.error != null) {
+        Text(
+            modifier = Modifier,
+            text = state.error,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Red,
+        )
+    }
 }
-
-// ПЕРЕДЕЛАТЬ UserField, навигация с экрана авторизации, регистрация

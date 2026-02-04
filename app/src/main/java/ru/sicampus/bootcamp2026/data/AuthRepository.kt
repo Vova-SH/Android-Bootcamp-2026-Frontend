@@ -12,9 +12,7 @@ class AuthRepository(
         password: String,
     ): Result<Boolean> {
         authLocalDataSource.setToken(login, password)
-        return authNetworkDataSource.checkAuth(
-            authLocalDataSource.token ?: return Result.success(false)
-        )
+        return authNetworkDataSource.checkAuth()
             .onSuccess { isLogin ->
                 if (!isLogin) authLocalDataSource.clearToken()
             }

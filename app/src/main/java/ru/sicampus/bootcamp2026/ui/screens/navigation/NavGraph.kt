@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import ru.sicampus.bootcamp2026.ui.screens.auth.AuthorizationScreen
 import ru.sicampus.bootcamp2026.ui.screens.createinvite.CreateInviteScreen
 import ru.sicampus.bootcamp2026.ui.screens.invites.InvitesScreen
 import ru.sicampus.bootcamp2026.ui.screens.profile.ProfileScreen

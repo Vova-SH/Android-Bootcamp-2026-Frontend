@@ -1,9 +1,14 @@
 package ru.sicampus.bootcamp2026.ui.screens.auth
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -12,12 +17,12 @@ import ru.sicampus.bootcamp2026.data.source.AuthLocalDataSource
 import ru.sicampus.bootcamp2026.data.source.AuthNetworkDataSource
 import ru.sicampus.bootcamp2026.domain.auth.CheckAndSaveAuthUseCase
 import ru.sicampus.bootcamp2026.domain.auth.CheckAuthFormatUseCase
+import ru.sicampus.bootcamp2026.ui.screens.navigation.AuthNavigation
 
 class AuthViewModel : ViewModel() {
     private val checkAuthFormatUseCase by lazy { CheckAuthFormatUseCase() }
     private val checkAndSaveAuthCodeUseCase by lazy {
         CheckAndSaveAuthUseCase(
-
             AuthRepository(
                 authNetworkDataSource = AuthNetworkDataSource(),
                 authLocalDataSource = AuthLocalDataSource
@@ -32,6 +37,10 @@ class AuthViewModel : ViewModel() {
     )
     val uiState: StateFlow<AuthState> = _uiState.asStateFlow()
 
+    private val _actionFlow = MutableSharedFlow<AuthAction>()
+
+    val actionFlow = _actionFlow.asSharedFlow()
+
     fun onIntent(intent: AuthIntent) {
         when (intent) {
             is AuthIntent.Send -> {
@@ -39,7 +48,8 @@ class AuthViewModel : ViewModel() {
                     checkAndSaveAuthCodeUseCase.invoke(intent.login,
                         intent.password).fold(
                         onSuccess = {
-                            TODO()
+                            _actionFlow
+                                .emit(AuthAction.OpenScreen(AuthNavigation.Profile))
                         },
                         onFailure = {error ->
                             updateStateIfData { oldState ->

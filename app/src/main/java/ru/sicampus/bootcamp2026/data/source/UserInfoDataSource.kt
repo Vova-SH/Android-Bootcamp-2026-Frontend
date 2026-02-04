@@ -2,11 +2,13 @@ package ru.sicampus.bootcamp2026.data.source
 
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.utils.EmptyContent.contentType
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +28,9 @@ class UserInfoDataSource {
 
     suspend fun getCurrentUser(): Result<UserDto> = withContext(Dispatchers.IO) {
         runCatching {
-            val result = Network.client.get("${Network.HOST}/api/person")
+            val result = Network.client.get("${Network.HOST}/api/person") {
+                addAuthHeader()
+            }
             if (result.status != HttpStatusCode.OK) {
                 error("Status: ${result.status}")
             }

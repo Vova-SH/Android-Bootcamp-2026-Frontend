@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import ru.sicampus.bootcamp2026.R
 import ru.sicampus.bootcamp2026.ui.components.ProfileField
 import ru.sicampus.bootcamp2026.ui.theme.Blue
@@ -60,7 +61,7 @@ import ru.sicampus.bootcamp2026.ui.theme.White
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = viewModel<ProfileViewModel>()
+    viewModel: ProfileViewModel = viewModel<ProfileViewModel>(),
 ) {
     val state by viewModel.uiState.collectAsState()
 
