@@ -1,4 +1,4 @@
-package ru.sicampus.bootcamp2026.ui.screens
+package ru.sicampus.bootcamp2026.ui.screens.register
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

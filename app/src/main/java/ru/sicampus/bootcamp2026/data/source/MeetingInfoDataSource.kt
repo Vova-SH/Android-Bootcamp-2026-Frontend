@@ -34,7 +34,6 @@ class MeetingInfoDataSource {
         runCatching {
             val meeting = CreateMeetingDTO(name, startTime, endTime, date, participants)
             val result = Network.client.post("${Network.HOST}/api/meeting") {
-                contentType(ContentType.Application.Json)
                 setBody(meeting)
             }
             if (result.status != HttpStatusCode.OK) {

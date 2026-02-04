@@ -49,7 +49,6 @@ class UserInfoDataSource {
         runCatching {
             val userUpdates = UserDto(name, phone, email, info, photoUrl)
             val result = Network.client.post("${Network.HOST}/api/person") {
-                contentType(ContentType.Application.Json)
                 setBody(userUpdates)
             }
             if (result.status != HttpStatusCode.OK) {
