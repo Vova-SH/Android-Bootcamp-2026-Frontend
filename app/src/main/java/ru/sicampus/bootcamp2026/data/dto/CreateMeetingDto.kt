@@ -4,15 +4,15 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateMeetingDTO (
+data class CreateMeetingDto (
     @SerialName("name")
-    val name: String?,
+    val name: String? = null,
     @SerialName("startTime")
-    val startTime: Byte?,
+    val startTime: Byte? = null,
     @SerialName("endTime")
-    val endTime: Byte?,
+    val endTime: Byte? = null,
     @SerialName("date")
-    val date: String?,
+    val date: String? = null,
     @SerialName("participants")
-    val participants: List<Int>?,
+    val participants: List<Int>? = null,
 )

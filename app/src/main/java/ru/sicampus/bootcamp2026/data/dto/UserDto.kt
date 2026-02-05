@@ -6,13 +6,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserDto(
     @SerialName("name")
-    val name: String?,
+    val name: String? = null,
     @SerialName("phone")
-    val phone: String?,
+    val phone: String? = null,
     @SerialName("email")
-    val email: String?,
+    val email: String? = null,
     @SerialName("info")
-    val info: String?,
+    val info: String? = null,
     @SerialName("photoUrl")
-    val photoUrl: String?,
+    val photoUrl: String? = null,
 )
