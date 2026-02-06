@@ -32,7 +32,7 @@ fun MeetingsScreen(
         derivedStateOf {
             val totalItems = listState.layoutInfo.totalItemsCount
             val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            totalItems > 0 && lastVisible >= totalItems - 2 // Начинаем грузить за 2 элемента до конца
+            totalItems > 0 && lastVisible >= totalItems - 2
         }
     }
 

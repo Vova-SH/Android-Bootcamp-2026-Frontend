@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -19,9 +20,10 @@ import androidx.navigation.compose.rememberNavController
 import ru.sicampus.bootcamp2026.ui.screen.AuthRoute
 import ru.sicampus.bootcamp2026.ui.screen.ProfileScreen
 import ru.sicampus.bootcamp2026.ui.screen.RegisterScreen
-import ru.sicampus.bootcamp2026.ui.screen.meetings.MeetingsScreen
 import ru.sicampus.bootcamp2026.ui.screen.auth.AuthViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import ru.sicampus.bootcamp2026.ui.screen.meetings.MeetingsScreen
+import ru.sicampus.bootcamp2026.ui.screen.meetings.MeetingsViewModel
+import ru.sicampus.bootcamp2026.ui.screen.profile.ProfileViewModel
 import ru.sicampus.bootcamp2026.ui.theme.AndroidBootcamp2026FrontendTheme
 
 class MainActivity : ComponentActivity() {
@@ -39,7 +41,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val authViewModel: AuthViewModel = viewModel()
+
+    val viewModelFactory = AppViewModelFactory()
+
+    val authViewModel: AuthViewModel = viewModel(factory = viewModelFactory)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -107,11 +112,13 @@ fun AppNavigation() {
             }
 
             composable("meetings") {
-                MeetingsScreen()
+                val meetingsViewModel: MeetingsViewModel = viewModel(factory = viewModelFactory)
+                MeetingsScreen(viewModel = meetingsViewModel)
             }
 
             composable("profile") {
-                ProfileScreen()
+                val profileViewModel: ProfileViewModel = viewModel(factory = viewModelFactory)
+                ProfileScreen(viewModel = profileViewModel)
             }
         }
     }

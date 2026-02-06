@@ -13,7 +13,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 object Network {
-    private const val BASE_URL = "http://192.168.1.195:8080"
+    private const val BASE_URL = "http://10.0.0.2:8080"
 
     val client by lazy {
         HttpClient(CIO) {
