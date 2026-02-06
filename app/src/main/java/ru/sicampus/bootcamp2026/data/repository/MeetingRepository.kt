@@ -1,4 +1,4 @@
-package ru.sicampus.bootcamp2026.data
+package ru.sicampus.bootcamp2026.data.repository
 
 import ru.sicampus.bootcamp2026.data.source.MeetingInfoDataSource
 import ru.sicampus.bootcamp2026.domain.entities.MeetingEntity

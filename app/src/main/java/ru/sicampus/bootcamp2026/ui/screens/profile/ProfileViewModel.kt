@@ -2,15 +2,13 @@ package ru.sicampus.bootcamp2026.ui.screens.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import ru.sicampus.bootcamp2026.data.UserRepository
+import ru.sicampus.bootcamp2026.data.repository.UserRepository
 import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
 import ru.sicampus.bootcamp2026.domain.GetProfileUseCase
 import ru.sicampus.bootcamp2026.domain.UpdateProfileUseCase
-import ru.sicampus.bootcamp2026.ui.screens.list.ListState
 
 class ProfileViewModel: ViewModel() {
 

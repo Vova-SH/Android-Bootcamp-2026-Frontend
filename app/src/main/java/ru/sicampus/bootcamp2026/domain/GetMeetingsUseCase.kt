@@ -1,6 +1,6 @@
 package ru.sicampus.bootcamp2026.domain
 
-import ru.sicampus.bootcamp2026.data.MeetingRepository
+import ru.sicampus.bootcamp2026.data.repository.MeetingRepository
 import ru.sicampus.bootcamp2026.domain.entities.MeetingEntity
 
 class GetMeetingsUseCase(

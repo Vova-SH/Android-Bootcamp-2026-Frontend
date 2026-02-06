@@ -1,7 +1,6 @@
 package ru.sicampus.bootcamp2026.domain
 
-import ru.sicampus.bootcamp2026.data.UserRepository
-import ru.sicampus.bootcamp2026.domain.entities.UserEntity
+import ru.sicampus.bootcamp2026.data.repository.UserRepository
 
 class UpdateProfileUseCase(
     private val userRepository: UserRepository
