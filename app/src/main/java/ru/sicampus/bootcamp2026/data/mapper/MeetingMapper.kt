@@ -1,52 +1,73 @@
 package ru.sicampus.bootcamp2026.data.mapper
 
-import ru.sicampus.bootcamp2026.data.dto.response.MeetingDto
-import ru.sicampus.bootcamp2026.data.dto.response.OrganizerInfoDto
-import ru.sicampus.bootcamp2026.data.dto.response.ParticipantInfoDto
-import ru.sicampus.bootcamp2026.data.dto.response.ParticipantStatus as ParticipantStatusDto
-import ru.sicampus.bootcamp2026.data.dto.response.MeetingStatus as MeetingStatusDto
+import ru.sicampus.bootcamp2026.data.remote.dto.FreeTimeSlotDto
+import ru.sicampus.bootcamp2026.data.remote.dto.MeetingResponse
+import ru.sicampus.bootcamp2026.data.remote.dto.PageResponse
+import ru.sicampus.bootcamp2026.data.remote.dto.ParticipantResponse
+import ru.sicampus.bootcamp2026.domain.model.FreeTimeSlot
 import ru.sicampus.bootcamp2026.domain.model.Meeting
 import ru.sicampus.bootcamp2026.domain.model.MeetingStatus
-import ru.sicampus.bootcamp2026.domain.model.OrganizerInfo
-import ru.sicampus.bootcamp2026.domain.model.ParticipantInfo
+import ru.sicampus.bootcamp2026.domain.model.PaginatedData
+import ru.sicampus.bootcamp2026.domain.model.Participant
 import ru.sicampus.bootcamp2026.domain.model.ParticipantStatus
-import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 
-fun MeetingDto.toDomain(): Meeting = Meeting(
-    id = id,
-    title = title,
-    description = description,
-    date = LocalDate.parse(date),
-    startTime = startTime,
-    endTime = endTime,
-    location = location,
-    status = status.toDomain(),
-    organizer = organizer.toDomain(),
-    participants = participants.map { it.toDomain() }
-)
-
-fun MeetingStatusDto.toDomain(): MeetingStatus = when (this) {
-    MeetingStatusDto.SCHEDULED -> MeetingStatus.SCHEDULED
-    MeetingStatusDto.CANCELLED -> MeetingStatus.CANCELLED
-    MeetingStatusDto.COMPLETED -> MeetingStatus.COMPLETED
+/**
+ * Маппер для преобразования ParticipantResponse в Participant
+ */
+fun ParticipantResponse.toDomain(): Participant {
+    return Participant(
+        userId = UUID.fromString(userId),
+        username = username,
+        status = ParticipantStatus.valueOf(status)
+    )
 }
 
-fun OrganizerInfoDto.toDomain(): OrganizerInfo = OrganizerInfo(
-    id = id,
-    username = username,
-    email = email
-)
+/**
+ * Маппер для преобразования MeetingResponse в Meeting
+ */
+fun MeetingResponse.toDomain(): Meeting {
+    return Meeting(
+        id = UUID.fromString(id),
+        organizerId = UUID.fromString(organizerId),
+        organizerUsername = organizerUsername,
+        title = title,
+        description = description,
+        location = location,
+        startTime = LocalDateTime.parse(startTime, DateTimeFormatter.ISO_DATE_TIME),
+        endTime = LocalDateTime.parse(endTime, DateTimeFormatter.ISO_DATE_TIME),
+        status = MeetingStatus.valueOf(status),
+        createdAt = LocalDateTime.parse(createdAt, DateTimeFormatter.ISO_DATE_TIME),
+        updatedAt = LocalDateTime.parse(updatedAt, DateTimeFormatter.ISO_DATE_TIME),
+        participants = participants.map { it.toDomain() }
+    )
+}
 
-fun ParticipantInfoDto.toDomain(): ParticipantInfo = ParticipantInfo(
-    id = id,
-    username = username,
-    email = email,
-    status = status.toDomain()
-)
+/**
+ * Маппер для преобразования PageResponse<MeetingResponse> в PaginatedData<Meeting>
+ */
+fun PageResponse<MeetingResponse>.toDomain(): PaginatedData<Meeting> {
+    return PaginatedData(
+        content = content.map { it.toDomain() },
+        totalPages = totalPages,
+        totalElements = totalElements,
+        number = number,
+        size = size,
+        first = first,
+        last = last,
+        empty = empty
+    )
+}
 
-fun ParticipantStatusDto.toDomain(): ParticipantStatus = when (this) {
-    ParticipantStatusDto.PENDING -> ParticipantStatus.PENDING
-    ParticipantStatusDto.CONFIRMED -> ParticipantStatus.CONFIRMED
-    ParticipantStatusDto.DECLINED -> ParticipantStatus.DECLINED
+/**
+ * Маппер для преобразования FreeTimeSlotDto в FreeTimeSlot
+ */
+fun FreeTimeSlotDto.toDomain(): FreeTimeSlot {
+    return FreeTimeSlot(
+        startTime = LocalDateTime.parse(startTime, DateTimeFormatter.ISO_DATE_TIME),
+        endTime = LocalDateTime.parse(endTime, DateTimeFormatter.ISO_DATE_TIME)
+    )
 }
 

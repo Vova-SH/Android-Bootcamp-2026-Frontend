@@ -1,35 +1,32 @@
 package ru.sicampus.bootcamp2026.domain.model
 
-import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
-data class Meeting(
-    val id: String, // UUID на сервере
-    val title: String,
-    val description: String?,
-    val date: LocalDate,
-    val startTime: String,
-    val endTime: String,
-    val location: String?,
-    val status: MeetingStatus,
-    val organizer: OrganizerInfo,
-    val participants: List<ParticipantInfo>
-)
-
-data class OrganizerInfo(
-    val id: String,//UUID на сервере
+/**
+ * Доменная модель участника встречи
+ */
+data class Participant(
+    val userId: UUID,
     val username: String,
-    val email: String
-)
-
-data class ParticipantInfo(
-    val id: String,//UUID на сервере
-    val username: String,
-    val email: String,
     val status: ParticipantStatus
 )
 
-enum class ParticipantStatus {
-    PENDING,
-    CONFIRMED,
-    DECLINED
-}
+/**
+ * Доменная модель встречи
+ */
+data class Meeting(
+    val id: UUID,
+    val organizerId: UUID,
+    val organizerUsername: String,
+    val title: String,
+    val description: String?,
+    val location: String?,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
+    val status: MeetingStatus,
+    val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime,
+    val participants: List<Participant>
+)
+
