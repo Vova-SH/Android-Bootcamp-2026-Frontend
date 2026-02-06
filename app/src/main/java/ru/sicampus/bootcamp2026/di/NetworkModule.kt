@@ -28,7 +28,27 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "http://localhost:8080/"
+    /**
+     * ИНСТРУКЦИЯ ПО ПОДКЛЮЧЕНИЮ К ЛОКАЛЬНОМУ БЭКЕНДУ:
+     *
+     * 1. На вашем ноутбуке запустите бэкенд на порту 8080:
+     *    java -jar backend.jar
+     *    или
+     *    ./mvnw spring-boot:run
+     *
+     * 2. Узнайте IP адрес вашего ноутбука (не localhost!):
+     *    Windows: ipconfig → IPv4 Address (например 192.168.1.100)
+     *    Linux/Mac: ifconfig или ip addr (например 192.168.1.100)
+     *
+     * 3. Обновите BASE_URL ниже на IP адрес вашего ноутбука:
+     *    например: private const val BASE_URL = "http://192.168.1.100:8080/"
+     *
+     * 4. Убедитесь что:
+     *    - Бэкенд запущен на 8080 порту
+     *    - Эмулятор/устройство в одной сети с ноутбуком
+     *    - Firewall не блокирует порт 8080
+     */
+    private const val BASE_URL = "http://192.168.1.100:8080/"  // ← ИЗМЕНИТЕ НА IP ВАШЕГО НОУТБУКА!
     private const val TIMEOUT_SECONDS = 30L
 
     @Provides

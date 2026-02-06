@@ -8,4 +8,3 @@ import dagger.hilt.android.HiltAndroidApp
  */
 @HiltAndroidApp
 class MeetingPlannerApplication : Application()
-

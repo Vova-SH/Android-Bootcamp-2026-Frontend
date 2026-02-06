@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.sicampus.bootcamp2026.ui.components.HomeMeetingCard
 import java.time.Instant
 import java.time.LocalDate
@@ -27,45 +29,33 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-val GreenLight = Color(0xFFBBDBA6)
+private val GreenLight = Color(0xFFBBDBA6)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarScreen() {
+fun CalendarScreen(
+    onNavigateToDetails: (String) -> Unit = {},
+    viewModel: CalendarViewModel = hiltViewModel()
+) {
     val datePickerState = rememberDatePickerState()
     var isCalendarExpanded by remember { mutableStateOf(true) }
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    //Вычисление выбранной даты
     val selectedDate: LocalDate? = datePickerState.selectedDateMillis?.let { millis ->
         Instant.ofEpochMilli(millis).atZone(ZoneId.of("UTC")).toLocalDate()
     }
 
-    //Авто-скрытие при выборе
     LaunchedEffect(datePickerState.selectedDateMillis) {
         if (datePickerState.selectedDateMillis != null) {
             isCalendarExpanded = false
+            selectedDate?.let { date ->
+                viewModel.onEvent(CalendarUiEvent.SelectDate(date))
+            }
         }
     }
 
-    //тестовые данные
-    val allMeetings = remember {
-        val today = LocalDate.now()
-        listOf(
-            MockMeeting("Meeting A", today, "10:00"),
-            MockMeeting("Project B", today, "14:00"),
-            MockMeeting("Meeting C", today, "15:00"),
-            MockMeeting("Project D", today, "16:00"),
-            MockMeeting("Design Review", today.plusDays(1), "11:00")
-        )
-    }
-
-    val filteredMeetings = if (selectedDate != null) {
-        allMeetings.filter { it.date == selectedDate }
-    } else {
-        emptyList()
-    }
-
     val dateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.getDefault())
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
 
     Column(
         modifier = Modifier
@@ -74,8 +64,6 @@ fun CalendarScreen() {
             .statusBarsPadding()
     ) {
 
-        //Заголовок (Виден, когда календарь СВЕРНУТ)
-        //Показываем всегда, если календарь закрыт (даже если дата null)
         AnimatedVisibility(
             visible = !isCalendarExpanded,
             enter = fadeIn() + expandVertically(),
@@ -102,7 +90,6 @@ fun CalendarScreen() {
                             style = MaterialTheme.typography.labelMedium,
                             color = Color.Gray
                         )
-                        //Если дата не выбрана, пишем "Select Date"
                         Text(
                             text = selectedDate?.format(dateFormatter) ?: "Select a date",
                             style = MaterialTheme.typography.titleLarge,
@@ -111,7 +98,6 @@ fun CalendarScreen() {
                         )
                     }
 
-                    // Кнопка открытия
                     IconButton(
                         onClick = { isCalendarExpanded = true },
                         colors = IconButtonDefaults.iconButtonColors(containerColor = GreenLight)
@@ -122,17 +108,14 @@ fun CalendarScreen() {
             }
         }
 
-        //Календарь (Виден, когда РАЗВЕРНУТ)
         AnimatedVisibility(
             visible = isCalendarExpanded,
-            //Плавное открытие (разворачивание сверху вниз + прозрачность)
             enter = expandVertically(
                 animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
                 expandFrom = Alignment.Top
             ) + fadeIn(
                 animationSpec = tween(durationMillis = 500)
             ),
-            //Плавное закрытие (сворачивание вверх + исчезновение)
             exit = shrinkVertically(
                 animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
                 shrinkTowards = Alignment.Top
@@ -143,7 +126,10 @@ fun CalendarScreen() {
             Surface(
                 color = Color(0xFF1E1E1E),
                 shape = RoundedCornerShape(48.dp),
-                modifier = Modifier.width(420.dp).padding(16.dp).align(Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .width(420.dp)
+                    .padding(16.dp)
+                    .align(Alignment.CenterHorizontally)
             ) {
                 Column {
                     MaterialTheme(
@@ -176,7 +162,6 @@ fun CalendarScreen() {
                         )
                     }
 
-                    // Кнопка "Свернуть" снизу календаря
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         IconButton(onClick = { isCalendarExpanded = false }) {
                             Icon(Icons.Default.KeyboardArrowUp, null, tint = Color.Gray)
@@ -186,40 +171,62 @@ fun CalendarScreen() {
             }
         }
 
-        //Список встреч
-        // Виден всегда под заголовком/календарем
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            if (selectedDate == null) {
-                if (!isCalendarExpanded) {
-                    Text("Please select a date above", color = Color.White,
-                        modifier = Modifier
-                            .align (Alignment.Center))
+            when {
+                state.isLoading -> {
+                    CircularProgressIndicator(color = GreenLight)
                 }
-            } else if (filteredMeetings.isEmpty()) {
-                Text(
-                    text = "No meetings found",
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(filteredMeetings) { meeting ->
-                        Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                            HomeMeetingCard(
-                                title = meeting.title,
-                                date = meeting.date.format(DateTimeFormatter.ofPattern("dd MMM")),
-                                startTime = meeting.time,
-                                endTime = meeting.time,
-                                participantsCount = 3,
-                                onClick = { /* ... */ }
-                            )
+                state.error != null -> {
+                    val isConnectionError = state.error!!.contains("Connection", ignoreCase = true) ||
+                            state.error!!.contains("timeout", ignoreCase = true) ||
+                            state.error!!.contains("unreachable", ignoreCase = true) ||
+                            state.error!!.contains("failed to connect", ignoreCase = true) ||
+                            state.error!!.contains("NetworkException", ignoreCase = true)
+
+                    Text(
+                        text = if (isConnectionError) "the server is not responding" else state.error!!,
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+                selectedDate == null -> {
+                    if (!isCalendarExpanded) {
+                        Text(
+                            "Please select a date above",
+                            color = Color.White,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                }
+                state.meetingsForSelectedDate.isEmpty() -> {
+                    Text(
+                        text = "No meetings found",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(state.meetingsForSelectedDate) { meeting ->
+                            Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+                                HomeMeetingCard(
+                                    title = meeting.title,
+                                    date = meeting.startTime.format(DateTimeFormatter.ofPattern("dd MMM")),
+                                    startTime = meeting.startTime.format(timeFormatter),
+                                    endTime = meeting.endTime.format(timeFormatter),
+                                    participantsCount = meeting.participants.size,
+                                    onClick = {
+                                        onNavigateToDetails(meeting.id.toString())
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -228,15 +235,8 @@ fun CalendarScreen() {
     }
 }
 
-//Для теста
-data class MockMeeting(val title: String, val date: LocalDate, val time: String)
-
 @Composable
 @Preview
-fun CalendarScreenPreview(){
-    CalendarScreen(
-
-    )
-
-
+fun CalendarScreenPreview() {
+    CalendarScreen()
 }

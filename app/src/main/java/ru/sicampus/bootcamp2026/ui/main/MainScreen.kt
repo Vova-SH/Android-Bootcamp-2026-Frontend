@@ -1,17 +1,14 @@
 package ru.sicampus.bootcamp2026.ui.main
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import ru.sicampus.bootcamp2026.R
 import ru.sicampus.bootcamp2026.ui.calendar.CalendarScreen
 import ru.sicampus.bootcamp2026.ui.components.HomeBottomBar
 import ru.sicampus.bootcamp2026.ui.home.HomeScreen
@@ -25,18 +22,8 @@ fun MainScreen(
 ) {
     var currentTab by remember { mutableIntStateOf(1) }
 
-    //Корневой Box держит Фон и Scaffold
-    Box(modifier = Modifier.fillMaxSize()) {
-
-        Image(
-            painter = painterResource(id = R.drawable.green_gradient),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-
-        //Scaffold лежит поверх картинки
-        Scaffold(
+    //Scaffold без фона (фон в AppNavGraph)
+    Scaffold(
             containerColor = Color.Transparent, // Прозрачный, чтобы видеть картинку
              contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
@@ -45,12 +32,13 @@ fun MainScreen(
                     onTabSelected = { currentTab = it }
                 )
             }
-        ) { paddingValues ->
+        ) { innerPadding ->
 
             //Контент экранов
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(innerPadding)
             ) {
                 when (currentTab) {
                     0 -> CalendarScreen()
@@ -59,11 +47,12 @@ fun MainScreen(
                         onNavigateToDetails = onNavigateToDetails,
                         onNavigateToProfile = onNavigateToProfile
                     )
-                    2 -> NotificationScreen()
+                    2 -> NotificationScreen(
+                        onNavigateToDetails = onNavigateToDetails
+                    )
                 }
             }
         }
-    }
 }
 
 @Preview

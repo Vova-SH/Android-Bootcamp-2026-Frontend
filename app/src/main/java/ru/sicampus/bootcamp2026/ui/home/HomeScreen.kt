@@ -2,7 +2,7 @@ package ru.sicampus.bootcamp2026.ui.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,9 +17,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.sicampus.bootcamp2026.R
 import ru.sicampus.bootcamp2026.ui.components.HomeMeetingCard
 import ru.sicampus.bootcamp2026.ui.components.HomeFilterDialog
+import java.time.format.DateTimeFormatter
 
 val GreenLight = Color(0xFFBBDBA6)
 
@@ -27,18 +30,22 @@ val GreenLight = Color(0xFFBBDBA6)
 fun HomeScreen(
     onNavigateToCreate: () -> Unit,
     onNavigateToDetails: (String) -> Unit,
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     // Локальное состояние UI
     var showFilterDialog by remember { mutableStateOf(false) }
     var isSortExpanded by remember { mutableStateOf(false) }
-    var sortLabel by remember { mutableStateOf("Decreasing") }
+
+    // Получаем состояние из ViewModel
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     val sidePadding = 24.dp
+    val dateFormatter = DateTimeFormatter.ofPattern("dd, EEE")
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
-    // 1. Корневой контейнер
+    // Box контейнер
     Box(modifier = Modifier.fillMaxSize()) {
-
 
         Column(
             modifier = Modifier
@@ -48,7 +55,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            //Хедер
+            // Хедер с приветствием и профилем
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -65,7 +72,7 @@ fun HomeScreen(
                         fontSize = 32.sp
                     )
                     Text(
-                        text = "Rodion",
+                        text = state.username.ifEmpty { "User" },
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         fontSize = 32.sp,
@@ -77,7 +84,6 @@ fun HomeScreen(
                     modifier = Modifier.size(56.dp)
                 ) {
                     Surface(shape = CircleShape, color = Color.Gray) {
-                        // Заглушка аватарки
                         Icon(Icons.Default.Person, null, modifier = Modifier.padding(8.dp))
                     }
                 }
@@ -105,7 +111,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            //Секция приглашений
+            // Секция приглашений
             Text(
                 text = "My invitations",
                 color = GreenLight,
@@ -113,26 +119,6 @@ fun HomeScreen(
                 modifier = Modifier.padding(horizontal = sidePadding),
                 fontSize = 24.sp,
             )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(horizontal = sidePadding)
-            ) {
-                items(5) {
-                    SuggestionChip(
-                        onClick = { },
-                        label = { Text("Discussion about design...", color = Color.White) },
-                        colors = SuggestionChipDefaults.suggestionChipColors(
-                            containerColor = Color(0xFF2A2A2A).copy(alpha = 0.6f)
-                        ),
-                        border = null,
-                        shape = RoundedCornerShape(50)
-                    )
-                }
-            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -176,7 +162,10 @@ fun HomeScreen(
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             modifier = Modifier.height(48.dp)
                         ) {
-                            Text(sortLabel, color = Color.Black)
+                            Text(
+                                text = if (state.sortOrder == SortOrder.DECREASING) "Decreasing" else "Increasing",
+                                color = Color.Black
+                            )
                             Spacer(modifier = Modifier.width(8.dp))
                             Icon(Icons.Default.ArrowDropDown, null, tint = Color.Black)
                         }
@@ -187,43 +176,113 @@ fun HomeScreen(
                         ) {
                             DropdownMenuItem(
                                 text = { Text("Increasing") },
-                                onClick = { sortLabel = "Increasing"; isSortExpanded = false }
+                                onClick = {
+                                    viewModel.onEvent(HomeUiEvent.ChangeSortOrder(SortOrder.INCREASING))
+                                    isSortExpanded = false
+                                }
                             )
                             DropdownMenuItem(
                                 text = { Text("Decreasing") },
-                                onClick = { sortLabel = "Decreasing"; isSortExpanded = false }
+                                onClick = {
+                                    viewModel.onEvent(HomeUiEvent.ChangeSortOrder(SortOrder.DECREASING))
+                                    isSortExpanded = false
+                                }
                             )
                         }
                     }
                 }
             }
 
-            // Диалог фильтров (показывается поверх всего, если showFilterDialog == true)
+            // Диалог фильтров
             if (showFilterDialog) {
                 HomeFilterDialog(
                     onDismiss = { showFilterDialog = false },
-                    onApply = { showFilterDialog = false }
+                    onApply = { status: String? ->
+                        viewModel.onEvent(HomeUiEvent.FilterByStatus(status))
+                        showFilterDialog = false
+                    }
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Список встреч
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(bottom = 16.dp), // Небольшой отступ снизу
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(10) { index ->
-                    Box(modifier = Modifier.padding(horizontal = sidePadding)) {
-                        HomeMeetingCard(
-                            title = "Meeting regarding the project #${index + 1}",
-                            date = "25, Tue",
-                            startTime = "15:00",
-                            endTime = "17:00",
-                            participantsCount = 4 + index,
-                            onClick = { onNavigateToDetails("id_$index") }
+            // Список встреч с состояниями загрузки и ошибок
+            when {
+                state.isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = GreenLight)
+                    }
+                }
+                state.error != null -> {
+                    // Определяем тип ошибки
+                    val isConnectionError = state.error!!.contains("Connection", ignoreCase = true) ||
+                            state.error!!.contains("timeout", ignoreCase = true) ||
+                            state.error!!.contains("unreachable", ignoreCase = true) ||
+                            state.error!!.contains("failed to connect", ignoreCase = true) ||
+                            state.error!!.contains("NetworkException", ignoreCase = true)
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = if (isConnectionError) "the server is not responding" else "Error loading meetings",
+                            color = Color.Red,
+                            style = MaterialTheme.typography.titleMedium
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (!isConnectionError) {
+                            Text(
+                                text = state.error!!,
+                                color = Color.White.copy(alpha = 0.6f),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                        Button(
+                            onClick = { viewModel.onEvent(HomeUiEvent.LoadMeetings) },
+                            colors = ButtonDefaults.buttonColors(containerColor = GreenLight)
+                        ) {
+                            Text("Retry", color = Color.Black)
+                        }
+                    }
+                }
+                state.filteredMeetings.isEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No meetings found",
+                            color = Color.White.copy(alpha = 0.6f),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(bottom = 100.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(state.filteredMeetings) { meeting ->
+                            Box(modifier = Modifier.padding(horizontal = sidePadding)) {
+                                HomeMeetingCard(
+                                    title = meeting.title,
+                                    date = meeting.startTime.format(dateFormatter),
+                                    startTime = meeting.startTime.format(timeFormatter),
+                                    endTime = meeting.endTime.format(timeFormatter),
+                                    participantsCount = meeting.participants.size,
+                                    onClick = { onNavigateToDetails(meeting.id.toString()) }
+                                )
+                            }
+                        }
                     }
                 }
             }

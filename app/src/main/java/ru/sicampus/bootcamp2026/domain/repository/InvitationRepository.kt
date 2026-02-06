@@ -1,7 +1,7 @@
 package ru.sicampus.bootcamp2026.domain.repository
 
 import ru.sicampus.bootcamp2026.domain.model.Invitation
-import ru.sicampus.bootcamp2026.domain.model.ParticipantStatus
+import ru.sicampus.bootcamp2026.domain.model.PaginatedData
 import ru.sicampus.bootcamp2026.domain.util.Result
 import java.util.UUID
 
@@ -13,7 +13,7 @@ interface InvitationRepository {
     /**
      * Получение списка приглашений
      */
-    suspend fun getInvitations(): Result<List<Invitation>>
+    suspend fun getInvitations(page: Int = 0, size: Int = 20): Result<PaginatedData<Invitation>>
 
     /**
      * Получение деталей приглашения
@@ -24,8 +24,8 @@ interface InvitationRepository {
      * Ответ на приглашение
      */
     suspend fun respondToInvitation(
-        meetingId: UUID,
-        status: ParticipantStatus
+        invitationId: UUID,
+        accept: Boolean
     ): Result<Invitation>
 }
 
