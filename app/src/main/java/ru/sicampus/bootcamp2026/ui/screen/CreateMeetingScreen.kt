@@ -1,120 +1,82 @@
 package ru.sicampus.bootcamp2026.ui.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CreateMeetingScreen(
-    onCreateClick: () -> Unit
+    onCreateClick: (String, String, String, String, Int) -> Unit
 ) {
     var title by remember { mutableStateOf("") }
-    var selectedHour by remember { mutableStateOf<Int?>(null) }
+    var description by remember { mutableStateOf("") }
+    var place by remember { mutableStateOf("") }
+    var date by remember { mutableStateOf("2026-02-12T10:00:00") }
+    var duration by remember { mutableStateOf("60") }
 
-    // хардкод
-    val participants = listOf("Anna", "Boris", "Clara", "Dmitry")
-    val timeSlots = (9..17).map { it } // 9:00 to 17:00
-
-    LazyColumn(
+    Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(16.dp)
     ) {
-        item {
-            Text(
-                text = "New Meeting",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Spacer(modifier = Modifier.height(24.dp))
+        Text("Новая встреча", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("Topic") },
-                modifier = Modifier.fillMaxWidth()
-            )
+        OutlinedTextField(
+            value = title,
+            onValueChange = { title = it },
+            label = { Text("Тема") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Select Time Slot (1 hour)",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
+        OutlinedTextField(
+            value = description,
+            onValueChange = { description = it },
+            label = { Text("Описание") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
 
-        item {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                timeSlots.forEach { hour ->
-                    FilterChip(
-                        selected = selectedHour == hour,
-                        onClick = { selectedHour = hour },
-                        label = { Text(text = "$hour:00 - ${hour + 1}:00") }
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Participants",
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
+        OutlinedTextField(
+            value = place,
+            onValueChange = { place = it },
+            label = { Text("Место") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
 
-        items(participants.size) { index ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Checkbox(checked = false, onCheckedChange = {})
-                Text(text = participants[index])
-            }
-        }
+        OutlinedTextField(
+            value = date,
+            onValueChange = { date = it },
+            label = { Text("Дата (YYYY-MM-DDTHH:MM:SS)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
 
-        item {
-            Spacer(modifier = Modifier.height(24.dp))
-            Button(
-                onClick = onCreateClick,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = title.isNotEmpty() && selectedHour != null
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(modifier = Modifier.padding(4.dp))
-                Text("Create Meeting")
-            }
+        OutlinedTextField(
+            value = duration,
+            onValueChange = { duration = it },
+            label = { Text("Длительность (мин)") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                val dur = duration.toIntOrNull() ?: 60
+                onCreateClick(title, description, place, date, dur)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = title.isNotBlank() && place.isNotBlank()
+        ) {
+            Text("Создать")
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun CreateMeetingScreenPreview() {
-    CreateMeetingScreen(onCreateClick = {})
 }

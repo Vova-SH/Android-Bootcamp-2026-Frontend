@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
-    <string msgid="389117264260014992" name="autofill">"ਆਟੋਫਿਲ"</string>
     <string msgid="881409763997275156" name="call_notification_answer_action">"ਜਵਾਬ ਦਿਓ"</string>
     <string msgid="8793775615905189152" name="call_notification_answer_video_action">"ਵੀਡੀਓ"</string>
-    <string msgid="3229508546291798546" name="call_notification_decline_action">"ਕਾਲ ਕੱਟੋ"</string>
+    <string msgid="3229508546291798546" name="call_notification_decline_action">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
     <string msgid="2659457946726154263" name="call_notification_hang_up_action">"ਸਮਾਪਤ ਕਰੋ"</string>
     <string msgid="6107532579223922871" name="call_notification_incoming_text">"ਇਨਕਮਿੰਗ ਕਾਲ"</string>
     <string msgid="8623827134497363134" name="call_notification_ongoing_text">"ਜਾਰੀ ਕਾਲ"</string>
@@ -77,7 +76,6 @@
     <string msgid="5941395253238309765" name="range_end">"ਰੇਂਜ ਸਮਾਪਤ"</string>
     <string msgid="7097486360902471446" name="range_start">"ਰੇਂਜ ਸ਼ੁਰੂ"</string>
     <string msgid="6043586758067023" name="selected">"ਚੁਣੀ ਗਈ"</string>
-    <string msgid="2792228137354697160" name="snackbar_pane_title">"ਅਲਰਟ"</string>
     <string msgid="4139871816613051306" name="state_empty">"ਖਾਲੀ"</string>
     <string msgid="5834637030682409883" name="state_off">"ਬੰਦ ਹੈ"</string>
     <string msgid="1490883874751719580" name="state_on">"ਚਾਲੂ ਹੈ"</string>

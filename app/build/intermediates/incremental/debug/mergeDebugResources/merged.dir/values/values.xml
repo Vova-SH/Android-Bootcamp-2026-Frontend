@@ -72,7 +72,6 @@
     <item name="accessibility_custom_action_8" type="id"/>
     <item name="accessibility_custom_action_9" type="id"/>
     <item name="androidx_compose_ui_view_composition_context" type="id"/>
-    <item name="compose_prefetch_scheduler" type="id"/>
     <item name="compose_view_saveable_id_tag" type="id"/>
     <item name="consume_window_insets_tag" type="id"/>
     <item name="hide_graphics_layer_in_inspector_tag" type="id"/>
@@ -81,19 +80,18 @@
     <item name="is_pooling_container_tag" type="id"/>
     <item name="line1" type="id"/>
     <item name="line3" type="id"/>
+    <item name="nav_controller_view_tag" type="id"/>
     <item name="pooling_container_listener_holder_tag" type="id"/>
     <item name="report_drawn" type="id"/>
     <item name="tag_accessibility_actions" type="id"/>
     <item name="tag_accessibility_clickable_spans" type="id"/>
     <item name="tag_accessibility_heading" type="id"/>
     <item name="tag_accessibility_pane_title" type="id"/>
-    <item name="tag_compat_insets_dispatch" type="id"/>
     <item name="tag_on_apply_window_listener" type="id"/>
     <item name="tag_on_receive_content_listener" type="id"/>
     <item name="tag_on_receive_content_mime_types" type="id"/>
     <item name="tag_screen_reader_focusable" type="id"/>
     <item name="tag_state_description" type="id"/>
-    <item name="tag_system_bar_state_monitor" type="id"/>
     <item name="tag_transition_group" type="id"/>
     <item name="tag_unhandled_key_event_manager" type="id"/>
     <item name="tag_unhandled_key_listeners" type="id"/>
@@ -101,9 +99,7 @@
     <item name="text" type="id"/>
     <item name="text2" type="id"/>
     <item name="title" type="id"/>
-    <id name="view_tree_disjoint_parent"/>
     <id name="view_tree_lifecycle_owner"/>
-    <id name="view_tree_navigation_event_dispatcher_owner"/>
     <id name="view_tree_on_back_pressed_dispatcher_owner"/>
     <id name="view_tree_saved_state_registry_owner"/>
     <id name="view_tree_view_model_store_owner"/>
@@ -112,7 +108,6 @@
     <integer name="status_bar_notification_info_maxnum">999</integer>
     <string name="androidx_startup" translatable="false">androidx.startup</string>
     <string name="app_name">Android-Bootcamp-2026-Frontend</string>
-    <string name="autofill">Autofill</string>
     <string name="call_notification_answer_action">Answer</string>
     <string name="call_notification_answer_video_action">Video</string>
     <string name="call_notification_decline_action">Decline</string>
@@ -193,7 +188,6 @@
     <string name="range_end">"Range end"</string>
     <string name="range_start">"Range start"</string>
     <string name="selected">Selected</string>
-    <string name="snackbar_pane_title">Alert</string>
     <string name="state_empty">Empty</string>
     <string name="state_off">Off</string>
     <string name="state_on">On</string>
@@ -219,9 +213,12 @@
     <style name="EdgeToEdgeFloatingDialogWindowTheme">
         <item name="android:dialogTheme">@style/EdgeToEdgeFloatingDialogTheme</item>
     </style>
+    <style name="FloatingDialogTheme">
+        <item name="android:windowIsFloating">false</item>
+    </style>
     <style name="FloatingDialogWindowTheme">
         <item name="android:windowClipToOutline">false</item>
-        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:dialogTheme">@style/FloatingDialogTheme</item>
     </style>
     <style name="TextAppearance.Compat.Notification" parent="@android:style/TextAppearance.StatusBar.EventContent"/>
     <style name="TextAppearance.Compat.Notification.Info">
@@ -237,6 +234,13 @@
     <style name="Theme.AndroidBootcamp2026Frontend" parent="android:Theme.Material.Light.NoActionBar"/>
     <style name="Widget.Compat.NotificationActionContainer" parent=""/>
     <style name="Widget.Compat.NotificationActionText" parent=""/>
+    <declare-styleable name="ActivityNavigator">
+        <attr name="android:name"/>
+        <attr format="string" name="action"/>
+        <attr format="string" name="data"/>
+        <attr format="string" name="dataPattern"/>
+        <attr format="string" name="targetPackage"/>
+    </declare-styleable>
     <declare-styleable name="Capability">
         
         <attr format="reference" name="queryPatterns"/>
@@ -261,8 +265,6 @@
         
         <attr format="string" name="fontProviderQuery"/>
         
-        <attr format="string" name="fontProviderFallbackQuery"/>
-        
         <attr format="reference" name="fontProviderCerts"/>
         
         <attr name="fontProviderFetchStrategy">
@@ -273,7 +275,7 @@
               default typeface will be used instead. -->
             <enum name="blocking" value="0"/>
             <!-- The async font fetch works as follows.
-              First, check the local cache, then if the requested font is not cached, trigger a
+              First, check the local cache, then if the requeted font is not cached, trigger a
               request the font and continue with layout inflation. Once the font fetch succeeds, the
               target text view will be refreshed with the downloaded font data. The
               fontProviderFetchTimeout will be ignored if async loading is specified. -->
@@ -347,5 +349,44 @@
         <attr name="android:offset"/>
         
         <attr name="android:color"/>
+    </declare-styleable>
+    <declare-styleable name="NavAction">
+        <attr name="android:id"/>
+        <attr format="reference" name="destination"/>
+        <attr format="boolean" name="launchSingleTop"/>
+        <attr format="boolean" name="restoreState"/>
+        <attr format="reference" name="popUpTo"/>
+        <attr format="boolean" name="popUpToInclusive"/>
+        <attr format="boolean" name="popUpToSaveState"/>
+        <attr format="reference" name="enterAnim"/>
+        <attr format="reference" name="exitAnim"/>
+        <attr format="reference" name="popEnterAnim"/>
+        <attr format="reference" name="popExitAnim"/>
+    </declare-styleable>
+    <declare-styleable name="NavArgument">
+        <attr name="android:name"/>
+        <attr name="android:defaultValue"/>
+        <attr format="boolean" name="nullable"/>
+        <attr format="string" name="argType"/>
+    </declare-styleable>
+    <declare-styleable name="NavDeepLink">
+        <attr format="string" name="uri"/>
+        <attr format="string" name="action"/>
+        <attr format="string" name="mimeType"/>
+        <attr name="android:autoVerify"/>
+    </declare-styleable>
+    <declare-styleable name="NavGraphNavigator">
+        <attr format="reference" name="startDestination"/>
+    </declare-styleable>
+    <declare-styleable name="NavHost">
+        <attr format="reference" name="navGraph"/>
+    </declare-styleable>
+    <declare-styleable name="NavInclude">
+        <attr format="reference" name="graph"/>
+    </declare-styleable>
+    <declare-styleable name="Navigator">
+        <attr name="android:id"/>
+        <attr format="string" name="route"/>
+        <attr name="android:label"/>
     </declare-styleable>
 </resources>

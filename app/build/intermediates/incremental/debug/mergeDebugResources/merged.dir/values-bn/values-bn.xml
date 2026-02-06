@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
-    <string msgid="389117264260014992" name="autofill">"অটোফিল"</string>
     <string msgid="881409763997275156" name="call_notification_answer_action">"উত্তর দিন"</string>
     <string msgid="8793775615905189152" name="call_notification_answer_video_action">"ভিডিও"</string>
     <string msgid="3229508546291798546" name="call_notification_decline_action">"বাতিল করুন"</string>
@@ -77,7 +76,6 @@
     <string msgid="5941395253238309765" name="range_end">"রেঞ্জ শেষ"</string>
     <string msgid="7097486360902471446" name="range_start">"রেঞ্জ শুরু"</string>
     <string msgid="6043586758067023" name="selected">"বেছে নেওয়া হয়েছে"</string>
-    <string msgid="2792228137354697160" name="snackbar_pane_title">"সতর্কতা"</string>
     <string msgid="4139871816613051306" name="state_empty">"ফাঁকা"</string>
     <string msgid="5834637030682409883" name="state_off">"বন্ধ আছে"</string>
     <string msgid="1490883874751719580" name="state_on">"চালু আছে"</string>

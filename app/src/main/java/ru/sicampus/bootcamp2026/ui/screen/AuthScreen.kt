@@ -1,92 +1,101 @@
 package ru.sicampus.bootcamp2026.ui.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import ru.sicampus.bootcamp2026.ui.screen.auth.AuthUiState
+import ru.sicampus.bootcamp2026.ui.screen.auth.AuthViewModel
 
 @Composable
-fun AuthScreen(
-    onLoginClick: () -> Unit,
-    onRegisterClick: () -> Unit
+fun AuthRoute(
+    viewModel: AuthViewModel = viewModel(),
+    navigateToHome: () -> Unit,
+    navigateToRegister: () -> Unit
 ) {
-    var login by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Welcome Back",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        OutlinedTextField(
-            value = login,
-            onValueChange = { login = it },
-            label = { Text("Login") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = onLoginClick,
-            modifier = Modifier.fillMaxWidth().height(50.dp)
-        ) {
-            Text("Sign In")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextButton(onClick = onRegisterClick) {
-            Text("Don't have an account? Register")
+    LaunchedEffect(uiState) {
+        if (uiState is AuthUiState.Success) {
+            navigateToHome()
         }
     }
+
+    if (uiState is AuthUiState.Error) {
+        val errorMsg = (uiState as AuthUiState.Error).message
+        AlertDialog(
+            onDismissRequest = { viewModel.clearError() },
+            confirmButton = { TextButton(onClick = { viewModel.clearError() }) { Text("OK") } },
+            title = { Text("Ошибка") },
+            text = { Text(errorMsg) }
+        )
+    }
+
+    AuthScreenContent(
+        isLoading = uiState is AuthUiState.Loading,
+        onLoginClick = { login, pass -> viewModel.login(login, pass) },
+        onRegisterClick = navigateToRegister
+    )
 }
 
-@Preview(showBackground = true)
 @Composable
-private fun AuthScreenPreview() {
-    AuthScreen(onLoginClick = {}, onRegisterClick = {})
+fun AuthScreenContent(
+    isLoading: Boolean,
+    onLoginClick: (String, String) -> Unit,
+    onRegisterClick: () -> Unit
+) {
+    var email by remember { mutableStateOf("jdh@test.com") } // Можно убрать дефолтное значение
+    var password by remember { mutableStateOf("admin") }
+
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Вход в систему", style = MaterialTheme.typography.headlineMedium)
+                Spacer(modifier = Modifier.height(24.dp))
+
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Пароль") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = { onLoginClick(email, password) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = email.isNotBlank() && password.isNotBlank()
+                ) {
+                    Text("Войти")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                TextButton(onClick = onRegisterClick) {
+                    Text("Нет аккаунта? Зарегистрироваться")
+                }
+            }
+        }
+    }
 }

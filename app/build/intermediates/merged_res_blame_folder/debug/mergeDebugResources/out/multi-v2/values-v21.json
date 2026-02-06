@@ -4,7 +4,7 @@
             "outputFile": "ru.sicampus.bootcamp2026.app-mergeDebugResources-2:/values-v21/values-v21.xml",
             "map": [
                 {
-                    "source": "D:\\gradle\\caches\\8.11.1\\transforms\\5b60662b73e7ddc0e677ed7a7c9f813b\\transformed\\core-1.16.0\\res\\values-v21\\values-v21.xml",
+                    "source": "D:\\gradle\\caches\\8.11.1\\transforms\\da637a3c8c4b72577b3208e7ae155772\\transformed\\core-1.13.1\\res\\values-v21\\values-v21.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,13",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4",
