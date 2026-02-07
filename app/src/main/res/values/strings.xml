@@ -1,3 +1,42 @@
 <resources>
-    <string name="app_name">Android-Bootcamp-2026-Frontend</string>
+    <string name="app_name">Synchro</string>
+    <string name="app_name_desk">Сводим календари</string>
+    <string name="login">Войти</string>
+    <string name="signup">Зарегистрироваться</string>
+    <string name="email">Почта</string>
+    <string name="password">Пароль</string>
+    <string name="repeat_password">Повторите пароль</string>
+    <string name="search">Поиск пользователей</string>
+    <string name="post">Должность</string>
+    <string name="department">Отдел</string>
+    <string name="about">О себе</string>
+    <string name="edit">Редактировать</string>
+    <string name="logout">Выйти из аккаунта</string>
+    <string name="new_meet">Новая встреча</string>
+    <string name="cancel">отмена</string>
+    <string name="success">Готово</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="ok">OK</string>
+    <string name="label">Название</string>
+    <string name="main_word">Основное</string>
+    <string name="description">Описание или повестка</string>
+    <string name="date_and_place">Время и место</string>
+    <string name="participant">участник</string>
+    <string name="date">Дата</string>
+    <string name="start">Начало</string>
+    <string name="end">Конец</string>
+    <string name="cabinet">Место проведения</string>
+    <string name="add_participant">Добавить участников</string>
+    <string name="incoming">Входящие</string>
+    <string name="details">Детали встречи</string>
+    <string name="accept">Принять</string>
+    <string name="reject">Отклонить</string>
+    <string name="day">День</string>
+    <string name="week">Неделя</string>
+    <string name="month">Месяц</string>
+    <string name="person_name">Имя</string>
+    <string name="person_surname">Фамилия</string>
+    <string name="title_activity_login">LoginActivity</string>
+
+    <string name="register">Зарегистрироваться</string>
 </resources>
