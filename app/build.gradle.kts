@@ -2,11 +2,12 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    kotlin("plugin.serialization") version "2.3.0"
 }
 
 android {
     namespace = "ru.sicampus.bootcamp2026"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "ru.sicampus.bootcamp2026"
@@ -28,15 +29,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
         compose = true
     }
+
 }
 
 dependencies {
@@ -56,4 +55,24 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.androidx.navigation.compose)
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6")
+
+    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+    implementation("io.coil-kt.coil3:coil-network-ktor3:3.3.0")
+    implementation("androidx.datastore:datastore-preferences:1.2.0")
+    implementation("androidx.datastore:datastore-preferences-core:1.2.0")
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.storage)
+    implementation ("androidx.camera:camera-core:1.5.3")
+    implementation ("androidx.camera:camera-camera2:1.5.3")
+    implementation ("androidx.camera:camera-lifecycle:1.5.3")
+    implementation ("androidx.camera:camera-video:1.5.3")
+    implementation ("androidx.camera:camera-view:1.5.3")
+    implementation ("androidx.camera:camera-extensions:1.5.3")
+    implementation("io.github.chouaibmo:rowkalendar:0.0.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.0.3")
+
+    implementation(libs.bundles.ktor)
+    implementation(libs.kotlinx.serialization.json)
 }
