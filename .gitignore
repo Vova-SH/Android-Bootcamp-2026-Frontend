@@ -2,8 +2,81 @@
 *.iml
 .gradle
 .DS_Store
-/build
+build/
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+.kotlin
+*.hprof
+
+# IDE
+.idea/*
+.idea/**
+*.iml
+*.iws
+/.idea/workspace.xml
+/.idea/tasks.xml
+/.idea/gradle.xml
+
+# Gradle
+.gradle/
+.gradle
+
+# Build outputs
+**/build/
+build/
+**/intermediates/
+**/outputs/
+**/generated/
+**/tmp/
+**/kotlin/
+*.apk
+*.ap_
+*.aab
+
+# Local configuration
+local.properties
+.env
+.env.*
+
+# Native build / C++
+.externalNativeBuild/
+.cxx/
+
+# Android Studio captures
+captures/
+
+# Keystores / secrets
+*.jks
+*.keystore
+*.p12
+*.pem
+
+# Logs and temp
+*.log
+out/
+
+# Generated / binary
+*.class
+*.jar
+*.war
+*.ear
+*.dex
+*.len
+*.tab
+*.tab_i
+*.s
+*.at
+
+# Navigation / DB / keys
+.navigation/
+adbkey
+adbkey.pub
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.hprof
