@@ -4,44 +4,41 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.authorization.presentation.AuthScreenViewModel
+import com.example.navigation.AppNavigation
+import com.example.navigation.NavigationViewModel
+import com.example.registration.presentation.RegisterScreenViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import ru.sicampus.bootcamp2026.ui.theme.AndroidBootcamp2026FrontendTheme
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val authViewModel: AuthScreenViewModel = hiltViewModel()
+            val registerViewModel: RegisterScreenViewModel = hiltViewModel()
+            val navigationViewModel: NavigationViewModel = hiltViewModel()
+
             AndroidBootcamp2026FrontendTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    Box(Modifier.padding(innerPadding)) {
+                        AppNavigation(
+                            authViewModel = authViewModel,
+                            registerScreenViewModel = registerViewModel,
+                            navigationViewModel = navigationViewModel
+                        )
+                    }
+
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AndroidBootcamp2026FrontendTheme {
-        Greeting("Android")
     }
 }
