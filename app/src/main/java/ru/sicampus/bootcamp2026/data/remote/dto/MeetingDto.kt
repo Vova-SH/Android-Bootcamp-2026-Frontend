@@ -49,7 +49,8 @@ data class CreateMeetingRequest(
  */
 @Serializable
 data class FreeTimeRequest(
-    val userIds: List<String>
+    val userIds: List<String>,
+    val date: String? = null  // Дата встречи в формате yyyy-MM-dd
 )
 
 /**

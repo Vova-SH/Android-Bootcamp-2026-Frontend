@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -144,19 +146,19 @@ fun RegisterScreen(
                     )
 
                     AuthTextField(
-                        value = state.password,
-                        onValueChange = onPasswordChange,
+                        value = state.confirmPassword,
+                        onValueChange = onConfirmPasswordChange,
                         label = "Confirm password*",
-                        visualTransformation = if (state.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        visualTransformation = if (state.isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Done
                         ),
                         trailingIcon = {
-                            IconButton(onClick = onTogglePasswordVisibility) {
+                            IconButton(onClick = onToggleConfirmPasswordVisibility) {
                                 Icon(
-                                    imageVector = if (state.isPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                    imageVector = if (state.isConfirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                                     contentDescription = "Show password",
                                     tint = Color.Black.copy(alpha = 0.6f)
                                 )
@@ -171,7 +173,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = onLoginClick,
+                onClick = onRegisterClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
@@ -187,6 +189,29 @@ fun RegisterScreen(
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = MplusFontFamily)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Already have account? ",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = "Sign in",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable(onClick = onLoginClick)
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))

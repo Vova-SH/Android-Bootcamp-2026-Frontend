@@ -36,8 +36,8 @@ class MeetingRepositoryImpl @Inject constructor(
                     title = title,
                     description = description,
                     location = location,
-                    startTime = startTime.format(DateTimeFormatter.ISO_DATE_TIME),
-                    endTime = endTime.format(DateTimeFormatter.ISO_DATE_TIME),
+                    startTime = startTime.atZone(java.time.ZoneId.of("UTC")).format(DateTimeFormatter.ISO_INSTANT),
+                    endTime = endTime.atZone(java.time.ZoneId.of("UTC")).format(DateTimeFormatter.ISO_INSTANT),
                     participantIds = participantIds.map { it.toString() }
                 )
             )
@@ -91,10 +91,13 @@ class MeetingRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getFreeTime(userIds: List<UUID>): Result<List<FreeTimeSlot>> {
+    override suspend fun getFreeTime(userIds: List<UUID>, date: String?): Result<List<FreeTimeSlot>> {
         return try {
             val response = meetingApi.getFreeTime(
-                FreeTimeRequest(userIds = userIds.map { it.toString() })
+                FreeTimeRequest(
+                    userIds = userIds.map { it.toString() },
+                    date = date
+                )
             )
             Result.Success(response.startEndTime.map { it.toDomain() })
         } catch (e: Exception) {

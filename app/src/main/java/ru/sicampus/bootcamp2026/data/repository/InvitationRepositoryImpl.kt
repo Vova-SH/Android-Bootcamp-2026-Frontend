@@ -62,7 +62,7 @@ class InvitationRepositoryImpl @Inject constructor(
         accept: Boolean
     ): Result<Invitation> {
         return try {
-            val status = if (accept) "ACCEPTED" else "DECLINED"
+            val status = if (accept) "CONFIRMED" else "DECLINED"
             val response = invitationApi.respondToInvitation(
                 meetingId = invitationId,
                 request = InvitationActionRequest(status = status)

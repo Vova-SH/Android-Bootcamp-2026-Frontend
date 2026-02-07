@@ -52,6 +52,6 @@ interface MeetingRepository {
     /**
      * Получение свободных временных слотов для участников
      */
-    suspend fun getFreeTime(userIds: List<UUID>): Result<List<FreeTimeSlot>>
+    suspend fun getFreeTime(userIds: List<UUID>, date: String? = null): Result<List<FreeTimeSlot>>
 }
 

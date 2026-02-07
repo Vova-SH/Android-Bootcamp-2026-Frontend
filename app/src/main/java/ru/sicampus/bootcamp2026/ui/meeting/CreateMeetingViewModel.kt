@@ -11,6 +11,7 @@ import ru.sicampus.bootcamp2026.domain.repository.MeetingRepository
 import ru.sicampus.bootcamp2026.domain.repository.ProfileRepository
 import ru.sicampus.bootcamp2026.domain.util.Result
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import javax.inject.Inject
 
@@ -120,7 +121,7 @@ class CreateMeetingViewModel @Inject constructor(
 
             val selectedIds = updatedParticipants
                 .filter { it.isSelected }
-                .map { it.id }
+                .map { it.id.toString() }  // Преобразуем UUID в String
 
             state.copy(
                 availableParticipants = updatedParticipants,
@@ -191,7 +192,13 @@ class CreateMeetingViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingFreeTime = true) }
 
-            val result = meetingRepository.getFreeTime(state.selectedParticipants)
+            // Преобразуем дату в строку формата yyyy-MM-dd
+            val dateString = state.selectedDate.toString()
+
+            val result = meetingRepository.getFreeTime(
+                state.selectedParticipants.map { UUID.fromString(it) },  // Преобразуем String в UUID
+                dateString
+            )
             when (result) {
                 is Result.Success -> {
                     val slots = result.data
@@ -201,8 +208,8 @@ class CreateMeetingViewModel @Inject constructor(
                         }
                         .map { slot ->
                             TimeSlotItem(
-                                startTime = slot.startTime,
-                                endTime = slot.endTime
+                                startTime = slot.startTime.format(DateTimeFormatter.ISO_DATE_TIME),  // Преобразуем в String
+                                endTime = slot.endTime.format(DateTimeFormatter.ISO_DATE_TIME)  // Преобразуем в String
                             )
                         }
 
@@ -238,41 +245,81 @@ class CreateMeetingViewModel @Inject constructor(
             return
         }
 
+        if (state.selectedParticipants.isEmpty()) {
+            _uiState.update { it.copy(error = "Please select at least one participant") }
+            return
+        }
+
         // Создание встречи
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            val result = meetingRepository.createMeeting(
-                title = state.title,
-                description = state.description.takeIf { it.isNotBlank() },
-                location = state.location.takeIf { it.isNotBlank() },
-                startTime = state.selectedTimeSlot.startTime,
-                endTime = state.selectedTimeSlot.endTime,
-                participantIds = state.selectedParticipants
-            )
+            try {
+                // TimeSlotItem.startTime и endTime уже в формате ISO_DATE_TIME строк
+                // Преобразуем их в LocalDateTime для репозитория
+                val startDateTime = LocalDateTime.parse(
+                    state.selectedTimeSlot.startTime,
+                    DateTimeFormatter.ISO_DATE_TIME
+                )
+                val endDateTime = LocalDateTime.parse(
+                    state.selectedTimeSlot.endTime,
+                    DateTimeFormatter.ISO_DATE_TIME
+                )
 
-            when (result) {
-                is Result.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            isSuccess = true
-                        )
+                val participantIds = state.selectedParticipants.map { UUID.fromString(it) }
+
+                // Логирование для отладки
+                android.util.Log.d("CreateMeeting", """
+                    Title: ${state.title}
+                    Description: ${state.description}
+                    Location: ${state.location}
+                    StartTime: ${startDateTime}
+                    EndTime: ${endDateTime}
+                    ParticipantIds: $participantIds
+                    ParticipantsCount: ${participantIds.size}
+                """.trimIndent())
+
+                val result = meetingRepository.createMeeting(
+                    title = state.title,
+                    description = state.description.takeIf { it.isNotBlank() },
+                    location = state.location.takeIf { it.isNotBlank() },
+                    startTime = startDateTime,
+                    endTime = endDateTime,
+                    participantIds = participantIds
+                )
+
+                when (result) {
+                    is Result.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                isSuccess = true
+                            )
+                        }
+                    }
+                    is Result.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = "Failed to create meeting: ${result.exception.message}"
+                            )
+                        }
+                    }
+                    is Result.Loading -> {
+                        // Already handled
                     }
                 }
-                is Result.Error -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = "Failed to create meeting: ${result.exception.message}"
-                        )
-                    }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Error parsing date/time: ${e.message}"
+                    )
                 }
-                is Result.Loading -> {
                     // Уже обработано выше
                 }
             }
         }
     }
-}
+
 

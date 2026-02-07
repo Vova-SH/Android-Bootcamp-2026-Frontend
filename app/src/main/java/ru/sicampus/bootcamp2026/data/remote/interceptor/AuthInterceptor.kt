@@ -48,8 +48,7 @@ class AuthInterceptor(
     private fun shouldSkipAuth(url: String): Boolean {
         return url.contains("/auth/login") ||
                 url.contains("/auth/register") ||
-                url.contains("/health") ||
-                url.contains("/profile/public/all")
+                url.contains("/health")
     }
 }
 

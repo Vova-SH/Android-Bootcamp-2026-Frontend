@@ -19,22 +19,28 @@ class RegisterViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(RegisterUiState())
+    private val _uiState = MutableStateFlow(RegisterUIState())
     val uiState = _uiState.asStateFlow()
 
     fun onEvent(event: RegisterUiEvent) {
         when (event) {
             is RegisterUiEvent.UsernameChanged -> {
-                _uiState.update { it.copy(username = event.username, usernameError = null) }
+                _uiState.update { it.copy(username = event.username) }
             }
             is RegisterUiEvent.EmailChanged -> {
-                _uiState.update { it.copy(email = event.email, emailError = null) }
+                _uiState.update { it.copy(email = event.email) }
             }
             is RegisterUiEvent.PasswordChanged -> {
-                _uiState.update { it.copy(password = event.password, passwordError = null) }
+                _uiState.update { it.copy(password = event.password) }
             }
             is RegisterUiEvent.ConfirmPasswordChanged -> {
-                _uiState.update { it.copy(confirmPassword = event.password, confirmPasswordError = null) }
+                _uiState.update { it.copy(confirmPassword = event.password) }
+            }
+            is RegisterUiEvent.TogglePasswordVisibility -> {
+                _uiState.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
+            }
+            is RegisterUiEvent.ToggleConfirmPasswordVisibility -> {
+                _uiState.update { it.copy(isConfirmPasswordVisible = !it.isConfirmPasswordVisible) }
             }
             is RegisterUiEvent.Register -> register()
             is RegisterUiEvent.DismissError -> {
@@ -50,34 +56,34 @@ class RegisterViewModel @Inject constructor(
         var hasErrors = false
 
         if (state.username.isBlank()) {
-            _uiState.update { it.copy(usernameError = "Username is required") }
+            _uiState.update { it.copy(error = "Username is required") }
             hasErrors = true
         } else if (state.username.length < 3) {
-            _uiState.update { it.copy(usernameError = "Username must be at least 3 characters") }
+            _uiState.update { it.copy(error = "Username must be at least 3 characters") }
             hasErrors = true
         }
 
         if (state.email.isBlank()) {
-            _uiState.update { it.copy(emailError = "Email is required") }
+            _uiState.update { it.copy(error = "Email is required") }
             hasErrors = true
         } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(state.email).matches()) {
-            _uiState.update { it.copy(emailError = "Invalid email format") }
+            _uiState.update { it.copy(error = "Invalid email format") }
             hasErrors = true
         }
 
         if (state.password.isBlank()) {
-            _uiState.update { it.copy(passwordError = "Password is required") }
+            _uiState.update { it.copy(error = "Password is required") }
             hasErrors = true
         } else if (state.password.length < 6) {
-            _uiState.update { it.copy(passwordError = "Password must be at least 6 characters") }
+            _uiState.update { it.copy(error = "Password must be at least 6 characters") }
             hasErrors = true
         }
 
         if (state.confirmPassword.isBlank()) {
-            _uiState.update { it.copy(confirmPasswordError = "Please confirm your password") }
+            _uiState.update { it.copy(error = "Please confirm your password") }
             hasErrors = true
         } else if (state.password != state.confirmPassword) {
-            _uiState.update { it.copy(confirmPasswordError = "Passwords do not match") }
+            _uiState.update { it.copy(error = "Passwords do not match") }
             hasErrors = true
         }
 
@@ -98,6 +104,7 @@ class RegisterViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
+                            error = null,
                             isSuccess = true
                         )
                     }

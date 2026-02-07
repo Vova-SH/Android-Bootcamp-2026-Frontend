@@ -1,6 +1,5 @@
 package ru.sicampus.bootcamp2026.ui.meeting
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,8 +20,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ru.sicampus.bootcamp2026.domain.model.MeetingStatus
+import ru.sicampus.bootcamp2026.domain.model.Participant
+import ru.sicampus.bootcamp2026.domain.model.ParticipantStatus
 import ru.sicampus.bootcamp2026.ui.theme.LightGreen
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 /**
  * Экран деталей встречи
@@ -365,5 +368,6 @@ private fun DetailRow(
         }
     }
 }
+
 
 

@@ -7,18 +7,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import ru.sicampus.bootcamp2026.domain.model.MeetingStatus
 
-val FilterGreenLight = Color(0xFFBBDBA6)
+val GreenLight = Color(0xFFBBDBA6)
 
 @Composable
 fun HomeFilterDialog(
@@ -28,10 +30,10 @@ fun HomeFilterDialog(
     var selectedStatus by remember { mutableStateOf<String?>(null) }
 
     val statuses = listOf(
-        null to "Все встречи",
-        MeetingStatus.SCHEDULED.name to "Запланированные",
-        MeetingStatus.COMPLETED.name to "Завершенные",
-        MeetingStatus.CANCELLED.name to "Отмененные"
+        null to "All meetings",
+        MeetingStatus.SCHEDULED.name to "Scheduled",
+        MeetingStatus.COMPLETED.name to "Completed",
+        MeetingStatus.CANCELED.name to "Canceled"
     )
 
     Dialog(onDismissRequest = onDismiss) {
@@ -48,7 +50,7 @@ fun HomeFilterDialog(
                     .padding(24.dp)
             ) {
                 Text(
-                    text = "Фильтр по статусу",
+                    text = "Filter by status",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -86,7 +88,12 @@ fun HomeFilterDialog(
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Отмена", color = Color.White)
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cancel",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
 
                     Button(
@@ -95,11 +102,16 @@ fun HomeFilterDialog(
                             .weight(1f)
                             .height(48.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = FilterGreenLight
+                            containerColor = GreenLight
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Применить", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Confirm",
+                            tint = Color.Black,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
             }
@@ -119,7 +131,7 @@ private fun FilterStatusItem(
             .height(48.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        color = if (isSelected) FilterGreenLight.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.05f)
+        color = if (isSelected) GreenLight.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.05f)
     ) {
         Row(
             modifier = Modifier
@@ -137,11 +149,19 @@ private fun FilterStatusItem(
             if (isSelected) {
                 Icon(
                     imageVector = Icons.Default.Check,
-                    contentDescription = "Выбрано",
-                    tint = FilterGreenLight,
+                    contentDescription = "Selected",
+                    tint = GreenLight,
                     modifier = Modifier.size(24.dp)
                 )
             }
         }
     }
+}
+@Composable
+@Preview
+fun HomeFilterDialogPreview() {
+    HomeFilterDialog(
+        onDismiss = {},
+        onApply = {}
+    )
 }

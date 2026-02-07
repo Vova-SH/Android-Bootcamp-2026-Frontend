@@ -5,7 +5,7 @@ package ru.sicampus.bootcamp2026.domain.model
  */
 enum class MeetingStatus {
     SCHEDULED,  // Запланирована
-    CANCELLED,  // Отменена
+    CANCELED,   // Отменена
     COMPLETED   // Завершена
 }
 

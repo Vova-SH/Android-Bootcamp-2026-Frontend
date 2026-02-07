@@ -48,7 +48,7 @@ object NetworkModule {
      *    - Эмулятор/устройство в одной сети с ноутбуком
      *    - Firewall не блокирует порт 8080
      */
-    private const val BASE_URL = "http://192.168.1.100:8080/"  // ← ИЗМЕНИТЕ НА IP ВАШЕГО НОУТБУКА!
+    private const val BASE_URL = "http://192.168.50.31:8080/"  // IP вашего ноутбука
     private const val TIMEOUT_SECONDS = 30L
 
     @Provides

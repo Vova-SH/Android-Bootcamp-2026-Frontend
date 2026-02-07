@@ -1,8 +1,6 @@
 package ru.sicampus.bootcamp2026.ui.meeting
 
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 import java.util.UUID
 
 /**
@@ -16,7 +14,7 @@ data class CreateMeetingUiState(
 
     // Выбор участников
     val availableParticipants: List<ParticipantItem> = emptyList(),
-    val selectedParticipants: List<UUID> = emptyList(),
+    val selectedParticipants: List<String> = emptyList(),
 
     // Выбор времени из доступных слотов
     val selectedDate: LocalDate = LocalDate.now(),
@@ -60,11 +58,20 @@ data class ParticipantItem(
  * Элемент для отображения временного слота
  */
 data class TimeSlotItem(
-    val startTime: LocalDateTime,
-    val endTime: LocalDateTime
+    val startTime: String,
+    val endTime: String
 ) {
     val displayTime: String
-        get() = "${startTime.toLocalTime()} - ${endTime.toLocalTime()}"
+        get() {
+            // Парсим строку и показываем только время
+            return try {
+                val start = java.time.LocalDateTime.parse(startTime, java.time.format.DateTimeFormatter.ISO_DATE_TIME)
+                val end = java.time.LocalDateTime.parse(endTime, java.time.format.DateTimeFormatter.ISO_DATE_TIME)
+                "${start.toLocalTime()} - ${end.toLocalTime()}"
+            } catch (_: Exception) {
+                "$startTime - $endTime"
+            }
+        }
 }
 
 /**
