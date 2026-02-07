@@ -1,7 +1,6 @@
 package ru.sicampus.bootcamp2026.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,199 +13,199 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.sicampus.bootcamp2026.data.model.AuthScreenType
 import ru.sicampus.bootcamp2026.data.model.AuthUiState
+import ru.sicampus.bootcamp2026.data.model.AuthViewModel
 import ru.sicampus.bootcamp2026.ui.utils.customDashedBorder
 
 @Composable
 fun AuthScreen(
+    viewModel: AuthViewModel,
     state: AuthUiState,
-    onRegister: (fullName: String, email: String, password: String) -> Unit,
-    onLogin: (email: String, password: String) -> Unit
+    onRegister: (String, String, String) -> Unit,
+    onLogin: (String, String) -> Unit
 ) {
-    var isRegister by remember { mutableStateOf(true) }
+    val vmState = viewModel.state.collectAsState().value
 
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val position by remember { mutableStateOf("Сотрудник") }
+    var tokenCode by remember { mutableStateOf("") }
 
-    val primaryPurple = Color(0xFF7E57FF)
-    val lightButton = Color(0xFFF3F4F6)
+    val mainButtonColor = Color(0xFF8B5CF6)
+    val secondaryButtonColor = Color(0xFFF3F4F6)
+    val secondaryTextColor = Color.Black
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(horizontal = 20.dp, vertical = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = if (isRegister) "Register" else "Login",
-            color = Color.Black.copy(alpha = 0.35f),
-            fontSize = 14.sp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp)
-        )
-
-        Spacer(modifier = Modifier.height(70.dp))
+        val titleText = when (vmState.screenType) {
+            AuthScreenType.LOGIN -> "Войдите в аккаунт"
+            AuthScreenType.REGISTER -> "Создайте аккаунт"
+            AuthScreenType.EMAIL_CONFIRM -> "Введите код"
+            AuthScreenType.FORGOT_PASSWORD -> "Сброс пароля"
+            AuthScreenType.RESET_PASSWORD -> "Новый пароль"
+        }
 
         Text(
-            text = if (isRegister) "Создайте аккаунт" else "Войдите в аккаунт",
-            fontSize = 34.sp,
-            fontWeight = FontWeight.Black,
+            text = titleText,
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
             color = Color.Black,
-            lineHeight = 38.sp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 34.dp),
+            textAlign = TextAlign.Center,
+            lineHeight = 40.sp
         )
 
-        if (isRegister) {
-            DashedTextField(
-                value = fullName,
-                onValueChange = { fullName = it },
-                placeholder = "ФИО",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            )
+        Spacer(modifier = Modifier.height(40.dp))
 
-            Spacer(modifier = Modifier.height(14.dp))
-        }
-
-        DashedTextField(
-            value = email,
-            onValueChange = { email = it },
-            placeholder = if (isRegister) "Почта" else "Почта / Номер телефона",
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        )
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        DashedTextField(
-            value = password,
-            onValueChange = { password = it },
-            placeholder = "Пароль",
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            isPassword = true
-        )
-
-        if (state.error != null) {
-            Spacer(modifier = Modifier.height(10.dp))
+        if (vmState.screenType == AuthScreenType.EMAIL_CONFIRM) {
             Text(
-                text = state.error!!,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.fillMaxWidth()
+                text = "Код отправлен на\n${vmState.emailForConfirmation}",
+                textAlign = TextAlign.Center,
+                color = Color.Gray,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
+            AuthInput(value = tokenCode, onValueChange = { tokenCode = it }, placeholder = "Код из письма")
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        if (vmState.screenType == AuthScreenType.REGISTER) {
+            AuthInput(value = fullName, onValueChange = { fullName = it }, placeholder = "ФИО")
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (vmState.screenType == AuthScreenType.LOGIN || vmState.screenType == AuthScreenType.REGISTER || vmState.screenType == AuthScreenType.FORGOT_PASSWORD) {
+            AuthInput(
+                value = email,
+                onValueChange = { email = it },
+                placeholder = if (vmState.screenType == AuthScreenType.LOGIN) "Почта" else "Почта",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (vmState.screenType == AuthScreenType.RESET_PASSWORD) {
+            AuthInput(value = tokenCode, onValueChange = { tokenCode = it }, placeholder = "Токен из письма")
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (vmState.screenType == AuthScreenType.LOGIN || vmState.screenType == AuthScreenType.REGISTER || vmState.screenType == AuthScreenType.RESET_PASSWORD) {
+            AuthInput(
+                value = password,
+                onValueChange = { password = it },
+                placeholder = if (vmState.screenType == AuthScreenType.RESET_PASSWORD) "Новый пароль" else "Пароль",
+                isPassword = true
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (vmState.error != null) {
+            Text(vmState.error, color = Color.Red, fontSize = 14.sp, textAlign = TextAlign.Center)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        if (vmState.successMessage != null) {
+            Text(vmState.successMessage, color = Color(0xFF008800), fontSize = 14.sp, textAlign = TextAlign.Center)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        val mainBtnText = when (vmState.screenType) {
+            AuthScreenType.LOGIN -> "Вход"
+            AuthScreenType.REGISTER -> "Регистрация"
+            AuthScreenType.EMAIL_CONFIRM -> "Подтвердить"
+            AuthScreenType.FORGOT_PASSWORD -> "Сбросить пароль"
+            AuthScreenType.RESET_PASSWORD -> "Сохранить"
+        }
 
         Button(
             onClick = {
-                if (isRegister) onRegister(fullName, email, password)
-                else onLogin(email, password)
+                when (vmState.screenType) {
+                    AuthScreenType.LOGIN -> viewModel.login(email.trim(), password)
+                    AuthScreenType.REGISTER -> viewModel.register(fullName.trim(), email.trim(), password, position)
+                    AuthScreenType.EMAIL_CONFIRM -> viewModel.confirmEmail(tokenCode.trim())
+                    AuthScreenType.FORGOT_PASSWORD -> viewModel.forgotPassword(email.trim())
+                    AuthScreenType.RESET_PASSWORD -> viewModel.resetPassword(tokenCode.trim(), password)
+                }
             },
-            enabled = !state.loading,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = primaryPurple,
-                contentColor = Color.White,
-                disabledContainerColor = primaryPurple.copy(alpha = 0.6f),
-                disabledContentColor = Color.White
-            ),
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(54.dp)
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = mainButtonColor),
+            enabled = !vmState.isLoading
         ) {
-            Text(
-                text = if (state.loading) "Подождите..." else if (isRegister) "Регистрация" else "Вход",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
+            if (vmState.isLoading) CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+            else Text(mainBtnText, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
         }
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = { isRegister = !isRegister },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = lightButton,
-                contentColor = Color.Black
-            ),
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(54.dp)
-        ) {
-            Text(
-                text = if (isRegister) "Вход" else "Регистрация",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-
-        if (!isRegister) {
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Button(
-                onClick = { /* TODO: forgot password */ },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = lightButton,
-                    contentColor = Color.Black
-                ),
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp)
-            ) {
-                Text(
-                    text = "Я не помню пароль",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+        if (vmState.screenType == AuthScreenType.LOGIN) {
+            SecondaryButton(text = "Регистрация", color = secondaryButtonColor, textColor = secondaryTextColor) {
+                viewModel.switchScreen(AuthScreenType.REGISTER)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            SecondaryButton(text = "Я не помню пароль", color = secondaryButtonColor, textColor = secondaryTextColor) {
+                viewModel.switchScreen(AuthScreenType.FORGOT_PASSWORD)
+            }
+        } else if (vmState.screenType == AuthScreenType.REGISTER) {
+            SecondaryButton(text = "Вход", color = secondaryButtonColor, textColor = secondaryTextColor) {
+                viewModel.switchScreen(AuthScreenType.LOGIN)
+            }
+        } else {
+            SecondaryButton(text = "Вернуться ко входу", color = secondaryButtonColor, textColor = secondaryTextColor) {
+                viewModel.switchScreen(AuthScreenType.LOGIN)
             }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
-private fun DashedTextField(
+fun SecondaryButton(text: String, color: Color, textColor: Color, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth().height(56.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = color, contentColor = textColor),
+        elevation = ButtonDefaults.buttonElevation(0.dp)
+    ) {
+        Text(text, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+fun AuthInput(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    keyboardOptions: KeyboardOptions,
-    isPassword: Boolean = false
+    isPassword: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
-    val shape = RoundedCornerShape(14.dp)
-
     TextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = {
-            Text(
-                text = placeholder,
-                color = Color.Black.copy(alpha = 0.55f)
-            )
-        },
+        placeholder = { Text(placeholder, color = Color.Gray.copy(alpha = 0.7f)) },
         singleLine = true,
-        keyboardOptions = keyboardOptions,
+        isError = false,
         visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        keyboardOptions = keyboardOptions,
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            disabledContainerColor = Color.White,
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent,
             cursorColor = Color.Black
         ),
-        shape = shape,
         modifier = Modifier
             .fillMaxWidth()
-            .height(54.dp)
-            .customDashedBorder()
+            .height(56.dp)
+            .customDashedBorder(color = Color.LightGray, cornerRadius = 12.dp)
     )
 }

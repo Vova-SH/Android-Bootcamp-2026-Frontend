@@ -15,4 +15,8 @@ class TokenStorage(private val context: Context) {
     fun clearToken() {
         prefs.edit().remove("token").apply()
     }
+
+    fun saveUserId(id: Long) = prefs.edit().putLong("user_id", id).apply()
+    fun getUserId(): Long = prefs.getLong("user_id", -1)
+    fun clear() = prefs.edit().clear().apply()
 }

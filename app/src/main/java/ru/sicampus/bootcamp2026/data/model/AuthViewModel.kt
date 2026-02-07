@@ -9,17 +9,31 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.data.auth.AuthRepository
 import ru.sicampus.bootcamp2026.data.auth.NetworkClient
+import ru.sicampus.bootcamp2026.data.auth.SessionManager
 import ru.sicampus.bootcamp2026.data.auth.TokenStorage
+
+enum class AuthScreenType {
+    LOGIN, REGISTER, FORGOT_PASSWORD, EMAIL_CONFIRM, RESET_PASSWORD
+}
 
 data class AuthUiState(
     val isAuthed: Boolean = false,
-    val loading: Boolean = false,
-    val error: String? = null
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val successMessage: String? = null,
+    val screenType: AuthScreenType = AuthScreenType.LOGIN,
+    val emailForConfirmation: String = ""
 )
 
-
-
 class AuthViewModel(app: Application) : AndroidViewModel(app) {
+
+    init {
+        viewModelScope.launch {
+            SessionManager.logoutSignal.collect {
+                logout()
+            }
+        }
+    }
 
     private val tokenStorage = TokenStorage(app.applicationContext)
     private val repo = AuthRepository(NetworkClient.createAuthApi(), tokenStorage)
@@ -29,66 +43,137 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
     )
     val state: StateFlow<AuthUiState> = _state
 
-    fun register(fullName: String, email: String, password: String) {
-        val err = validate(fullName, email, password)
-        if (err != null) {
-            _state.value = _state.value.copy(error = err)
+    fun switchScreen(type: AuthScreenType) {
+        _state.value = _state.value.copy(screenType = type, error = null, successMessage = null)
+    }
+
+    fun login(email: String, pass: String) {
+        if (!isValidEmail(email)) {
+            setError("Введите корректную почту")
             return
         }
-
-        viewModelScope.launch {
-            _state.value = _state.value.copy(loading = true, error = null)
-            val result = repo.register(fullName, email, password)
-            _state.value = _state.value.copy(
-                loading = false,
-                error = result.exceptionOrNull()?.message,
-                isAuthed = result.isSuccess && !tokenStorage.getToken().isNullOrBlank()
-            )
+        if (pass.isBlank()) {
+            setError("Введите пароль")
+            return
+        }
+        launchRequest {
+            repo.login(email, pass)
+            if (tokenStorage.getToken() != null) {
+                _state.value = _state.value.copy(isAuthed = true)
+            }
         }
     }
 
-    fun login(email: String, password: String) {
-        val e = email.trim()
-
-        if (e.isEmpty()) {
-            _state.value = _state.value.copy(error = "Введите email")
+    fun register(name: String, email: String, pass: String, position: String) {
+        if (name.isBlank()) {
+            setError("Введите ФИО")
             return
         }
-
-        if (!Patterns.EMAIL_ADDRESS.matcher(e).matches()) {
-            _state.value = _state.value.copy(error = "Некорректный email")
+        if (!isValidEmail(email)) {
+            setError("Введите корректную почту")
             return
         }
-
-        if (password.isEmpty()) {
-            _state.value = _state.value.copy(error = "Введите пароль")
+        if (pass.length < 6) {
+            setError("Пароль должен быть не менее 6 символов")
             return
         }
+        launchRequest {
+            val res = repo.register(name, email, pass, position)
+            res.onSuccess {
+                _state.value = _state.value.copy(
+                    screenType = AuthScreenType.EMAIL_CONFIRM,
+                    emailForConfirmation = email,
+                    error = null
+                )
+            }.onFailure {
+                setError(it.message ?: "Ошибка регистрации")
+            }
+        }
+    }
 
-        viewModelScope.launch {
-            _state.value = _state.value.copy(loading = true, error = null)
+    fun confirmEmail(token: String) {
+        if (token.length < 6) {
+            setError("Код должен состоять из 6 цифр")
+            return
+        }
+        launchRequest {
+            repo.confirmEmail(token)
+                .onSuccess {
+                    _state.value = _state.value.copy(
+                        successMessage = "Почта подтверждена! Войдите.",
+                        screenType = AuthScreenType.LOGIN
+                    )
+                }
+                .onFailure { setError(it.message ?: "Неверный код") }
+        }
+    }
 
-            val result = repo.login(e, password)
+    fun forgotPassword(email: String) {
+        if (!isValidEmail(email)) {
+            setError("Введите корректную почту")
+            return
+        }
+        launchRequest {
+            val res = repo.forgotPassword(email)
+            res.onSuccess {
+                _state.value = _state.value.copy(
+                    emailForConfirmation = email,
+                    screenType = AuthScreenType.RESET_PASSWORD
+                )
+            }.onFailure {
+                setError(it.message ?: "Ошибка отправки")
+            }
+        }
+    }
 
-            _state.value = _state.value.copy(
-                loading = false,
-                error = result.exceptionOrNull()?.message,
-                isAuthed = result.isSuccess && !tokenStorage.getToken().isNullOrBlank()
-            )
+    fun resetPassword(token: String, newPass: String) {
+        if (token.isBlank()) {
+            setError("Введите токен из письма")
+            return
+        }
+        if (newPass.length < 6) {
+            setError("Новый пароль должен быть не менее 6 символов")
+            return
+        }
+        launchRequest {
+            val res = repo.resetPassword(token, newPass)
+            res.onSuccess {
+                _state.value = _state.value.copy(
+                    successMessage = "Пароль изменен!",
+                    screenType = AuthScreenType.LOGIN
+                )
+            }.onFailure {
+                setError(it.message ?: "Ошибка сброса")
+            }
         }
     }
 
     fun logout() {
-        tokenStorage.clearToken()
-        _state.value = _state.value.copy(isAuthed = false)
+        repo.logout()
+        _state.value = AuthUiState(
+            isAuthed = false,
+            screenType = AuthScreenType.LOGIN
+        )
     }
 
-    private fun validate(fullName: String, email: String, password: String): String? {
-        if (fullName.trim().length < 2) return "Введите ФИО (минимум 2 символа)"
-        val e = email.trim()
-        if (e.isEmpty()) return "Введите email"
-        if (!Patterns.EMAIL_ADDRESS.matcher(e).matches()) return "Некорректный email"
-        if (password.length < 6) return "Пароль должен быть не короче 6 символов"
-        return null
+    private fun isValidEmail(email: String): Boolean {
+        return email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    private fun launchRequest(block: suspend () -> Unit) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true, error = null)
+            try {
+                block()
+            } catch (e: Exception) {
+                setError(e.message ?: "Ошибка сети")
+            } finally {
+                _state.value = _state.value.copy(isLoading = false)
+            }
+        }
+    }
+
+    private fun setError(msg: String) {
+        _state.value = _state.value.copy(error = msg, isLoading = false)
     }
 }

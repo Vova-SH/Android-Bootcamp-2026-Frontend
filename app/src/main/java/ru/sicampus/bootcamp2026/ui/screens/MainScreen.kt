@@ -1,12 +1,9 @@
 package ru.sicampus.bootcamp2026.ui.screens
 
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,28 +13,30 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import ru.sicampus.bootcamp2026.data.model.AuthViewModel
+import ru.sicampus.bootcamp2026.data.model.MeetingDto
 import ru.sicampus.bootcamp2026.ui.theme.BackgroundColor
 import ru.sicampus.bootcamp2026.ui.theme.PrimaryPurple
 import ru.sicampus.bootcamp2026.ui.theme.TextWhite
-import ru.sicampus.bootcamp2026.data.model.MeetingDto
+import ru.sicampus.bootcamp2026.ui.theme.getMeetingColor
 import ru.sicampus.bootcamp2026.ui.utils.customDashedBorder
+import ru.sicampus.bootcamp2026.ui.utils.darken
 import ru.sicampus.bootcamp2026.ui.viewmodel.MainViewModel
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.TextStyle
+import java.util.Locale
 
 @Composable
 fun MainScreen(
@@ -47,82 +46,9 @@ fun MainScreen(
     viewModel: MainViewModel = viewModel()
 ) {
     val meetings by viewModel.meetings.collectAsState()
+    val selectedDate by viewModel.selectedDate.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    MainScreenContent(
-        isLoading = isLoading,
-        meetings = meetings,
-        onAddMeetingClicked = onAddMeetingClicked,
-        onInvitesClicked = onInvitesClicked,
-        onProfileClicked = onProfileClicked
-    )
-}
-
-private object Routes {
-    const val AUTH = "auth"
-    const val MAIN = "main_screen"
-    const val NEW_MEETING = "new_meeting_screen"
-    const val INVITES = "invites_screen"
-    const val PROFILE = "profile_screen"
-}
-
-@Composable
-fun AppNavigation() {
-    val navController = rememberNavController()
-    val authVm: AuthViewModel = viewModel()
-    val state by authVm.state.collectAsState()
-
-    LaunchedEffect(state.isAuthed) {
-        val target = if (state.isAuthed) Routes.MAIN else Routes.AUTH
-        navController.navigate(target) {
-            popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
-            launchSingleTop = true
-        }
-    }
-
-    NavHost(navController = navController, startDestination = Routes.AUTH) {
-
-        composable(Routes.AUTH) {
-            AuthScreen(
-                state = state,
-                onRegister = { fullName, email, pass -> authVm.register(fullName, email, pass) },
-                onLogin = { email, pass -> authVm.login(email, pass) }
-            )
-        }
-
-        composable(Routes.MAIN) {
-            MainScreen(
-                onAddMeetingClicked = { navController.navigate(Routes.NEW_MEETING) },
-                onInvitesClicked = { navController.navigate(Routes.INVITES) },
-                onProfileClicked = { navController.navigate(Routes.PROFILE) }
-            )
-        }
-
-        composable(Routes.NEW_MEETING) {
-            NewMeetingScreen(onBackClicked = { navController.popBackStack() })
-        }
-
-        composable(Routes.INVITES) {
-            InvitesScreen(onBackClicked = { navController.popBackStack() })
-        }
-
-        composable(Routes.PROFILE) {
-            ProfileScreen(
-                onBackClicked = { navController.popBackStack() },
-                onLogoutClicked = { authVm.logout() }
-            )
-        }
-    }
-}
-
-@Composable
-fun MainScreenContent(
-    isLoading: Boolean,
-    meetings: List<MeetingDto>,
-    onAddMeetingClicked: () -> Unit,
-    onInvitesClicked: () -> Unit,
-    onProfileClicked: () -> Unit
-) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = BackgroundColor,
@@ -146,7 +72,12 @@ fun MainScreenContent(
         ) {
             HeaderSection(onInvitesClicked, onProfileClicked)
             Spacer(modifier = Modifier.height(16.dp))
-            DaysSelectorSection()
+
+            DaysSelectorSection(
+                selectedDate = selectedDate,
+                onDateSelected = { viewModel.selectDate(it) }
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
 
             if (isLoading) {
@@ -157,6 +88,59 @@ fun MainScreenContent(
                 ScheduleGridSection(meetings = meetings)
             }
         }
+    }
+}
+
+@Composable
+fun DaysSelectorSection(
+    selectedDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit
+) {
+    val days = (0..6).map { LocalDate.now().plusDays(it.toLong()) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        days.forEach { date ->
+            val isSelected = date == selectedDate
+            DayCard(
+                date = date,
+                isSelected = isSelected,
+                onClick = { onDateSelected(date) }
+            )
+        }
+    }
+}
+
+@Composable
+fun DayCard(date: LocalDate, isSelected: Boolean, onClick: () -> Unit) {
+    val dayName = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("ru")).uppercase()
+    val dayNumber = date.dayOfMonth.toString()
+
+    Column(
+        modifier = Modifier
+            .width(70.dp)
+            .height(60.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (isSelected) PrimaryPurple else Color(0xFFF3F4F6))
+            .clickable { onClick() },
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = dayName,
+            fontSize = 12.sp,
+            color = if (isSelected) Color.White.copy(alpha = 0.8f) else Color.Black.copy(alpha = 0.5f)
+        )
+        Text(
+            text = dayNumber,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = if (isSelected) Color.White else Color.Black
+        )
     }
 }
 
@@ -172,10 +156,20 @@ fun ScheduleGridSection(meetings: List<MeetingDto>) {
 
         for (hour in 9..21) {
             val timeString = String.format("%02d:00", hour)
-            val meetingAtThisHour = meetings.find { it.startTime.startsWith(String.format("%02d", hour)) }
+
+            val meetingAtThisHour = meetings.find {
+                try {
+                    it.startsAt?.let { utcString ->
+                        val localTime = OffsetDateTime.parse(utcString)
+                            .atZoneSameInstant(ZoneId.systemDefault())
+                        localTime.hour == hour
+                    } ?: false
+                } catch (e: Exception) { false }
+            }
+
             TimeSlotRow(time = timeString, meeting = meetingAtThisHour)
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(80.dp))
     }
 }
 
@@ -213,56 +207,41 @@ fun TimeSlotRow(time: String, meeting: MeetingDto?) {
                     .background(Color.White)
             )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(1.dp)
-                    .clip(RoundedCornerShape(12.dp))
-            ) {
-                if (meeting != null) {
-                    val cardColor = parseColor(meeting.colorHex) ?: PrimaryPurple.copy(alpha = 0.1f)
-                    val accentColor = parseColor(meeting.colorHex)?.copy(alpha = 1f)?.darken(0.3f) ?: PrimaryPurple
-
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = cardColor),
-                        shape = RoundedCornerShape(12.dp),
-                        elevation = CardDefaults.cardElevation(0.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Row(
+            if (meeting != null) {
+                val cardColor = getMeetingColor(meeting.colorHex)
+                val accentColor = cardColor.darken(0.3f)
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = cardColor),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(0.dp),
+                    modifier = Modifier.fillMaxSize().padding(1.dp)
+                ) {
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        Box(
+                            modifier = Modifier
+                                .width(4.dp)
+                                .fillMaxHeight()
+                                .background(accentColor)
+                        )
+                        Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .height(IntrinsicSize.Min)
+                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalArrangement = Arrangement.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .width(4.dp)
-                                    .fillMaxHeight()
-                                    .background(accentColor)
+                            Text(
+                                text = meeting.title ?: "Встреча",
+                                color = Color.Black,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
                             )
-
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalArrangement = Arrangement.Center
-                            ) {
+                            if (!meeting.description.isNullOrBlank()) {
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = meeting.title,
-                                    color = Color.Black,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    text = meeting.description,
+                                    color = Color.Black.copy(alpha = 0.6f),
+                                    fontSize = 12.sp
                                 )
-
-                                if (!meeting.description.isNullOrEmpty()) {
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    Text(
-                                        text = meeting.description,
-                                        color = Color.Black.copy(alpha = 0.6f),
-                                        fontSize = 12.sp,
-                                        lineHeight = 16.sp
-                                    )
-                                }
                             }
                         }
                     }
@@ -272,144 +251,21 @@ fun TimeSlotRow(time: String, meeting: MeetingDto?) {
     }
 }
 
-fun parseColor(hex: String?): Color? {
-    return try {
-        if (hex.isNullOrEmpty()) null else Color(android.graphics.Color.parseColor(hex))
-    } catch (e: Exception) {
-        null
-    }
-}
-
-fun Color.darken(factor: Float): Color {
-    return Color(
-        red = (this.red * (1 - factor)).coerceAtLeast(0f),
-        green = (this.green * (1 - factor)).coerceAtLeast(0f),
-        blue = (this.blue * (1 - factor)).coerceAtLeast(0f),
-        alpha = this.alpha
-    )
-}
-
 @Composable
-fun HeaderSection(
-    onInvitesClicked: () -> Unit,
-    onProfileClicked: () -> Unit
-) {
+fun HeaderSection(onInvitesClicked: () -> Unit, onProfileClicked: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-
-        Row(
-            modifier = Modifier.height(50.dp).weight(1f).padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.Start),
-        ) {
-
-            Text(
-                text = "Мое расписание",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.Black
-            )
-
-            Row(
-                modifier = Modifier
-                    .height(50.dp)
-                    .width(50.dp)
-                    .clip(CircleShape)
-                    .clickable { onInvitesClicked() },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Notifications,
-                    contentDescription = "Notifications",
-                    modifier = Modifier.size(24.dp),
-                    tint = Color.Black
-                )
+        Text("Мое расписание", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Row {
+            IconButton(onClick = onInvitesClicked) {
+                Icon(Icons.Outlined.Notifications, null, tint = Color.Black)
+            }
+            IconButton(onClick = onProfileClicked) {
+                Box(Modifier.size(32.dp).clip(CircleShape).background(Color.LightGray))
             }
         }
-
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .clip(CircleShape)
-                .clickable { onProfileClicked() }
-                .background(Color.LightGray),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("И", color = Color.White, fontWeight = FontWeight.Bold)
-        }
     }
-}
-
-@Composable
-fun DaysSelectorSection() {
-    val days = listOf(
-        "ПН" to "26",
-        "ВТ" to "27",
-        "СР" to "28",
-        "ЧТ" to "29",
-        "ПТ" to "30"
-    )
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        days.forEach { (dayName, date) ->
-            val isSelected = date == "28"
-            DayCard(dayName, date, isSelected)
-        }
-    }
-}
-
-@Composable
-fun DayCard(dayName: String, date: String, isSelected: Boolean) {
-    Column(
-        modifier = Modifier
-            .width(70.dp)
-            .height(60.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                if (isSelected) PrimaryPurple else Color(0xFFF3F4F6)
-            )
-            .clickable { /* TODO */ },
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = dayName,
-            fontSize = 14.sp,
-            color = if (isSelected) Color.White.copy(alpha = 0.7f) else Color.Black.copy(alpha = 0.5f)
-        )
-        Text(
-            text = date,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = if (isSelected) Color.White else Color.Black
-        )
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
-@Composable
-fun MainScreenPreview() {
-    val mockMeetings = listOf(
-        MeetingDto(1, "Дейли", "10:00", "11:00", "Тест", "#F3E8FF"),
-        MeetingDto(2, "Обсуждение API", "14:00", "15:00", "Тест", "#E0F2FE")
-    )
-
-    MainScreenContent(
-        isLoading = false,
-        meetings = mockMeetings,
-        onAddMeetingClicked = {},
-        onInvitesClicked = {},
-        onProfileClicked = {}
-    )
 }
