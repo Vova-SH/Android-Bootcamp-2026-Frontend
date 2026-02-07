@@ -70,6 +70,8 @@ dependencies {
     implementation ("androidx.camera:camera-video:1.5.3")
     implementation ("androidx.camera:camera-view:1.5.3")
     implementation ("androidx.camera:camera-extensions:1.5.3")
+    implementation("io.github.chouaibmo:rowkalendar:0.0.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.0.3")
 
     implementation(libs.bundles.ktor)
     implementation(libs.kotlinx.serialization.json)

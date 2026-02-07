@@ -1,5 +1,6 @@
 package ru.sicampus.bootcamp2026.ui.screens.schedule
 
+import android.icu.util.Calendar
 import androidx.compose.foundation.background
 
 import androidx.compose.foundation.layout.Column
@@ -17,8 +18,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -26,6 +30,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.chouaibmo.rowkalendar.RowKalendar
+import io.github.chouaibmo.rowkalendar.components.DateCell
+import io.github.chouaibmo.rowkalendar.components.DateCellDefaults
 import ru.sicampus.bootcamp2026.R
 import ru.sicampus.bootcamp2026.ui.components.DayField
 import ru.sicampus.bootcamp2026.ui.components.MeetingField
@@ -36,7 +43,6 @@ import ru.sicampus.bootcamp2026.ui.theme.White
 
 @Composable
 fun ScheduleScreen() {
-
     Column(modifier = Modifier.fillMaxSize().background(White)) {
         Card(
             colors = CardDefaults.cardColors(
@@ -54,60 +60,39 @@ fun ScheduleScreen() {
                         alpha = 0.3f
                     )
                 ),
-            shape = RoundedCornerShape(bottomStart = 30.dp,
-                bottomEnd = 30.dp)
+            shape = RoundedCornerShape(
+                bottomStart = 30.dp,
+                bottomEnd = 30.dp
+            )
         )
         {
-            Text(text = "Jan, 2026",
+            Text(
+                text = "",
                 fontSize = 30.sp,
                 color = Black,
                 fontFamily = FontFamily(Font(R.font.montserrat_bold)),
                 modifier = Modifier.padding(horizontal = 24.dp)
-                    .padding(top=60.dp)
+                    .padding(top = 60.dp)
             )
-            LazyRow (
-                modifier = Modifier.fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(top=47.dp),
-            ) {
-                item {TodayField(28, "Ср")
-                    Spacer(modifier = Modifier.width(10.dp))
-                }
-                item {DayField(29, "Чт")
-                    Spacer(modifier = Modifier.width(10.dp))
-                }
-                item {DayField(30, "Пт")
-                    Spacer(modifier = Modifier.width(10.dp))
-                }
 
-                item { DayField(31, "Сб")
-                    Spacer(modifier = Modifier.width(10.dp))
-                }
-                item {
-                    DayField(1, "Вс")
-                    Spacer(modifier = Modifier.width(10.dp))
-                }
-                item {
-                    DayField(2, "Пн")
-                    Spacer(modifier = Modifier.width(10.dp))
-                }
-            }
+            RowKalendarSample()
 
         }
 
-        Text(text = "Встречи",
+        Text(
+            text = "Встречи",
             fontSize = 20.sp,
             color = Black,
             fontFamily = FontFamily(Font(R.font.montserrat_bold)),
             modifier = Modifier.padding(horizontal = 24.dp)
-                .padding(top=30.dp)
+                .padding(top = 30.dp)
         )
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp)
         ) {
-            item{
+            item {
                 MeetingField("Обсуждение 1", "18:00")
                 Spacer(modifier = Modifier.height(30.dp))
             }
@@ -125,14 +110,36 @@ fun ScheduleScreen() {
                 MeetingField("Обсуждение 4", "21:00")
                 Spacer(modifier = Modifier.height(130.dp))
             }
+
         }
 
     }
-
 }
 
-@Preview
 @Composable
-fun Show5() {
-    ScheduleScreen()
+fun RowKalendarSample() {
+    RowKalendar(
+        modifier = Modifier.fillMaxWidth(),
+        content = { date, isSelected, onClick ->
+            DateCell(
+                date = date,
+                isSelected = isSelected,
+                onDateSelected = onClick,
+                shape = RoundedCornerShape(12.dp),
+                elevation = DateCellDefaults.DateCellElevation(
+                    selectedElevation = 4.dp,
+                    pastElevation = 2.dp,
+                    futureElevation = 2.dp
+                ),
+                colors = DateCellDefaults.colors(
+                    selectedContainerColor = Blue,
+                    selectedTextColor = White,
+                    pastContainerColor = Color.Transparent,
+                    pastTextColor = Black,
+                    futureContainerColor = Color.Transparent,
+                    futureTextColor = Black
+                ),
+            )
+        }
+    )
 }

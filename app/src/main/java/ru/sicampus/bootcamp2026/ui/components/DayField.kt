@@ -21,7 +21,7 @@ import ru.sicampus.bootcamp2026.ui.theme.Black
 
 @Composable
 fun DayField(
-    number: Int,
+    number: String,
     dayWeek: String
 ) {
     Column(modifier = Modifier
@@ -30,7 +30,7 @@ fun DayField(
         .height(83.dp)
         .width(74.dp)
         .clip(RoundedCornerShape(30.dp))) {
-        Text(text = number.toString(),
+        Text(text = number,
             fontSize = 20.sp,
             color = Black,
             fontFamily = FontFamily(Font(R.font.montserrat_bold)),

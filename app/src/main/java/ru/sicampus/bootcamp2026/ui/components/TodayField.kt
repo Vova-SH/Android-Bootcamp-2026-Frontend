@@ -21,7 +21,7 @@ import ru.sicampus.bootcamp2026.ui.theme.White
 
 @Composable
 fun TodayField(
-    number: Int,
+    number: String,
     dayWeek: String
 ) {
     Column(modifier = Modifier
@@ -30,14 +30,14 @@ fun TodayField(
         .height(83.dp)
         .width(74.dp)
         .clip(RoundedCornerShape(30.dp))) {
-        Text(text = "28",
+        Text(text = number,
             fontSize = 20.sp,
             color = White,
             fontFamily = FontFamily(Font(R.font.montserrat_bold)),
             modifier = Modifier
                 .padding(5.dp)
                 .align(Alignment.CenterHorizontally) )
-        Text(text = "Ср",
+        Text(text = dayWeek,
             fontSize = 20.sp,
             color = White,
             fontFamily = FontFamily(Font(R.font.montserrat_regular)),
