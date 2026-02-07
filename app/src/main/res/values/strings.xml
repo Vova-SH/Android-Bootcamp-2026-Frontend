@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Android-Bootcamp-2026-Frontend</string>
+    <string name="auth_title">Авторизация</string>
+    <string name="auth_label">Логин</string>
+    <string name="auth_pass_label">Пароль</string>
+    <string name="auth_sign_in">Войти</string>
+    <string name="register_title">Create Account</string>
+    <string name="register_subtitle">Sign up to get started</string>
+    <string name="register_email_label">Email or Username</string>
+    <string name="register_password_label">Password</string>
+    <string name="register_confirm_password_label">Confirm Password</string>
+    <string name="register_button">Sign Up</string>
 </resources>
