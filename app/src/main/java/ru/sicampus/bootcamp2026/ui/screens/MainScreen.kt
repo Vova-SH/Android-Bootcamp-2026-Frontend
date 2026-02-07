@@ -38,6 +38,9 @@ import java.time.ZoneId
 import java.time.format.TextStyle
 import java.util.Locale
 
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+
 @Composable
 fun MainScreen(
     onAddMeetingClicked: () -> Unit,
@@ -48,6 +51,7 @@ fun MainScreen(
     val meetings by viewModel.meetings.collectAsState()
     val selectedDate by viewModel.selectedDate.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val avatarUrl by viewModel.avatarUrl.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -70,7 +74,7 @@ fun MainScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
-            HeaderSection(onInvitesClicked, onProfileClicked)
+            HeaderSection(onInvitesClicked, onProfileClicked, avatarUrl)
             Spacer(modifier = Modifier.height(16.dp))
 
             DaysSelectorSection(
@@ -252,7 +256,7 @@ fun TimeSlotRow(time: String, meeting: MeetingDto?) {
 }
 
 @Composable
-fun HeaderSection(onInvitesClicked: () -> Unit, onProfileClicked: () -> Unit) {
+fun HeaderSection(onInvitesClicked: () -> Unit, onProfileClicked: () -> Unit, avatarUrl: String?) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -264,7 +268,16 @@ fun HeaderSection(onInvitesClicked: () -> Unit, onProfileClicked: () -> Unit) {
                 Icon(Icons.Outlined.Notifications, null, tint = Color.Black)
             }
             IconButton(onClick = onProfileClicked) {
-                Box(Modifier.size(32.dp).clip(CircleShape).background(Color.LightGray))
+                if (!avatarUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = avatarUrl,
+                        contentDescription = "Avatar",
+                        modifier = Modifier.size(32.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(Modifier.size(32.dp).clip(CircleShape).background(Color.LightGray))
+                }
             }
         }
     }

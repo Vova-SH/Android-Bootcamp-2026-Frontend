@@ -1,14 +1,18 @@
 package ru.sicampus.bootcamp2026.data.network
 
+import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 import ru.sicampus.bootcamp2026.data.model.CreateMeetingRequest
+import ru.sicampus.bootcamp2026.data.model.ImageResponse
 import ru.sicampus.bootcamp2026.data.model.InvitationDecisionRequest
 import ru.sicampus.bootcamp2026.data.model.MeetingDto
 import ru.sicampus.bootcamp2026.data.model.PageResponse
@@ -67,4 +71,8 @@ interface AppApi {
         @Query("size") size: Int = 20,
         @Query("search") search: String?
     ): PageResponse<UserDto>
+
+    @Multipart
+    @POST("api/images/upload")
+    suspend fun uploadImage(@Part image: MultipartBody.Part): ImageResponse
 }

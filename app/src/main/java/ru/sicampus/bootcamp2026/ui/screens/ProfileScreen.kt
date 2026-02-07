@@ -1,7 +1,13 @@
 package ru.sicampus.bootcamp2026.ui.screens
 
+import android.Manifest
 import android.app.DatePickerDialog
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -21,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -28,7 +35,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import ru.sicampus.bootcamp2026.ui.theme.BackgroundColor
 import ru.sicampus.bootcamp2026.ui.theme.PrimaryPurple
 import ru.sicampus.bootcamp2026.ui.utils.PhoneVisualTransformation
@@ -46,13 +55,51 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel()
 ) {
     val user by viewModel.user.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     val context = LocalContext.current
 
-    if (user == null) {
+    var showPhotoDialog by remember { mutableStateOf(false) }
+
+    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { viewModel.uploadAvatar(context, null, it) }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+        bitmap?.let { viewModel.uploadAvatar(context, it, null) }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) cameraLauncher.launch(null)
+        else Toast.makeText(context, "Разрешите доступ к камере.", Toast.LENGTH_SHORT).show()
+    }
+
+    if (user == null && isLoading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = PrimaryPurple)
         }
         return
+    }
+
+    if (showPhotoDialog) {
+        AlertDialog(
+            onDismissRequest = { showPhotoDialog = false },
+            title = { Text("Сменить фото") },
+            text = { Text("Выберите источник") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPhotoDialog = false
+                    galleryLauncher.launch("image/*")
+                }) { Text("Галерея") }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showPhotoDialog = false
+                    val hasPerm = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+                    if (hasPerm) cameraLauncher.launch(null)
+                    else permissionLauncher.launch(Manifest.permission.CAMERA)
+                }) { Text("Камера") }
+            }
+        )
     }
 
     Scaffold(
@@ -83,15 +130,33 @@ fun ProfileScreen(
                 modifier = Modifier
                     .size(120.dp)
                     .clip(CircleShape)
-                    .background(Color.LightGray),
+                    .background(Color.LightGray)
+                    .clickable { showPhotoDialog = true },
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = user?.name?.take(1) ?: "",
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                if (!user?.avatarUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = user!!.avatarUrl,
+                        contentDescription = "Avatar",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Text(
+                        text = user?.name?.take(1) ?: "",
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+
+                Box(
+                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.BottomCenter
+                ) {}
+            }
+            if (isLoading) {
+                LinearProgressIndicator(modifier = Modifier.width(120.dp).padding(top = 8.dp), color = PrimaryPurple)
             }
 
             Spacer(modifier = Modifier.height(16.dp))

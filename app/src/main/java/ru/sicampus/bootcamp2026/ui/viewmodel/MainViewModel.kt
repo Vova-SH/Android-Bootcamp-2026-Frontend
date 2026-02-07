@@ -44,8 +44,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _avatarUrl = MutableStateFlow<String?>(null)
+    val avatarUrl = _avatarUrl.asStateFlow()
+
     init {
         loadMeetings()
+        loadCurrentUser()
 
         val stomp = NetworkClient.getStompManager(tokenStorage)
         stomp.connect()
@@ -70,5 +74,13 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun selectDate(date: LocalDate) {
         _selectedDate.value = date
+    }
+
+    private fun loadCurrentUser() {
+        viewModelScope.launch {
+            repository.getCurrentUser().onSuccess {
+                _avatarUrl.value = it.avatarUrl
+            }
+        }
     }
 }
