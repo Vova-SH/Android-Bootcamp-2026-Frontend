@@ -1,65 +1,41 @@
 package com.example.meet.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 
-val DarkColorScheme = darkColorScheme(
-    primary = DarkPrimary,
-    onPrimary = DarkOnPrimary,
-    background = DarkBackground,
-    onBackground = DarkOnSurface,
-    surface = DarkSurface,
-    onSurface = DarkOnSurface,
-    onSurfaceVariant = DarkOnSurfaceVariant,
-    inverseSurface = Color(0xFFFFFFFF),
-    inverseOnSurface = Color(0xFF121212),
-    error = Color(0xFFBA1A1A),
-    onError = Color(0xFFFFFFFF),
+private val LightColors = lightColorScheme(
+    primary = PrimaryColor,
+    onPrimary = SurfaceColor,
+    secondary = SecondaryColor,
+    background = BackgroundColor,
+    surface = SurfaceColor,
+    error = ErrorColor
 )
 
-val LightColorScheme = lightColorScheme(
-    primary = Primary,
-    onPrimary = OnPrimary,
-    background = Background,
-    onBackground = OnBackground,
-    surface = Surface,
-    onSurface = OnSurface,
-    onSurfaceVariant = OnSurfaceVariant,
-    inverseSurface = Color(0xFF121212),
-    inverseOnSurface = Color(0xFFFFFFFF),
-    error = Color(0xFFBA1A1A),
-    onError = Color(0xFFFFFFFF),
+private val DarkColors = darkColorScheme(
+    primary = PrimaryColor,
+    onPrimary = SurfaceColor,
+    secondary = SecondaryColor,
+    background = Color(0xFF121212),
+    surface = Color(0xFF1E1E1E),
+    error = ErrorColor
 )
 
 @Composable
 fun MeetTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colors: ColorScheme = if (darkTheme) DarkColors else LightColors
 
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
+        colorScheme = colors,
+        typography = AppTypography,
         content = content
     )
 }
