@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil3.compose.AsyncImage
 import ru.sicampus.bootcamp2026.data.UserRepository
 import ru.sicampus.bootcamp2026.data.dto.UserDto
 import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
@@ -53,7 +54,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        userRepository.getUsers()
+        UserRepository.getUsers(userRepository)
     }
 
     Box(
@@ -77,13 +78,20 @@ fun LoginScreen(
                 modifier = Modifier.size(110.dp),
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primary
-            ) {}
+            ) {
+                AsyncImage(
+                    model = "https://i.pinimg.com/736x/8c/da/a0/8cdaa0d82bc09570f348d96657324d87.jpg",
+                    contentDescription = "Profile image",
+                    modifier = Modifier.size(100.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
                 text = "Вход",
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(8.dp))

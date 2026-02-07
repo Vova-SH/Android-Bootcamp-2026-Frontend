@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
                         LoginScreen(navController = navController, userRepository = userRepository)
                     }
                     composable("registration") {
-                        RegistrationScreen(navController = navController, userRepository = userRepository)
+                        RegistrationScreen(userRepository = userRepository)
                     }
                     composable("main") {
                         MainHomeScreen(navController = navController)

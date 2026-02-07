@@ -30,18 +30,26 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+
     buildFeatures {
         compose = true
     }
+
+    buildToolsVersion = "35.0.0"
+    ndkVersion = "29.0.14206865"
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        freeCompilerArgs.add("-Xjsr305=strict")
+    }
+}
 dependencies {
 
     implementation(libs.androidx.core.ktx)

@@ -35,23 +35,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil3.compose.AsyncImage
+import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.data.UserRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistrationScreen(navController: NavController, userRepository: UserRepository) {
+fun RegistrationScreen(userRepository: UserRepository) {
 
     var name by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
@@ -59,6 +60,8 @@ fun RegistrationScreen(navController: NavController, userRepository: UserReposit
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val coroutineScope = rememberCoroutineScope()
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -96,10 +99,6 @@ fun RegistrationScreen(navController: NavController, userRepository: UserReposit
             ) {
                 if (selectedImageUri != null) {
                     AsyncImage(
-                        model = selectedImageUri,
-                        contentDescription = "Фото профиля",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
                     )
                 } else {
                     Icon(
@@ -207,7 +206,9 @@ fun RegistrationScreen(navController: NavController, userRepository: UserReposit
 
             Button(
                 onClick = {
-                    userRepository.getUsers()
+                    coroutineScope.launch {
+                        val result = userRepository.getUsers()
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -223,18 +224,17 @@ fun RegistrationScreen(navController: NavController, userRepository: UserReposit
 }
 
 @Composable
-fun AsyncImage(
-    model: Uri?,
-    contentDescription: String,
-    modifier: Modifier,
-    contentScale: ContentScale
-) {
-    TODO("Not yet implemented")
+fun AsyncImage() {
+    AsyncImage(
+        model = "https://i.pinimg.com/736x/8c/da/a0/8cdaa0d82bc09570f348d96657324d87.jpg",
+        contentDescription = "Profile image",
+        modifier = Modifier.size(100.dp)
+    )
+
 }
 
 @Preview
 @Composable
 fun PreviewRegistrationScreen() {
     val navController = rememberNavController()
-    RegistrationScreen(navController = navController)
 }

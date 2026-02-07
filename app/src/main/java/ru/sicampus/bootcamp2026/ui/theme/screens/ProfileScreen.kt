@@ -21,10 +21,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -97,9 +97,9 @@ fun ProfileScreen(navController: NavController) {
                     .height(48.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(Icons.Default.Edit, null, modifier = Modifier.size(20.dp))
+                Icon(Icons.Default.Done, null, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Редактировать профиль", fontSize = 16.sp)
+                Text("Сохранить изменения", fontSize = 16.sp)
             }
             
             Spacer(Modifier.height(24.dp))
@@ -167,7 +167,7 @@ fun ProfileHeader(
             ) {
                 if (imageUri != null) {
                     AsyncImage(
-                        model = imageUri,
+                        model = "https://i.pinimg.com/736x/8c/da/a0/8cdaa0d82bc09570f348d96657324d87.jpg",
                         contentDescription = "Аватар",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -237,7 +237,7 @@ fun LogoutButton(navController: NavController) {
             containerColor = Color(0xFFE53935)
         )
     ) {
-        Icon(Icons.Default.ExitToApp, null, modifier = Modifier.size(18.dp))
+        Icon(Icons.AutoMirrored.Filled.ExitToApp, null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(8.dp))
         Text(
             text = "Выйти из профиля",
