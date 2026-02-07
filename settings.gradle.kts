@@ -12,6 +12,7 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
+    @Suppress("UnstableApiUsage")
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
@@ -21,4 +22,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Android-Bootcamp-2026-Frontend"
 include(":app")
- 

@@ -4,14 +4,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import ru.sicampus.bootcamp2026.data.UserRepository
+import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
 import ru.sicampus.bootcamp2026.ui.theme.AndroidBootcamp2026FrontendTheme
+import ru.sicampus.bootcamp2026.ui.theme.screens.LoginScreen
+import ru.sicampus.bootcamp2026.ui.theme.screens.MainHomeScreen
+import ru.sicampus.bootcamp2026.ui.theme.screens.InviteScreen
+import ru.sicampus.bootcamp2026.ui.theme.screens.ProfileScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,29 +21,30 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AndroidBootcamp2026FrontendTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                val userInfoDataSource = UserInfoDataSource()
+                val userRepository = UserRepository(userInfoDataSource)
+                val navController = rememberNavController()
+                NavHost(
+                    navController = navController,
+                    startDestination = "login"
+                ) {
+                    composable("login") {
+                        LoginScreen(navController = navController, userRepository = userRepository)
+                    }
+                    composable("registration") {
+                        RegistrationScreen(userRepository = userRepository)
+                    }
+                    composable("main") {
+                        MainHomeScreen(navController = navController)
+                    }
+                    composable("meetings") {
+                        InviteScreen(navController = navController)
+                    }
+                    composable("profile") {
+                        ProfileScreen(navController = navController)
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AndroidBootcamp2026FrontendTheme {
-        Greeting("Android")
     }
 }
