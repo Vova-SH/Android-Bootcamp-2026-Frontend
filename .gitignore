@@ -3,6 +3,8 @@
 .gradle
 .DS_Store
 /build
+/app/build
+*.log
 /captures
 .externalNativeBuild
 .cxx

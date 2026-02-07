@@ -1,3 +1,28 @@
 <resources>
     <string name="app_name">Android-Bootcamp-2026-Frontend</string>
+    <string name="sign_up_title">Регистрация</string>
+    <string name="name_placeholder">имя</string>
+    <string name="surname_placeholder">фамилия</string>
+    <string name="patronymic_placeholder">отчество</string>
+    <string name="email_placeholder">email</string>
+    <string name="password_placeholder">пароль</string>
+    <string name="sign_up_button">Зарегистрироваться</string>
+    <string name="already_have_account">Уже есть аккаунт?</string>
+    <string name="sign_in_title">Вход</string>
+    <string name="sign_in_button">Войти</string>
+    <string name="dont_have_account">Ещё нет аккаунта?</string>
+    <string name="back">Back</string>
+    <string name="sign_out">Выйти</string>
+    <string name="profile_title">Профиль</string>
+    <string name="save_button">Сохранить</string>
+    <string name="creating_invitation_title">Пригласить</string>
+    <string name="email_guest_placeholder">email гостя</string>
+    <string name="invite_button">Пригласить</string>
+    <string name="creating_meeting_title">Создание встречи</string>
+    <string name="create_button">Создать</string>
+    <string name="name_meeting_placeholder">название</string>
+    <string name="description_meeting_placeholder">описание</string>
+    <string name="my_invitations_title">Приглашения</string>
+    <string name="accept_button">Принять</string>
+    <string name="reject_button">Отклонить</string>
 </resources>
