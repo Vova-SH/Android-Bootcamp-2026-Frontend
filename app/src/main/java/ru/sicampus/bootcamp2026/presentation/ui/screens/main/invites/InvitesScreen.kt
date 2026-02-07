@@ -1,87 +1,154 @@
 package ru.sicampus.bootcamp2026.presentation.ui.screens.main.invites
 
-import android.view.RoundedCorner
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.sicampus.bootcamp2026.presentation.ui.theme.AndroidBootcamp2026FrontendTheme
 
-//@Preview(showSystemUi = true)
+data class Invite(
+    val title: String,
+    val time: String,
+    val date: String,
+    val author: String
+)
+
 @Composable
 fun InvitesScreen() {
-    Text("invites")
+    val invites = listOf(
+        Invite(
+            title = "Обсуждение требований",
+            time = "00:00",
+            date = "01.01",
+            author = "Иван Иванов"
+        ),
+        Invite(
+            title = "Планирование тестирования",
+            time = "9:20",
+            date = "5 апр.",
+            author = "Иван Лебедев"
+        ),
+        Invite(
+            title = "Синхронизация по срокам",
+            time = "00:00",
+            date = "01.01",
+            author = "Никита Ардашев"
+        )
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Приглашения",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(bottom = 24.dp)
+        ) {
+            items(invites) { invite ->
+                MeetInvite(
+                    title = invite.title,
+                    time = invite.time,
+                    date = invite.date,
+                    author = invite.author,
+                    onAccept = { /* TODO: Принять приглашение */ },
+                    onDecline = { /* TODO: Отклонить приглашение */ }
+                )
+            }
+        }
+    }
 }
 
-
-
 @Composable
-fun MeetInvite() {
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .clip(RoundedCornerShape(18.dp))
+fun MeetInvite(
+    title: String,
+    time: String,
+    date: String,
+    author: String,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        )
     ) {
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .padding(16.dp),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .padding(16.dp),
         ) {
-            Column(modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
             ) {
                 Text(
-                    "Планирование тестирования",
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+
                 Spacer(modifier = Modifier.weight(1f))
-                Text("9:20 5 апр.", style = MaterialTheme.typography.labelMedium)
-                Text("Иван Лебедев", style = MaterialTheme.typography.labelMedium)
+
+                Text(
+                    text = "$time $date",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = author,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            Spacer(modifier = Modifier.weight(0.1f))
+
+            Spacer(modifier = Modifier.width(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxHeight(),
-                horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                ReactButton(Icons.Default.Check) { }
-                ReactButton(Icons.Default.Close) { }
+                ReactButton(
+                    icon = Icons.Default.Check,
+                    onClick = onAccept
+                )
+                ReactButton(
+                    icon = Icons.Default.Close,
+                    onClick = onDecline
+                )
             }
         }
     }
@@ -89,28 +156,71 @@ fun MeetInvite() {
 
 @Composable
 fun ReactButton(
-    img: ImageVector,
+    icon: ImageVector,
     onClick: () -> Unit
 ) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(15.dp),
+        shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         modifier = Modifier.size(48.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Icon(img, contentDescription = null)
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
 
+@Preview(
+    name = "Invites Screen",
+    showBackground = true,
+    showSystemUi = true
+)
+@Composable
+fun InvitesScreenPreview() {
+    AndroidBootcamp2026FrontendTheme(darkTheme = false) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            InvitesScreen()
+        }
+    }
+}
 
+@Preview(
+    name = "Invites Screen Dark",
+    showBackground = true,
+    showSystemUi = true
+)
+@Composable
+fun InvitesScreenDarkPreview() {
+    AndroidBootcamp2026FrontendTheme(darkTheme = true) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            InvitesScreen()
+        }
+    }
+}
 
 @Preview
 @Composable
 private fun MeetInvitePreview() {
     AndroidBootcamp2026FrontendTheme(darkTheme = true) {
-        MeetInvite()
+        MeetInvite(
+            title = "Планирование тестирования",
+            time = "9:20",
+            date = "5 апр.",
+            author = "Иван Лебедев",
+            onAccept = {},
+            onDecline = {}
+        )
     }
 }
