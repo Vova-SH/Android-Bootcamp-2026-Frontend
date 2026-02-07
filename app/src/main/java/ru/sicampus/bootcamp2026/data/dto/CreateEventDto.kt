@@ -1,0 +1,28 @@
+package ru.sicampus.bootcamp2026.data.dto
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class CreateEventDto(
+    @SerialName("title")
+    val title: String,
+
+    @SerialName("description")
+    val description: String,
+
+    @SerialName("organizerId")
+    val organizerId: Int,
+
+    @SerialName("date")
+    val date: String,
+
+    @SerialName("startTime")
+    val startTime: String,
+
+    @SerialName("endTime")
+    val endTime: String,
+
+    @SerialName("participantsId")
+    val participantsId: List<Int>
+)
