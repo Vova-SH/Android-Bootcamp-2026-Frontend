@@ -75,4 +75,13 @@ interface AppApi {
     @Multipart
     @POST("api/images/upload")
     suspend fun uploadImage(@Part image: MultipartBody.Part): ImageResponse
+
+    @GET("api/users/{userId}/meetings")
+    suspend fun getInvites(
+        @Header("Authorization") token: String,
+        @Path("userId") userId: Long,
+        @Query("status") status: String = "PENDING",
+        @Query("page") page: Int,
+        @Query("size") size: Int = 10
+    ): PageResponse<MeetingDto>
 }

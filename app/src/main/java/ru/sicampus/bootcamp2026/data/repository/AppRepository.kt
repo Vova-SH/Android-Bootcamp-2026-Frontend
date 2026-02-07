@@ -54,10 +54,6 @@ class AppRepository(
         api.updateUser(getAuthHeader(), id, req)
     }
 
-    suspend fun getInvites(userId: Long) = runCatching {
-        api.getInvites(getAuthHeader(), userId, "PENDING")
-    }
-
     suspend fun answerInvite(userId: Long, meetingId: Long, isAccepted: Boolean) = runCatching {
         val status = if (isAccepted) "ACCEPTED" else "REJECTED"
         api.decideInvitation(getAuthHeader(), userId, meetingId, InvitationDecisionRequest(status))
@@ -65,5 +61,9 @@ class AppRepository(
 
     suspend fun getUsers(page: Int, size: Int, search: String?): Result<PageResponse<UserDto>> = runCatching {
         api.getUsers(getAuthHeader(), page, size, search)
+    }
+
+    suspend fun getInvites(userId: Long, page: Int) = runCatching {
+        api.getInvites(getAuthHeader(), userId, "PENDING", page, 10)
     }
 }
