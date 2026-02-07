@@ -1,0 +1,18 @@
+package ru.sicampus.bootcamp2026.android.ui.theme
+
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+
+@Composable
+fun AppTheme(content: @Composable () -> Unit){
+    MaterialTheme(
+        colorScheme = lightColorScheme(
+            primary = DarkBlue,
+            background = White,
+            onBackground = Black
+
+        ),
+        content = content
+    )
+}
