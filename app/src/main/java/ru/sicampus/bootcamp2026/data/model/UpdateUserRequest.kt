@@ -7,5 +7,6 @@ data class UpdateUserRequest(
     @SerializedName("position") val position: String,
     @SerializedName("login") val email: String,
     @SerializedName("phone") val phone: String?,
-    @SerializedName("birthDate") val birthDate: String?
+    @SerializedName("birthDate") val birthDate: String?,
+    @SerializedName("avatarUrl") val avatarUrl: String?
 )

@@ -39,6 +39,9 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewMeetingScreen(
@@ -205,6 +208,7 @@ fun NewMeetingScreen(
                         UserRow(
                             name = user.name ?: "Без имени",
                             position = user.position ?: "Без должности",
+                            avatarUrl = user.avatarUrl,
                             isSelected = selectedIds.contains(user.id),
                             onToggle = { viewModel.toggleSelection(user.id) }
                         )
@@ -217,7 +221,7 @@ fun NewMeetingScreen(
 }
 
 @Composable
-fun UserRow(name: String, position: String, isSelected: Boolean, onToggle: () -> Unit) {
+fun UserRow(name: String, position: String, avatarUrl: String?, isSelected: Boolean, onToggle: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -225,11 +229,20 @@ fun UserRow(name: String, position: String, isSelected: Boolean, onToggle: () ->
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier.size(40.dp).clip(CircleShape).background(Color.LightGray),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(name.take(1), color = Color.White, fontWeight = FontWeight.Bold)
+        if (!avatarUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = avatarUrl,
+                contentDescription = "Avatar",
+                modifier = Modifier.size(40.dp).clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Box(
+                modifier = Modifier.size(40.dp).clip(CircleShape).background(Color.LightGray),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(name.take(1), color = Color.White, fontWeight = FontWeight.Bold)
+            }
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {

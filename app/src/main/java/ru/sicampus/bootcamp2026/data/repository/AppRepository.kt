@@ -47,9 +47,10 @@ class AppRepository(
         position: String,
         email: String,
         phone: String?,
-        birthDate: String?
+        birthDate: String?,
+        avatarUrl: String?
     ): Result<UserDto> = runCatching {
-        val req = UpdateUserRequest(name, position, email, phone, birthDate)
+        val req = UpdateUserRequest(name, position, email, phone, birthDate, avatarUrl)
         api.updateUser(getAuthHeader(), id, req)
     }
 
