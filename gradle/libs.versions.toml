@@ -12,6 +12,7 @@ activityCompose = "1.12.2"
 composeBom = "2024.06.00"
 navigationCompose = "2.8.5"
 runtimeLivedata = "1.10.2"
+firebaseComponents = "19.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,6 +37,7 @@ ktor-client-logging = { group = "io.ktor", name="ktor-client-logging", version.r
 ktor-client-serialization = { group = "io.ktor", name="ktor-serialization-kotlinx-json", version.ref = "ktorClient" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+firebase-components = { group = "com.google.firebase", name = "firebase-components", version.ref = "firebaseComponents" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

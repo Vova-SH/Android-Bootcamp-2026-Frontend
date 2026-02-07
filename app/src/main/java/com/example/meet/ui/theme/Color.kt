@@ -7,4 +7,6 @@ val PrimaryDarkColor = Color(0xFF003C8F)
 val SecondaryColor = Color(0xFFFFA000)
 val BackgroundColor = Color(0xFFF5F5F5)
 val SurfaceColor = Color(0xFFFFFFFF)
+
+val BlackGroundColor = Color(0xFF121212)
 val ErrorColor = Color(0xFFD32F2F)

@@ -23,8 +23,6 @@ class CreateMeetingViewModel : ViewModel() {
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    //private val userInfoDataSource = DataLocator.userInfoDataSource
-
     private var allUsersCache: List<UserDto> = emptyList()
 
     init {
@@ -37,8 +35,8 @@ class CreateMeetingViewModel : ViewModel() {
             try {
                 allUsersCache = userInfoDataSource.loadAllUsers()
                 _searchResults.value = allUsersCache
-            } catch (e: Exception) {
-                // Можно добавить обработку ошибок
+            } catch (_: Exception) {
+
                 _searchResults.value = emptyList()
             } finally {
                 _isLoading.value = false
@@ -56,7 +54,7 @@ class CreateMeetingViewModel : ViewModel() {
                 try {
                     val filteredUsers = userInfoDataSource.searchUsers(query)
                     _searchResults.value = filteredUsers
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     _searchResults.value = emptyList()
                 }
             }
