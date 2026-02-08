@@ -15,24 +15,28 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,9 +46,96 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch
+import ru.sicampus.bootcamp2026.data.UserRepository
+import ru.sicampus.bootcamp2026.data.source.MeetingDto
+import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
+private fun getDefaultMeetings(): List<MeetingDto> = listOf(
+    MeetingDto(
+        id = 1,
+        title = "Ревью кода",
+        date = "2026-02-08",
+        time = "10:00",
+        members = 3,
+        confirmed = true
+    ),
+    MeetingDto(
+        id = 2,
+        title = "Обсуждение задач",
+        date = "2026-02-08",
+        time = "14:00",
+        members = 5,
+        confirmed = true
+    ),
+    MeetingDto(
+        id = 3,
+        title = "Планерка команды",
+        date = "2026-02-08",
+        time = "16:00",
+        members = 8,
+        confirmed = true
+    )
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainHomeScreen(navController: NavController) {
+fun MainHomeScreen(navController: NavController, userRepository: UserRepository? = null) {
+    var selectedDate by remember { mutableStateOf<Long?>(null) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var meetings by remember { mutableStateOf(getDefaultMeetings()) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    val coroutineScope = rememberCoroutineScope()
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val displayDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("ru"))
+
+    val datePickerState = rememberDatePickerState()
+
+    LaunchedEffect(selectedDate) {
+        if (selectedDate != null && userRepository != null) {
+            isLoading = true
+            errorMessage = ""
+            val dateString = dateFormat.format(Date(selectedDate!!))
+
+            coroutineScope.launch {
+                val result = userRepository.getMeetingsByDate(dateString)
+                result.onSuccess { meetingsList ->
+                    meetings = if (meetingsList.isEmpty()) getDefaultMeetings() else meetingsList
+                }.onFailure { exception ->
+                    errorMessage = "Ошибка загрузки: ${exception.message}"
+                    meetings = getDefaultMeetings()
+                }
+                isLoading = false
+            }
+        }
+    }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    selectedDate = datePickerState.selectedDateMillis
+                    showDatePicker = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Отмена")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) },
         containerColor = MaterialTheme.colorScheme.background
@@ -56,24 +147,74 @@ fun MainHomeScreen(navController: NavController) {
                 .verticalScroll(rememberScrollState())
         ) {
             HeaderSection()
+
             Spacer(modifier = Modifier.height(16.dp))
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                ScheduleCard(
-                    title = "Ревью кода",
-                    time = "10:00",
-                    members = "3 участника",
-                    confirmed = true
+
+            // DatePicker кнопка
+            Button(
+                onClick = { showDatePicker = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
-                ScheduleCard(
-                    title = "Обсуждение задач",
-                    time = "14:00",
-                    members = "5 участников",
-                    confirmed = true
+            ) {
+                Text(
+                    text = if (selectedDate != null) {
+                        "Выбрана дата: ${displayDateFormat.format(Date(selectedDate!!))}"
+                    } else {
+                        "📅 Выберите дату"
+                    },
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontSize = 16.sp
                 )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = errorMessage,
+                    color = Color.Red,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            if (isLoading) {
+                Text(
+                    text = "Загрузка расписания...",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    fontSize = 16.sp
+                )
+            } else if (meetings.isNotEmpty()) {
+                Text(
+                    text = if (selectedDate != null) "Мероприятия на выбранную дату" else "Мероприятия на сегодня",
+                    modifier = Modifier.padding(start = 16.dp),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    meetings.forEach { meeting ->
+                        ScheduleCard(
+                            title = meeting.title,
+                            time = meeting.time,
+                            members = "${meeting.members ?: 0} участников",
+                            confirmed = meeting.confirmed ?: false
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
@@ -84,7 +225,7 @@ fun HeaderSection() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp)
+            .height(140.dp)
             .background(MaterialTheme.colorScheme.primary)
             .padding(20.dp)
     ) {
@@ -97,19 +238,10 @@ fun HeaderSection() {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "29 января 2026",
+                text = "Выберите дату для просмотра",
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onPrimary
             )
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Icon(Icons.Default.KeyboardArrowLeft, null, tint = MaterialTheme.colorScheme.onPrimary)
-                Icon(Icons.Default.CalendarToday, null, tint = MaterialTheme.colorScheme.onPrimary)
-                Icon(Icons.Default.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onPrimary)
-            }
         }
     }
 }
@@ -150,22 +282,12 @@ fun ScheduleCard(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Schedule,
-                            null,
-                            modifier = Modifier.size(14.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Text("⏰", modifier = Modifier.size(14.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.width(4.dp))
                         Text(time, fontSize = 11.sp)
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Person,
-                            null,
-                            modifier = Modifier.size(14.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Text("👤", modifier = Modifier.size(14.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.width(4.dp))
                         Text(members, fontSize = 11.sp)
                     }
@@ -195,18 +317,18 @@ fun BottomNavigationBar(navController: NavController) {
     ) {
         NavigationBarItem(
             selected = true,
-            onClick = {
-                navController.navigate("main")
-            },
-            icon = { Icon(Icons.Default.DateRange, null) },
+            onClick = {},
+            icon = { Text("📅") },
             label = { Text("Расписание") }
         )
         NavigationBarItem(
             selected = false,
             onClick = {
-                navController.navigate("meetings")
+                navController.navigate("meetings") {
+                    popUpTo("meetings") { inclusive = true }
+                }
             },
-            icon = { Icon(Icons.Default.Email, null) },
+            icon = { Text("✉️") },
             label = { Text("Приглашения") }
         )
         NavigationBarItem(
@@ -214,7 +336,7 @@ fun BottomNavigationBar(navController: NavController) {
             onClick = {
                 navController.navigate("profile")
             },
-            icon = { Icon(Icons.Default.Person, null) },
+            icon = { Text("👤") },
             label = { Text("Профиль") }
         )
     }
@@ -223,8 +345,8 @@ fun BottomNavigationBar(navController: NavController) {
 @Preview(showBackground = true, widthDp = 360, heightDp = 640)
 @Composable
 fun MainHomePreview() {
-    _root_ide_package_.ru.sicampus.bootcamp2026.ui.theme.AndroidBootcamp2026FrontendTheme {
-        val navController = rememberNavController()
+    val navController = rememberNavController()
+    MaterialTheme {
         MainHomeScreen(navController)
     }
 }

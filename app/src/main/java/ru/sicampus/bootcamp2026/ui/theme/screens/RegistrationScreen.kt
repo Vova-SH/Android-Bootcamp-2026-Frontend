@@ -1,4 +1,4 @@
-package ru.sicampus.bootcamp2026
+package ru.sicampus.bootcamp2026.ui.theme.screens
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -23,11 +23,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -45,14 +42,19 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.data.UserRepository
+import ru.sicampus.bootcamp2026.data.dto.UserDto
+import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistrationScreen(userRepository: UserRepository) {
+fun RegistrationScreen(
+    navController: NavController,
+    userRepository: UserRepository
+) {
 
     var name by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
@@ -98,15 +100,10 @@ fun RegistrationScreen(userRepository: UserRepository) {
                 contentAlignment = Alignment.Center
             ) {
                 if (selectedImageUri != null) {
-                    AsyncImage(
-                    )
+                    // упрощённый плейсхолдер вместо AsyncImage
+                    Text(text = "Фото", color = MaterialTheme.colorScheme.onPrimaryContainer)
                 } else {
-                    Icon(
-                        imageVector = Icons.Default.AddAPhoto,
-                        contentDescription = "Выбрать фото",
-                        modifier = Modifier.size(40.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                    Text(text = "Добавить", color = MaterialTheme.colorScheme.onPrimaryContainer)
                 }
             }
 
@@ -207,7 +204,10 @@ fun RegistrationScreen(userRepository: UserRepository) {
             Button(
                 onClick = {
                     coroutineScope.launch {
-                        val result = userRepository.getUsers()
+                        // TODO: handle registration via repository.registerUser
+                        navController.navigate("main") {
+                            popUpTo("login") { inclusive = true }
+                        }
                     }
                 },
                 modifier = Modifier
@@ -218,23 +218,35 @@ fun RegistrationScreen(userRepository: UserRepository) {
                 Text("Зарегистрироваться")
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Уже есть аккаунт? Вернуться на вход",
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable {
+                    navController.popBackStack()
+                },
+                textAlign = TextAlign.Center
+            )
+
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
-}
-
-@Composable
-fun AsyncImage() {
-    AsyncImage(
-        model = "https://i.pinimg.com/736x/8c/da/a0/8cdaa0d82bc09570f348d96657324d87.jpg",
-        contentDescription = "Profile image",
-        modifier = Modifier.size(100.dp)
-    )
-
 }
 
 @Preview
 @Composable
 fun PreviewRegistrationScreen() {
     val navController = rememberNavController()
+    val fakeDataSource = object : UserInfoDataSource() {
+        override suspend fun getAllUsers(): Result<List<UserDto>> {
+            return Result.success(emptyList())
+        }
+    }
+
+    val userRepository = UserRepository(
+        userInfoDataSource = fakeDataSource
+    )
+
+    RegistrationScreen(navController = navController, userRepository = userRepository)
 }

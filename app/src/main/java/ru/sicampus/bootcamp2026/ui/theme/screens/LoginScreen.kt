@@ -38,7 +38,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import coil3.compose.AsyncImage
 import ru.sicampus.bootcamp2026.data.UserRepository
 import ru.sicampus.bootcamp2026.data.dto.UserDto
 import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
@@ -54,7 +53,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        UserRepository.getUsers(userRepository)
+        val result = userRepository.getUsers()
     }
 
     Box(
@@ -79,11 +78,8 @@ fun LoginScreen(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primary
             ) {
-                AsyncImage(
-                    model = "https://i.pinimg.com/736x/8c/da/a0/8cdaa0d82bc09570f348d96657324d87.jpg",
-                    contentDescription = "Profile image",
-                    modifier = Modifier.size(100.dp)
-                )
+                // Простая заглушка вместо AsyncImage
+                Text(text = "A", modifier = Modifier.size(100.dp))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -132,10 +128,9 @@ fun LoginScreen(
 
             Button(
                 onClick = {
-                    if (email.isNotBlank() && password.isNotBlank()) {
-                        navController.navigate("main") {
-                            popUpTo("login") { inclusive = true }
-                        }
+                    // Переход на главный экран после логина
+                    navController.navigate("main") {
+                        popUpTo("login") { inclusive = true }
                     }
                 },
                 modifier = Modifier
@@ -152,6 +147,7 @@ fun LoginScreen(
                 text = "Нет аккаунта? Зарегистрироваться",
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable {
+                    // Переход на экран регистрации
                     navController.navigate("registration")
                 },
                 textAlign = TextAlign.Center
@@ -166,9 +162,8 @@ fun LoginScreen(
 @Composable
 fun PreviewLoginScreen() {
     val navController = rememberNavController()
-
     val fakeDataSource = object : UserInfoDataSource() {
-        override suspend fun getUser(): Result<List<UserDto>> {
+        override suspend fun getAllUsers(): Result<List<UserDto>> {
             return Result.success(emptyList())
         }
     }
