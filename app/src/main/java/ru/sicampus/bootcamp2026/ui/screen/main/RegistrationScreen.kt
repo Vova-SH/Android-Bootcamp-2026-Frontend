@@ -9,9 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
 
 @Composable
-fun RegistrationScreen() {
+fun RegistrationScreen(navController: NavHostController) {
     Column(modifier = Modifier.fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally) {
         TextField(
@@ -30,8 +31,8 @@ fun RegistrationScreen() {
     }
 }
 
-@Preview(device = "id:pixel_9_pro_xl")
-@Composable
-fun ShowRegistration() {
-    RegistrationScreen()
-}
+//@Preview(device = "id:pixel_9_pro_xl")
+//@Composable
+//fun ShowRegistration() {
+//    RegistrationScreen(navController)
+//}

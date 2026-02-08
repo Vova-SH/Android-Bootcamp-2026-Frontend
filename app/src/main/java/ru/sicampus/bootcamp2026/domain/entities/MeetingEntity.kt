@@ -1,12 +1,9 @@
-package ru.sicampus.bootcamp2026.data
+package ru.sicampus.bootcamp2026.domain.entities
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -16,29 +13,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import ru.sicampus.bootcamp2026.data.MeetingData.InvitationState.*
 import java.time.LocalDateTime
 
-data class MeetingData(
-    var name : String,
-    var description : String,
-    var time: LocalDateTime,
-    var users : MutableMap<UserData, InvitationState> = mutableMapOf(),
-    var admins : MutableList<UserData> = mutableListOf(),
-    var creator: UserData
+data class MeetingEntity(
+    val name: String = "",
+    val employeeAdmin: String = "" ,
+    val startBooking: LocalDateTime = LocalDateTime.now(),
+    val endBooking : LocalDateTime = LocalDateTime.now(),
+    val invited : List<String> = listOf(),
+    val approval : Boolean? = null
 ) {
-    enum class InvitationState {
-        Agree,
-        Disagree,
-        NoAnswer
-    }
-
-
 
     @Composable
-    fun ClassicCard(currentUser: UserData, modifier: Modifier = Modifier) {
+    fun ClassicCard(currentUser: UserEntity, modifier: Modifier = Modifier) {
         Card {
             Column(modifier.padding(10.dp)) {
                 Row {
@@ -50,34 +38,36 @@ data class MeetingData(
                 Row {
                     Text("Дата: ",
                         color = Color.Gray)
-                    Text("" + time.dayOfMonth + "." + time.monthValue + "." + time.year)
+                    Text("" + startBooking.dayOfMonth + "." + startBooking.monthValue + "." + startBooking.year)
                 }
                 Spacer(Modifier.padding(5.dp))
                 Row {
-                    Text("Время: ",
+                    Text("Время начала: ",
                         color = Color.Gray)
-                    Text("" + time.hour + ":00")
+                    Text("" + startBooking.hour + ":00")
+                }
+                Row {
+                    Text("Время конца: ",
+                        color = Color.Gray)
+                    Text("" + endBooking.hour + ":00")
                 }
                 Spacer(Modifier.padding(5.dp))
-                if (currentUser in admins) {
-                    Text("Вы модератор данной встречи")
-                } else if (currentUser == creator) {
+                 if (currentUser.FIO() + " ${currentUser.mail}" == employeeAdmin) {
                     Text("Вы создатель данной встречи")
                 } else {
-                    Log.d("us", users.toString())
-                    Log.d("u", (currentUser in users).toString())
-                    when (users[currentUser]) {
-                        Agree -> Text(
+                    Log.d("us", currentUser.toString())
+                    when (approval) {
+                        true -> Text(
                             "Вы согласились",
                             color = Color(0xFF4CAF50)
                         )
 
-                        Disagree -> Text(
+                        false -> Text(
                             "Вы отказались",
                             color = Color.Red
                         )
 
-                        NoAnswer -> Row {
+                        null -> Row {
                             Button(
                                 {},
                                 colors = ButtonDefaults.buttonColors(
@@ -105,24 +95,25 @@ data class MeetingData(
 
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview
-@Composable
-fun ClassicCardPreview() {
-    var meetingData = MeetingData(
-        "Встреча 1",
-        "Это первая встреча",
-        time = LocalDateTime.now(),
-        creator = UserData("Admin"),
-        users = mutableMapOf(
-            UserData("1") to NoAnswer,
-            UserData("2") to Agree,
-            UserData("3") to Disagree
-        )
-    )
-    Column {
-        meetingData.ClassicCard(UserData("1"), Modifier.fillMaxWidth())
-        meetingData.ClassicCard(UserData("2"), Modifier.fillMaxWidth())
-        meetingData.ClassicCard(UserData("3"), Modifier.fillMaxWidth())
-    }
-}
+//@RequiresApi(Build.VERSION_CODES.O)
+//@Preview
+//@Composable
+//fun ClassicCardPreview() {
+//    val meetingEntity = MeetingEntity(
+//        id = 1,
+//        "Встреча 1",
+//        "Это первая встреча",
+//        time = LocalDateTime.now(),
+//        creator = UserEntity("Admin"),
+//        users = mutableMapOf(
+//            UserEntity("1") to NoAnswer,
+//            UserEntity("2") to Agree,
+//            UserEntity("3") to Disagree
+//        )
+//    )
+//    Column {
+//        meetingEntity.ClassicCard(UserEntity("1"), Modifier.fillMaxWidth())
+//        meetingEntity.ClassicCard(UserEntity("2"), Modifier.fillMaxWidth())
+//        meetingEntity.ClassicCard(UserEntity("3"), Modifier.fillMaxWidth())
+//    }
+//}

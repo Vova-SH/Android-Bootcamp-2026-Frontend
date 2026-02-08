@@ -23,14 +23,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.sicampus.bootcamp2026.screen.main.AuthScreen
+import androidx.navigation.NavHostController
+import ru.sicampus.bootcamp2026.ui.screen.auth.AuthScreen
 import kotlin.jvm.java
 
 @Composable
-fun WelcomeScreen() {
-    var isAutorized by remember { mutableStateOf(false) }
+fun WelcomeScreen(navController: NavHostController) {
+    var isAuthorized by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val intent = Intent(context, AuthScreen()::class.java)
     Column(modifier = Modifier.fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Добро пожаловать в [название приложения]\n" +
@@ -40,7 +40,9 @@ fun WelcomeScreen() {
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(vertical = 69.dp))
         Spacer(modifier = Modifier.height(217.dp))
-        Button(onClick = {context.startActivity(intent)}, shape = RoundedCornerShape(10.dp),
+        Button(onClick = {
+            navController.navigate(NavRoutes.Auth.route)
+        }, shape = RoundedCornerShape(10.dp),
             contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
             Text("Войти", fontSize = 16.sp,
@@ -54,8 +56,3 @@ fun WelcomeScreen() {
     }
 }
 
-@Preview
-@Composable
-fun ShowScreen() {
-    WelcomeScreen()
-}
