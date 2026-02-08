@@ -13,7 +13,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 object Network {
-    const val HOST = "http://10.0.2.2:8080"
+    const val HOST = "http://196.168.0.235:8080"
 
     val client by lazy {
         HttpClient(CIO) {
@@ -24,14 +24,6 @@ object Network {
                         ignoreUnknownKeys = true
                     }
                 )
-            }
-
-            install(Logging) {
-                logger = object : Logger {
-                    override fun log(message: String) {
-                        Log.d("KTOR", message)
-                    }
-                }
             }
 
             defaultRequest {

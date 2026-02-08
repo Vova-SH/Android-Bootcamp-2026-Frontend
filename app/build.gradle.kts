@@ -35,7 +35,6 @@ android {
     buildFeatures {
         compose = true
     }
-
 }
 
 dependencies {
@@ -55,24 +54,24 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.androidx.navigation.compose)
-    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6")
+
+    implementation("io.ktor:ktor-client-core:3.0.3")
+    implementation("io.ktor:ktor-client-cio:3.0.3")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.3")
+
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.3.0"))
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    implementation("io.github.jan-tennert.supabase:auth-kt")
+    implementation("io.github.jan-tennert.supabase:realtime-kt")
+    implementation("io.github.jan-tennert.supabase:storage-kt")
+    implementation("androidx.datastore:datastore-preferences:1.2.0")
+    implementation("androidx.navigation:navigation-compose:2.7.2")
 
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("io.coil-kt.coil3:coil-network-ktor3:3.3.0")
-    implementation("androidx.datastore:datastore-preferences:1.2.0")
-    implementation("androidx.datastore:datastore-preferences-core:1.2.0")
-    implementation(platform(libs.supabase.bom))
-    implementation(libs.supabase.storage)
-    implementation ("androidx.camera:camera-core:1.5.3")
-    implementation ("androidx.camera:camera-camera2:1.5.3")
-    implementation ("androidx.camera:camera-lifecycle:1.5.3")
-    implementation ("androidx.camera:camera-video:1.5.3")
-    implementation ("androidx.camera:camera-view:1.5.3")
-    implementation ("androidx.camera:camera-extensions:1.5.3")
+    implementation("io.github.chouaibmo:rowkalendar:0.0.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.0.3")
     implementation("io.github.chouaibmo:rowkalendar:0.0.3")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.0.3")
 
-    implementation(libs.bundles.ktor)
-    implementation(libs.kotlinx.serialization.json)
 }
