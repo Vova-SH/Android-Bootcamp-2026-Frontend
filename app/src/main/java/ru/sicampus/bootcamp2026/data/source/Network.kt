@@ -15,7 +15,7 @@ import kotlinx.serialization.json.Json
 
 
 object Network {
-    const val HOST = "http://10.0.2.2:8080"
+    const val HOST = "http://192.168.1.181:8080"
     private const val KTOR_LOG_TAG = "KTOR"
 
     val client by lazy {

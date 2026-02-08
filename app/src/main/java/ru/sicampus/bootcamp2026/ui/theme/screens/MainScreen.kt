@@ -49,44 +49,43 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.data.UserRepository
 import ru.sicampus.bootcamp2026.data.source.MeetingDto
-import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private fun getDefaultMeetings(): List<MeetingDto> = listOf(
-    MeetingDto(
-        id = 1,
-        title = "Ревью кода",
-        date = "2026-02-08",
-        time = "10:00",
-        members = 3,
-        confirmed = true
-    ),
-    MeetingDto(
-        id = 2,
-        title = "Обсуждение задач",
-        date = "2026-02-08",
-        time = "14:00",
-        members = 5,
-        confirmed = true
-    ),
-    MeetingDto(
-        id = 3,
-        title = "Планерка команды",
-        date = "2026-02-08",
-        time = "16:00",
-        members = 8,
-        confirmed = true
-    )
-)
+//private fun getDefaultMeetings(): List<MeetingDto> = listOf(
+//    MeetingDto(
+//        id = 1,
+//        title = "Ревью кода",
+//        startTime = "2026-02-08",
+//        endTime = "10:00",
+//        members = 3,
+//        confirmed = true
+//    ),
+//    MeetingDto(
+//        id = 2,
+//        title = "Обсуждение задач",
+//        startTime = "2026-02-08",
+//        endTime = "14:00",
+//        members = 5,
+//        confirmed = true
+//    ),
+//    MeetingDto(
+//        id = 3,
+//        title = "Планерка команды",
+//        startTime = "2026-02-08",
+//        endTime = "16:00",
+//        members = 8,
+//        confirmed = true
+//    )
+//)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainHomeScreen(navController: NavController, userRepository: UserRepository? = null) {
     var selectedDate by remember { mutableStateOf<Long?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
-    var meetings by remember { mutableStateOf(getDefaultMeetings()) }
+    var meetings by remember { mutableStateOf(emptyList<MeetingDto>()) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
@@ -105,10 +104,10 @@ fun MainHomeScreen(navController: NavController, userRepository: UserRepository?
             coroutineScope.launch {
                 val result = userRepository.getMeetingsByDate(dateString)
                 result.onSuccess { meetingsList ->
-                    meetings = if (meetingsList.isEmpty()) getDefaultMeetings() else meetingsList
+                    meetings = meetingsList
                 }.onFailure { exception ->
                     errorMessage = "Ошибка загрузки: ${exception.message}"
-                    meetings = getDefaultMeetings()
+                    meetings = emptyList()
                 }
                 isLoading = false
             }
@@ -207,9 +206,7 @@ fun MainHomeScreen(navController: NavController, userRepository: UserRepository?
                     meetings.forEach { meeting ->
                         ScheduleCard(
                             title = meeting.title,
-                            time = meeting.time,
-                            members = "${meeting.members ?: 0} участников",
-                            confirmed = meeting.confirmed ?: false
+                            time = meeting.endTime
                         )
                     }
                 }
@@ -250,8 +247,6 @@ fun HeaderSection() {
 fun ScheduleCard(
     title: String,
     time: String,
-    members: String,
-    confirmed: Boolean
 ) {
     Card(
         modifier = Modifier
@@ -289,23 +284,23 @@ fun ScheduleCard(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("👤", modifier = Modifier.size(14.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.width(4.dp))
-                        Text(members, fontSize = 11.sp)
+                            //Text(members, fontSize = 11.sp)
                     }
                 }
             }
-            if (confirmed) {
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = Color(0xFFCCFCD1)
-                ) {
-                    Text(
-                        text = "Подтверждено",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                        fontSize = 11.sp,
-                        color = Color(0xFF0A6E20)
-                    )
-                }
-            }
+//            if (confirmed) {
+//                Surface(
+//                    shape = RoundedCornerShape(20.dp),
+//                    color = Color(0xFFCCFCD1)
+//                ) {
+//                    Text(
+//                        text = "Подтверждено",
+//                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+//                        fontSize = 11.sp,
+//                        color = Color(0xFF0A6E20)
+//                    )
+//                }
+//            }
         }
     }
 }
