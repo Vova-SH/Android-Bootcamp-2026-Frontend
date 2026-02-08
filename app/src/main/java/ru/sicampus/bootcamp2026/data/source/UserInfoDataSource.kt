@@ -1,9 +1,12 @@
 package ru.sicampus.bootcamp2026.data.source
 
+import android.util.Base64
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import ru.sicampus.bootcamp2026.data.CredentialsHolder
+import ru.sicampus.bootcamp2026.data.dto.InvitationDto
 import ru.sicampus.bootcamp2026.data.dto.UserDto
 import java.net.HttpURLConnection
 import java.net.URL
@@ -38,6 +41,33 @@ open class UserInfoDataSource {
                 conn.apply {
                     requestMethod = "GET"
                     setRequestProperty("Authorization", "Basic $encoded")
+                    setRequestProperty("Accept", "application/json")
+                    connectTimeout = 5000
+                    readTimeout = 5000
+                }
+
+                val code = conn.responseCode
+                val text = if (code in 200..299) {
+                    conn.inputStream.bufferedReader().use { it.readText() }
+                } else {
+                    conn.errorStream?.bufferedReader()?.use { it.readText() } ?: ""
+                }
+                conn.disconnect()
+
+                if (code != 200) error("HTTP $code: $text")
+
+                json.decodeFromString<UserDto>(text)
+            }
+        }
+
+    open suspend fun getUserByUsername(username: String): Result<UserDto> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val url = URL(Network.HOST + "/api/persons/username/$username")
+                val conn = url.openConnection() as HttpURLConnection
+
+                conn.apply {
+                    requestMethod = "GET"
                     setRequestProperty("Accept", "application/json")
                     connectTimeout = 5000
                     readTimeout = 5000
@@ -206,6 +236,40 @@ open class UserInfoDataSource {
                 if (code !in 200..299) error("Status: $code, body: $text")
 
                 json.decodeFromString<List<MeetingDto>>(text)
+            }
+        }
+
+    open suspend fun getInvitationsByPersonId(id: Long): Result<List<InvitationDto>> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val url = URL(Network.HOST + "/api/invitations/person/$id")
+                val conn = url.openConnection() as HttpURLConnection
+
+                val auth = "${CredentialsHolder.username}:${CredentialsHolder.password}"
+                val encoded = Base64.encodeToString(
+                    auth.toByteArray(),
+                    Base64.NO_WRAP
+                )
+                conn.setRequestProperty("Authorization", "Basic $encoded")
+
+                conn.apply {
+                    requestMethod = "GET"
+                    setRequestProperty("Accept", "application/json")
+                    connectTimeout = 5000
+                    readTimeout = 5000
+                }
+
+                val code = conn.responseCode
+                val text = if (code in 200..299) {
+                    conn.inputStream.bufferedReader().use { it.readText() }
+                } else {
+                    conn.errorStream?.bufferedReader()?.use { it.readText() } ?: ""
+                }
+                conn.disconnect()
+
+                if (code != 200) error("HTTP $code: $text")
+
+                json.decodeFromString<List<InvitationDto>>(text)
             }
         }
 }

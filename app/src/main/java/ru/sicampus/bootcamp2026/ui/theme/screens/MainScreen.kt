@@ -53,33 +53,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-//private fun getDefaultMeetings(): List<MeetingDto> = listOf(
-//    MeetingDto(
-//        id = 1,
-//        title = "Ревью кода",
-//        startTime = "2026-02-08",
-//        endTime = "10:00",
-//        members = 3,
-//        confirmed = true
-//    ),
-//    MeetingDto(
-//        id = 2,
-//        title = "Обсуждение задач",
-//        startTime = "2026-02-08",
-//        endTime = "14:00",
-//        members = 5,
-//        confirmed = true
-//    ),
-//    MeetingDto(
-//        id = 3,
-//        title = "Планерка команды",
-//        startTime = "2026-02-08",
-//        endTime = "16:00",
-//        members = 8,
-//        confirmed = true
-//    )
-//)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainHomeScreen(navController: NavController, userRepository: UserRepository? = null) {
@@ -337,7 +310,7 @@ fun BottomNavigationBar(navController: NavController) {
     }
 }
 
-@Preview(showBackground = true, widthDp = 360, heightDp = 640)
+@Preview(showBackground = true, widthDp = 1280, heightDp = 520)
 @Composable
 fun MainHomePreview() {
     val navController = rememberNavController()

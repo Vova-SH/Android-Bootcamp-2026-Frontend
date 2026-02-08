@@ -3,6 +3,7 @@ package ru.sicampus.bootcamp2026.data
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import ru.sicampus.bootcamp2026.data.dto.InvitationDto
 import ru.sicampus.bootcamp2026.data.dto.UserDto
 import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
 import ru.sicampus.bootcamp2026.data.source.MeetingDto
@@ -24,6 +25,10 @@ open class UserRepository(
 
     suspend fun getUserById(id: Long): Result<UserEntity> {
         return userInfoDataSource.getUserById(id).map { it.toEntity() }
+    }
+
+    suspend fun getCurrentUser(username: String): Result<UserEntity> {
+        return userInfoDataSource.getUserByUsername(username).map { it.toEntity() }
     }
 
     suspend fun registerUser(user: UserEntity): Result<UserEntity> {
@@ -48,7 +53,21 @@ open class UserRepository(
 
     suspend fun login(username: String, password: String): Result<UserEntity> {
         return userInfoDataSource.login(username, password)
-            .map { it.toEntity() }
+            .map { userDto ->
+                CredentialsHolder.username = username
+                CredentialsHolder.password = password
+                userDto.toEntity()
+            }
+    }
+
+    private fun saveCredentials(username: String, password: String) {
+        // Простейший вариант — в памяти
+        CredentialsHolder.username = username
+        CredentialsHolder.password = password
+    }
+
+    suspend fun getInvitationsByPersonId(id: Long): Result<List<InvitationDto>> {
+        return userInfoDataSource.getInvitationsByPersonId(id)
     }
 }
 
@@ -63,3 +82,8 @@ data class LoginResponse(
     val token: String,
     val user: UserDto
 )
+
+object CredentialsHolder {
+    var username: String = ""
+    var password: String = ""
+}

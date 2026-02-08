@@ -53,9 +53,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
+import ru.sicampus.bootcamp2026.data.UserRepository
 
 @Composable
-fun ProfileScreen(navController: NavController) {
+fun ProfileScreen(
+    navController: NavController,
+) {
     var firstName by remember { mutableStateOf("Иван") }
     var lastName by remember { mutableStateOf("Иванов") }
     var email by remember { mutableStateOf("ivan.ivanov@company.com") }
