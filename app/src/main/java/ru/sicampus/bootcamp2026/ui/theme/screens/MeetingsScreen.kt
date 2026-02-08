@@ -108,10 +108,10 @@ fun InviteScreen(navController: NavController, userRepository: UserRepository? =
             coroutineScope.launch {
                 val result = userRepository.getMeetingsByDate(dateString)
                 result.onSuccess { meetingsList ->
-                    meetings = if (meetingsList.isEmpty()) getDefaultInviteMeetings() else meetingsList
+                    meetings = meetingsList
                 }.onFailure { exception ->
+                    meetings = emptyList()
                     errorMessage = "Ошибка загрузки: ${exception.message}"
-                    meetings = getDefaultInviteMeetings()
                 }
                 isLoading = false
             }
