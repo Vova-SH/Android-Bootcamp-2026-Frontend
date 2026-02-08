@@ -25,7 +25,7 @@ open class UserInfoDataSource {
 
     open suspend fun getAllUsers(): Result<List<UserDto>> = withContext(Dispatchers.IO) {
         runCatching {
-            val url = URL(Network.HOST + "/api/user")
+            val url = URL(Network.HOST + "/api/person")
             val conn = (url.openConnection() as HttpURLConnection).apply {
                 requestMethod = "GET"
                 setRequestProperty("Accept", "application/json")
@@ -45,7 +45,7 @@ open class UserInfoDataSource {
 
     open suspend fun getUserById(id: Long): Result<UserDto> = withContext(Dispatchers.IO) {
         runCatching {
-            val url = URL(Network.HOST + "/api/user/" + id)
+            val url = URL(Network.HOST + "/api/person/" + id)
             val conn = (url.openConnection() as HttpURLConnection).apply {
                 requestMethod = "GET"
                 setRequestProperty("Accept", "application/json")
@@ -65,7 +65,7 @@ open class UserInfoDataSource {
 
     open suspend fun registerUser(user: UserDto): Result<UserDto> = withContext(Dispatchers.IO) {
         runCatching {
-            val url = URL(Network.HOST + "/api/user/register")
+            val url = URL(Network.HOST + "/api/person/register")
             val conn = (url.openConnection() as HttpURLConnection).apply {
                 requestMethod = "POST"
                 doOutput = true
@@ -90,7 +90,7 @@ open class UserInfoDataSource {
 
     open suspend fun updateUser(id: Long, user: UserDto): Result<UserDto> = withContext(Dispatchers.IO) {
         runCatching {
-            val url = URL(Network.HOST + "/api/user/" + id)
+            val url = URL(Network.HOST + "/api/person/" + id)
             val conn = (url.openConnection() as HttpURLConnection).apply {
                 requestMethod = "PUT"
                 doOutput = true
@@ -115,7 +115,7 @@ open class UserInfoDataSource {
 
     open suspend fun deleteUser(id: Long): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            val url = URL(Network.HOST + "/api/user/" + id)
+            val url = URL(Network.HOST + "/api/person/" + id)
             val conn = (url.openConnection() as HttpURLConnection).apply {
                 requestMethod = "DELETE"
                 setRequestProperty("Accept", "application/json")
