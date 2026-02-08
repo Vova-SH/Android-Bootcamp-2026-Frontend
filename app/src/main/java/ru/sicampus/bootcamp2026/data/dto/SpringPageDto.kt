@@ -10,5 +10,7 @@ data class SpringPageDto<T>(
     val last: Boolean,
     val size: Int,
     val number: Int,
-    val empty: Boolean
+    val numberOfElements: Int? = null,
+    val first: Boolean? = null,
+    val empty: Boolean? = null
 )

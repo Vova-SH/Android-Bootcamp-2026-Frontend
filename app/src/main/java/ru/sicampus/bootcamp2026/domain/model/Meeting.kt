@@ -7,5 +7,6 @@ data class Meeting(
     val location: String,
     val startTime: String,
     val durationMinutes: Int,
-    val creatorName: String?
+    val creatorName: String?,
+    val creatorId: Long
 )

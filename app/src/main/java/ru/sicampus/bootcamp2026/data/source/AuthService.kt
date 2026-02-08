@@ -19,11 +19,9 @@ class AuthService {
         val response = client.post("/api/users/register") {
             setBody(registerDto)
         }
-
         if (!response.status.isSuccess()) {
             throw Exception("Ошибка регистрации: ${response.status.value}")
         }
-
         return response.body()
     }
 
@@ -39,14 +37,14 @@ class AuthService {
         if (response.status == HttpStatusCode.Unauthorized) {
             throw Exception("Неверный email или пароль")
         }
-
         if (!response.status.isSuccess()) {
             throw Exception("Ошибка сервера: ${response.status.value}")
         }
 
-        val user = response.body<UserDto>()
+        val userDto = response.body<UserDto>()
 
-        SessionManager.saveSession(authHeader, user.id)
-        return user
+        SessionManager.saveSession(authHeader, userDto.id)
+
+        return userDto
     }
 }

@@ -1,149 +1,214 @@
 package ru.sicampus.bootcamp2026.ui.screen.meetings
 
+import androidx.compose.animation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.sp
 import ru.sicampus.bootcamp2026.domain.model.Meeting
-import ru.sicampus.bootcamp2026.ui.screen.CreateMeetingScreen
+import ru.sicampus.bootcamp2026.ui.components.*
+import ru.sicampus.bootcamp2026.ui.theme.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeetingsScreen(
-    viewModel: MeetingsViewModel = viewModel()
+    viewModel: MeetingsViewModel,
+    onCreateMeetingClick: () -> Unit,
+    onMeetingClick: (Long) -> Unit
 ) {
     val meetings by viewModel.meetings.collectAsState()
-    val error by viewModel.error.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val isScheduleMode by viewModel.isScheduleMode.collectAsState()
 
-    var showCreateDialog by remember { mutableStateOf(false) }
-
-    val listState = rememberLazyListState()
-    val shouldLoadMore = remember {
-        derivedStateOf {
-            val totalItems = listState.layoutInfo.totalItemsCount
-            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            totalItems > 0 && lastVisible >= totalItems - 2
-        }
-    }
-
-    LaunchedEffect(shouldLoadMore.value) {
-        if (shouldLoadMore.value) {
-            viewModel.loadMeetings()
-        }
-    }
-
-    if (showCreateDialog) {
-        ModalBottomSheet(onDismissRequest = { showCreateDialog = false }) {
-            CreateMeetingScreen(
-                onCreateClick = { title, desc, place, date, duration ->
-                    viewModel.createMeeting(title, desc, place, date, duration)
-                    showCreateDialog = false
+    JuicyBackground {
+        Scaffold(
+            containerColor = Color.Transparent,
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = onCreateMeetingClick,
+                    containerColor = BrandPrimary,
+                    contentColor = Color.White,
+                    shape = RoundedCornerShape(20.dp),
+                    elevation = FloatingActionButtonDefaults.elevation(8.dp)
+                ) {
+                    Icon(Icons.Default.Add, null, modifier = Modifier.size(28.dp))
                 }
-            )
-        }
-    }
-
-    if (error != null) {
-        AlertDialog(
-            onDismissRequest = { viewModel.clearError() },
-            confirmButton = { TextButton(onClick = { viewModel.clearError() }) { Text("OK") } },
-            text = { Text(error ?: "") }
-        )
-    }
-
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Встречи") }) },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { showCreateDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "New Meeting")
             }
-        }
-    ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-            if (meetings.isEmpty() && !isLoading) {
-                Text(
-                    text = "Нет запланированных встреч",
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-
-            LazyColumn(
-                state = listState,
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
             ) {
-                items(meetings, key = { it.id }) { meeting ->
-                    MeetingItem(
-                        meeting = meeting,
-                        onDelete = { viewModel.deleteMeeting(meeting.id) }
+                Column(Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
+                    Text(
+                        text = "События",
+                        style = MaterialTheme.typography.displayMedium
+                    )
+                    Text(
+                        text = "Не пропускайте важное",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = TextTertiary
                     )
                 }
 
-                if (isLoading && meetings.isNotEmpty()) {
-                    item {
-                        Box(Modifier.fillMaxWidth().padding(8.dp), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(Modifier.size(24.dp))
-                        }
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .background(SurfaceWhite, RoundedCornerShape(16.dp))
+                        .padding(4.dp)
+                ) {
+                    Row(Modifier.fillMaxSize()) {
+                        TabItem("Все", !isScheduleMode) { if(isScheduleMode) viewModel.toggleMode() }
+                        TabItem("Моё расписание", isScheduleMode) { if(!isScheduleMode) viewModel.toggleMode() }
                     }
                 }
-            }
 
-            if (isLoading && meetings.isEmpty()) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                Spacer(modifier = Modifier.height(24.dp))
+
+                if (isLoading && meetings.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = BrandPrimary)
+                    }
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp)
+                    ) {
+                        items(meetings) { meeting ->
+                            HarmoniousMeetingItem(meeting, onClick = { onMeetingClick(meeting.id) })
+                        }
+                        item { Spacer(Modifier.height(80.dp)) }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun MeetingItem(meeting: Meeting, onDelete: () -> Unit) {
-    Card(
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        modifier = Modifier.fillMaxWidth()
+fun RowScope.TabItem(text: String, isSelected: Boolean, onClick: () -> Unit) {
+    val bgColor = if (isSelected) BrandPrimary else Color.Transparent
+    val textColor = if (isSelected) Color.White else TextSecondary
+
+    Box(
+        modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight()
+            .clip(RoundedCornerShape(12.dp))
+            .background(bgColor)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium.copy(fontSize = 15.sp),
+            color = textColor,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+fun HarmoniousMeetingItem(meeting: Meeting, onClick: () -> Unit) {
+    JuicyCard(onClick = onClick) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            DateBadge(meeting.startTime)
+
+            Spacer(Modifier.width(20.dp))
+
+            Column(Modifier.weight(1f)) {
                 Text(
-                    text = meeting.title,
+                    meeting.title,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f)
+                    maxLines = 1
                 )
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
+                Spacer(Modifier.height(8.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Rounded.LocationOn,
+                        null,
+                        modifier = Modifier.size(16.dp),
+                        tint = AccentPurple
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        meeting.location,
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1
+                    )
+
+                    Spacer(Modifier.width(12.dp))
+
+                    Icon(
+                        Icons.Default.DateRange,
+                        null,
+                        modifier = Modifier.size(16.dp),
+                        tint = TextTertiary
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        "${meeting.durationMinutes} мин",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = TextTertiary
+                    )
                 }
             }
-
-            meeting.description?.let {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = it, style = MaterialTheme.typography.bodyMedium)
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row {
-                Text(text = "\uD83D\uDCC5 ${meeting.startTime}", style = MaterialTheme.typography.bodySmall)
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(text = "⏱ ${meeting.durationMinutes} мин", style = MaterialTheme.typography.bodySmall)
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "\uD83D\uDCCD ${meeting.location}", style = MaterialTheme.typography.bodySmall)
-
-            meeting.creatorName?.let {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Организатор: $it", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-            }
         }
+    }
+}
+
+@Composable
+fun DateBadge(dateString: String) {
+    val parts = dateString.split("T").getOrNull(0)?.split("-")
+    val day = parts?.getOrNull(2) ?: "01"
+    val month = parts?.getOrNull(1) ?: "01"
+
+    val monthName = when(month) {
+        "01" -> "ЯНВ"; "02" -> "ФЕВ"; "03" -> "МАР"; "04" -> "АПР"
+        "05" -> "МАЙ"; "06" -> "ИЮН"; "07" -> "ИЮЛ"; "08" -> "АВГ"
+        "09" -> "СЕН"; "10" -> "ОКТ"; "11" -> "НОЯ"; "12" -> "ДЕК"
+        else -> month
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .width(56.dp)
+            .height(64.dp)
+            .background(SurfaceLight, RoundedCornerShape(14.dp))
+            .padding(vertical = 8.dp)
+    ) {
+        Text(
+            day,
+            style = MaterialTheme.typography.headlineSmall.copy(fontSize = 22.sp),
+            color = BrandPrimary
+        )
+        Text(
+            monthName,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = TextTertiary
+        )
     }
 }

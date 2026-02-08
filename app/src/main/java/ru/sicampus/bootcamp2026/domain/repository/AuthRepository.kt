@@ -6,4 +6,6 @@ import ru.sicampus.bootcamp2026.data.dto.UserRegisterDto
 interface AuthRepository {
     suspend fun registerUser(user: UserRegisterDto): Result<UserDto>
     suspend fun loginUser(email: String, pass: String): Result<UserDto>
+    suspend fun logout()
+    fun isUserLoggedIn(): Boolean
 }

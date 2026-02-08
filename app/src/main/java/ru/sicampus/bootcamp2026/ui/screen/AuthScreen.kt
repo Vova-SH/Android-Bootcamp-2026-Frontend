@@ -1,16 +1,23 @@
 package ru.sicampus.bootcamp2026.ui.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import ru.sicampus.bootcamp2026.ui.components.*
 import ru.sicampus.bootcamp2026.ui.screen.auth.AuthUiState
 import ru.sicampus.bootcamp2026.ui.screen.auth.AuthViewModel
+import ru.sicampus.bootcamp2026.ui.theme.*
 
 @Composable
 fun AuthRoute(
@@ -20,55 +27,49 @@ fun AuthRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(uiState) {
-        if (uiState is AuthUiState.Success) {
-            navigateToHome()
-        }
-    }
+    LaunchedEffect(uiState) { if (uiState is AuthUiState.Success) navigateToHome() }
 
-    AuthScreen(
-        uiState = uiState,
-        onLoginClick = { email, pass -> viewModel.login(email, pass) },
-        onRegisterClick = navigateToRegister,
-        onClearError = { viewModel.clearError() }
-    )
-}
-
-@Composable
-fun AuthScreen(
-    uiState: AuthUiState,
-    onLoginClick: (String, String) -> Unit,
-    onRegisterClick: () -> Unit,
-    onClearError: () -> Unit
-) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
-    if (uiState is AuthUiState.Error) {
-        AlertDialog(
-            onDismissRequest = onClearError,
-            confirmButton = { TextButton(onClick = onClearError) { Text("OK") } },
-            title = { Text("Ошибка") },
-            text = { Text(uiState.message) }
-        )
-    }
-
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    JuicyBackground {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(text = "Вход", style = MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.height(24.dp))
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .background(MainGradient, RoundedCornerShape(24.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(40.dp)
+                )
+            }
 
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth()
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                "С возвращением",
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Black,
+                color = MaterialTheme.colorScheme.surfaceVariant
             )
+            Text(
+                "Войдите, чтобы продолжить",
+                color = TextSecondary
+            )
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            var email by remember { mutableStateOf("") }
+            var password by remember { mutableStateOf("") }
+
+            JuicyTextField(value = email, onValueChange = { email = it }, label = "Email", modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
@@ -76,28 +77,29 @@ fun AuthScreen(
                 onValueChange = { password = it },
                 label = { Text("Пароль") },
                 visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = BrandPrimary,
+                    unfocusedBorderColor = OutlineLight,
+                    focusedContainerColor = SurfaceWhite,
+                    unfocusedContainerColor = SurfaceLight
+                )
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            JuicyButton(
+                text = "Войти",
+                onClick = { viewModel.login(email, password) },
                 modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
-                onClick = { onLoginClick(email, password) },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = uiState !is AuthUiState.Loading
-            ) {
-                Text("Войти")
+            TextButton(onClick = navigateToRegister) {
+                Text("Нет аккаунта? Создать", color = BrandPrimary, fontWeight = FontWeight.Bold)
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TextButton(onClick = onRegisterClick) {
-                Text("Нет аккаунта? Зарегистрироваться")
-            }
-        }
-
-        if (uiState is AuthUiState.Loading) {
-            CircularProgressIndicator()
         }
     }
 }

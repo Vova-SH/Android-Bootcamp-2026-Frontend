@@ -5,6 +5,6 @@ import ru.sicampus.bootcamp2026.domain.repository.UserRepository
 
 class GetUserProfileUseCase(private val repository: UserRepository) {
     suspend operator fun invoke(): Result<UserDto> {
-        return repository.getCurrentUser()
+        return repository.getUserProfile()
     }
 }

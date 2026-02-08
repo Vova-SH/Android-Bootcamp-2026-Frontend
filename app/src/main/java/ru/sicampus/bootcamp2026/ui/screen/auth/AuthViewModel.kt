@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.data.dto.UserRegisterDto
 import ru.sicampus.bootcamp2026.domain.usecase.LoginUseCase
 import ru.sicampus.bootcamp2026.domain.usecase.RegisterUseCase
+
 class AuthViewModel(
     private val loginUseCase: LoginUseCase,
     private val registerUseCase: RegisterUseCase
@@ -19,18 +20,23 @@ class AuthViewModel(
     fun login(email: String, pass: String) {
         _uiState.value = AuthUiState.Loading
         viewModelScope.launch {
-            loginUseCase(email, pass)
+            loginUseCase(email.trim(), pass.trim())
                 .onSuccess { _uiState.value = AuthUiState.Success(it) }
-                .onFailure { _uiState.value = AuthUiState.Error("Login failed: ${it.message}") }
+                .onFailure { _uiState.value = AuthUiState.Error("Ошибка входа: ${it.message}") }
         }
     }
 
     fun register(dto: UserRegisterDto) {
         _uiState.value = AuthUiState.Loading
         viewModelScope.launch {
-            registerUseCase(dto)
+            val cleanDto = dto.copy(
+                email = dto.email.trim(),
+                firstName = dto.firstName.trim(),
+                secondName = dto.secondName.trim()
+            )
+            registerUseCase(cleanDto)
                 .onSuccess { _uiState.value = AuthUiState.Success(it) }
-                .onFailure { _uiState.value = AuthUiState.Error("Registration failed: ${it.message}") }
+                .onFailure { _uiState.value = AuthUiState.Error("Ошибка регистрации: ${it.message}") }
         }
     }
 

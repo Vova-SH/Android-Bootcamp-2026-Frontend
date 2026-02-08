@@ -9,5 +9,6 @@ data class UserDto(
     val secondName: String,
     val patronymic: String? = null,
     val email: String,
-    val position: String? = null
+    val position: String? = null,
+    val createdAt: String? = null
 )

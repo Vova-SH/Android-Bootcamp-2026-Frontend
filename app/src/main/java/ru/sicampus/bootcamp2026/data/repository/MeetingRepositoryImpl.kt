@@ -2,8 +2,8 @@ package ru.sicampus.bootcamp2026.data.repository
 
 import ru.sicampus.bootcamp2026.data.dto.MeetingDto
 import ru.sicampus.bootcamp2026.data.dto.MeetingInputDto
+import ru.sicampus.bootcamp2026.data.dto.MemberDto
 import ru.sicampus.bootcamp2026.data.source.MeetingService
-import ru.sicampus.bootcamp2026.data.source.SessionManager
 import ru.sicampus.bootcamp2026.domain.model.Meeting
 import ru.sicampus.bootcamp2026.domain.repository.MeetingRepository
 
@@ -19,6 +19,33 @@ class MeetingRepositoryImpl : MeetingRepository {
         }
     }
 
+    override suspend fun getSchedule(): Result<List<Meeting>> {
+        return try {
+            val meetings = service.getSchedule()
+            Result.success(meetings.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getMeetingById(id: Long): Result<Meeting> {
+        return try {
+            val dto = service.getMeetingById(id)
+            Result.success(dto.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getMeetingMembers(id: Long): Result<List<MemberDto>> {
+        return try {
+            val members = service.getMeetingMembers(id)
+            Result.success(members)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun createMeeting(
         title: String,
         description: String,
@@ -27,7 +54,6 @@ class MeetingRepositoryImpl : MeetingRepository {
         duration: Int
     ): Result<Unit> {
         return try {
-            val userId = SessionManager.currentUserId ?: throw IllegalStateException("User not logged in")
             val input = MeetingInputDto(
                 start = start,
                 duration = duration,
@@ -35,7 +61,30 @@ class MeetingRepositoryImpl : MeetingRepository {
                 theme = title,
                 description = description
             )
-            service.createMeeting(userId, input)
+            service.createMeeting(input)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateMeeting(
+        id: Long,
+        title: String,
+        description: String,
+        place: String,
+        start: String,
+        duration: Int
+    ): Result<Unit> {
+        return try {
+            val input = MeetingInputDto(
+                start = start,
+                duration = duration,
+                place = place,
+                theme = title,
+                description = description
+            )
+            service.updateMeeting(id, input)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -52,15 +101,20 @@ class MeetingRepositoryImpl : MeetingRepository {
     }
 
     private fun MeetingDto.toDomain(): Meeting {
-        val creatorName = creator?.let { "${it.firstName} ${it.secondName}" } ?: "Unknown"
+        val creatorName = creator?.let { "${it.firstName} ${it.secondName}" } ?: "Неизвестно"
+        val creatorId = creator?.id ?: -1L
+
+        val effectiveTitle = theme?.takeIf { it.isNotBlank() } ?: "Без темы"
+
         return Meeting(
             id = id,
-            title = theme ?: "Без темы",
+            title = effectiveTitle,
             description = description,
-            location = place ?: "Место не указано",
-            startTime = start.replace("T", " "),
+            location = place,
+            startTime = start,
             durationMinutes = duration,
-            creatorName = creatorName
+            creatorName = creatorName,
+            creatorId = creatorId
         )
     }
 }

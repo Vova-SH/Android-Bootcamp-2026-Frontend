@@ -1,44 +1,69 @@
 package ru.sicampus.bootcamp2026.data.source
 
 import io.ktor.client.call.body
-import io.ktor.client.request.delete
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.parameter
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.HttpHeaders
+import io.ktor.client.request.*
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.isSuccess
 import ru.sicampus.bootcamp2026.data.dto.MeetingDto
 import ru.sicampus.bootcamp2026.data.dto.MeetingInputDto
+import ru.sicampus.bootcamp2026.data.dto.MemberDto
 import ru.sicampus.bootcamp2026.data.dto.SpringPageDto
 
 class MeetingService {
     private val client = Network.client
 
     suspend fun getAllMeetings(): List<MeetingDto> {
-        return client.get("/api/meeting/") {
-            SessionManager.authHeader?.let { header(HttpHeaders.Authorization, it) }
-        }.body()
+        return client.get("/api/meeting/").body()
     }
 
     suspend fun getMeetingsPaginated(page: Int, size: Int): SpringPageDto<MeetingDto> {
         return client.get("/api/meeting/paginated") {
-            SessionManager.authHeader?.let { header(HttpHeaders.Authorization, it) }
             parameter("page", page)
             parameter("size", size)
         }.body()
     }
 
-    suspend fun createMeeting(userId: Long, input: MeetingInputDto): MeetingDto {
-        return client.post("/api/meeting/book/$userId") {
-            SessionManager.authHeader?.let { header(HttpHeaders.Authorization, it) }
+    suspend fun getSchedule(): List<MeetingDto> {
+        return client.get("/api/meeting/schedule").body()
+    }
+
+    suspend fun getMeetingById(id: Long): MeetingDto {
+        return client.get("/api/meeting/$id").body()
+    }
+
+    suspend fun getMeetingMembers(id: Long): List<MemberDto> {
+        return client.get("/api/meeting/$id/members").body()
+    }
+
+    suspend fun createMeeting(input: MeetingInputDto): MeetingDto {
+        val response = client.post("/api/meeting/book") {
             setBody(input)
-        }.body()
+        }
+        if (response.status.isSuccess()) {
+            return response.body()
+        } else {
+            val errorText = response.bodyAsText()
+            throw Exception(errorText.ifBlank { "Ошибка создания: ${response.status.value}" })
+        }
+    }
+
+    suspend fun updateMeeting(id: Long, input: MeetingInputDto): MeetingDto {
+        val response = client.put("/api/meeting/$id") {
+            setBody(input)
+        }
+        if (response.status.isSuccess()) {
+            return response.body()
+        } else {
+            val errorText = response.bodyAsText()
+            throw Exception(errorText.ifBlank { "Ошибка обновления: ${response.status.value}" })
+        }
     }
 
     suspend fun deleteMeeting(meetingId: Long) {
-        client.delete("/api/meeting/$meetingId") {
-            SessionManager.authHeader?.let { header(HttpHeaders.Authorization, it) }
+        val response = client.delete("/api/meeting/$meetingId")
+        if (!response.status.isSuccess()) {
+            val errorText = response.bodyAsText()
+            throw Exception(errorText.ifBlank { "Ошибка удаления: ${response.status.value}" })
         }
     }
 }

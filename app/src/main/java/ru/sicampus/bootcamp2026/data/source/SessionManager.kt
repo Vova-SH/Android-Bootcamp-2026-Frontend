@@ -16,5 +16,17 @@ object SessionManager {
         currentUserId = null
     }
 
+    fun tryRestoreSession(): Boolean {
+        val token = TokenStorage.accessToken
+        val userId = TokenStorage.userId
+
+        if (token != null && userId != null && userId != -1L) {
+            authHeader = token
+            currentUserId = userId
+            return true
+        }
+        return false
+    }
+
     fun isLoggedIn(): Boolean = authHeader != null
 }
