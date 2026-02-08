@@ -16,6 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -23,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.sicampus.bootcamp2026.ui.theme.LightGreen
+import androidx.compose.foundation.Image
 
 /**
  * Экран профиля пользователя
@@ -194,12 +197,25 @@ private fun ProfileContent(
                 .background(LightGreen.copy(alpha = 0.3f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Avatar",
-                tint = LightGreen,
-                modifier = Modifier.size(64.dp)
-            )
+            if (state.avatarLoadedBitmap != null) {
+                // Показываем загруженное изображение
+                Image(
+                    bitmap = state.avatarLoadedBitmap.asImageBitmap(),
+                    contentDescription = "Avatar",
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                // Показываем иконку по умолчанию
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Avatar",
+                    tint = LightGreen,
+                    modifier = Modifier.size(64.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -304,17 +320,30 @@ private fun EditProfileFields(
         colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = Color.White,
             unfocusedTextColor = Color.White,
-            focusedBorderColor = LightGreen,
-            unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
-            cursorColor = LightGreen
+            focusedBorderColor = if (state.avatarLoadingError != null) Color.Red else LightGreen,
+            unfocusedBorderColor = if (state.avatarLoadingError != null) Color.Red else Color.White.copy(alpha = 0.5f),
+            cursorColor = LightGreen,
+            errorBorderColor = Color.Red
         ),
+        isError = state.avatarLoadingError != null,
+        supportingText = state.avatarLoadingError?.let { { Text(it, color = Color.Red, maxLines = 2) } },
         singleLine = true,
         leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Image,
-                contentDescription = null,
-                tint = LightGreen
-            )
+            if (state.avatarLoadedBitmap != null) {
+                // Показываем зеленую галочку если изображение успешно загружено
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Image loaded",
+                    tint = Color.Green,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Image,
+                    contentDescription = null,
+                    tint = LightGreen
+                )
+            }
         }
     )
 

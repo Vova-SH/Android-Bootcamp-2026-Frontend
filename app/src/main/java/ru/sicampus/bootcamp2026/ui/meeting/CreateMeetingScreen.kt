@@ -1,5 +1,6 @@
 package ru.sicampus.bootcamp2026.ui.meeting
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,9 +14,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.LocalDate
@@ -119,13 +123,16 @@ fun CreateMeetingScreen(
     if (state.error != null) {
         AlertDialog(
             onDismissRequest = { viewModel.onEvent(CreateMeetingUiEvent.DismissError) },
-            title = { Text("Error") },
-            text = { Text(state.error!!) },
+            title = { Text("Error", color = Color.White) },
+            text = { Text(state.error!!, color = Color.White.copy(alpha = 0.9f)) },
+            containerColor = Color(0xFF1E1E1E),
+            titleContentColor = Color.White,
+            textContentColor = Color.White,
             confirmButton = {
                 TextButton(
                     onClick = { viewModel.onEvent(CreateMeetingUiEvent.DismissError) }
                 ) {
-                    Text("OK")
+                    Text("OK", color = LightGreen, fontWeight = FontWeight.Bold)
                 }
             }
         )
@@ -589,28 +596,80 @@ private fun DatePickerField(
             initialSelectedDateMillis = selectedDate.toEpochDay() * 24 * 60 * 60 * 1000
         )
 
-        DatePickerDialog(
+        Dialog(
             onDismissRequest = { showDialog = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            val epochDay = millis / (24 * 60 * 60 * 1000)
-                            onDateSelected(LocalDate.ofEpochDay(epochDay))
-                        }
-                        showDialog = false
-                    }
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .clip(RoundedCornerShape(24.dp)),
+                color = Color(0xFF1E1E1E),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF1E1E1E))
+                        .clip(RoundedCornerShape(24.dp))
                 ) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("Cancel")
+                    MaterialTheme(
+                        colorScheme = MaterialTheme.colorScheme.copy(
+                            onSurface = Color.White,
+                            onSurfaceVariant = Color.White.copy(alpha = 0.6f),
+                            primary = LightGreen,
+                            surface = Color(0xFF1E1E1E)
+                        )
+                    ) {
+                        DatePicker(
+                            state = datePickerState,
+                            modifier = Modifier.background(Color(0xFF1E1E1E)),
+                            colors = DatePickerDefaults.colors(
+                                containerColor = Color(0xFF1E1E1E),
+                                titleContentColor = LightGreen,
+                                headlineContentColor = Color.White,
+                                weekdayContentColor = LightGreen,
+                                subheadContentColor = Color.White,
+                                yearContentColor = LightGreen,
+                                currentYearContentColor = Color.White,
+                                selectedYearContentColor = LightGreen,
+                                selectedYearContainerColor = LightGreen,
+                                dayContentColor = Color.White,
+                                selectedDayContainerColor = LightGreen,
+                                selectedDayContentColor = Color.Black,
+                                todayContentColor = LightGreen,
+                                todayDateBorderColor = LightGreen,
+                                dividerColor = Color.White.copy(alpha = 0.1f)
+                            )
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFF1E1E1E))
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End)
+                    ) {
+                        TextButton(
+                            onClick = { showDialog = false }
+                        ) {
+                            Text("Cancel", color = Color.White.copy(alpha = 0.7f), fontWeight = FontWeight.Bold)
+                        }
+                        TextButton(
+                            onClick = {
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    val epochDay = millis / (24 * 60 * 60 * 1000)
+                                    onDateSelected(LocalDate.ofEpochDay(epochDay))
+                                }
+                                showDialog = false
+                            }
+                        ) {
+                            Text("OK", color = LightGreen, fontWeight = FontWeight.Bold)
+                        }
+                    }
                 }
             }
-        ) {
-            DatePicker(state = datePickerState)
         }
     }
 }

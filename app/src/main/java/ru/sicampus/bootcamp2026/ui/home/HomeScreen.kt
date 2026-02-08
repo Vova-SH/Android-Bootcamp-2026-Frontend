@@ -1,5 +1,6 @@
 package ru.sicampus.bootcamp2026.ui.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,7 +12,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -83,8 +87,31 @@ fun HomeScreen(
                     onClick = onNavigateToProfile,
                     modifier = Modifier.size(56.dp)
                 ) {
-                    Surface(shape = CircleShape, color = Color.Gray) {
-                        Icon(Icons.Default.Person, null, modifier = Modifier.padding(8.dp))
+                    Surface(
+                        shape = CircleShape,
+                        color = Color.Gray,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                    ) {
+                        val avatarBitmap = state.avatarBitmap
+                        if (avatarBitmap != null) {
+                            Image(
+                                bitmap = avatarBitmap.asImageBitmap(),
+                                contentDescription = "Avatar",
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.Person,
+                                null,
+                                modifier = Modifier.padding(8.dp),
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
             }
@@ -113,7 +140,7 @@ fun HomeScreen(
 
             // Секция приглашений
             Text(
-                text = "My invitations",
+                text = "My meetings",
                 color = GreenLight,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = sidePadding),
@@ -172,17 +199,19 @@ fun HomeScreen(
 
                         DropdownMenu(
                             expanded = isSortExpanded,
-                            onDismissRequest = { isSortExpanded = false }
+                            onDismissRequest = { isSortExpanded = false },
+                            containerColor = Color(0xFF2A2A2A),
+                            shape = RoundedCornerShape(16.dp)
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Increasing") },
+                                text = { Text("Increasing", color = Color.White) },
                                 onClick = {
                                     viewModel.onEvent(HomeUiEvent.ChangeSortOrder(SortOrder.INCREASING))
                                     isSortExpanded = false
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Decreasing") },
+                                text = { Text("Decreasing", color = Color.White) },
                                 onClick = {
                                     viewModel.onEvent(HomeUiEvent.ChangeSortOrder(SortOrder.DECREASING))
                                     isSortExpanded = false
