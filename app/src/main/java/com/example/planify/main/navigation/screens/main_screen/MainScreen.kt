@@ -28,8 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.planify.core.ui.pager_router_screen.PagerRouterScreen
 import com.example.planify.core.ui.pager_router_screen.rememberPagerRouterScreenState
+import com.example.planify.main.navigation.screens.chat_screen.ChatScreen
 import com.example.planify.main.navigation.screens.create_meeting_screen.components.create_meeting_floating_dialog.CreateMeetingDialog
 import com.example.planify.main.navigation.screens.inbox_screen.ui.InboxView
 import com.example.planify.main.navigation.screens.main_screen.components.BottomNavBar
@@ -41,7 +43,9 @@ import com.example.planify.main.navigation.screens.main_screen.views.profile.ui.
 fun MainScreenBox(
     onSettings: () -> Unit,
     onCreateClick: () -> Unit,
-    onEditProfileClick: () -> Unit
+    onEditProfileClick: () -> Unit,
+    onNotifications: () -> Unit,
+    navController: NavController
 ) {
     val colors = MaterialTheme.colorScheme
 
@@ -55,7 +59,9 @@ fun MainScreenBox(
             onSettings = onSettings,
             onOpen = { opened = true },
             viewModel = hiltViewModel(),
-            onEditProfileClick = onEditProfileClick
+            onEditProfileClick = onEditProfileClick,
+            onNotifications = onNotifications,
+            navController = navController
         )
 
         AnimatedVisibility(
@@ -104,11 +110,13 @@ private fun MainScreen(
     onSettings: () -> Unit,
     onOpen: () -> Unit,
     onEditProfileClick: () -> Unit,
+    onNotifications: () -> Unit,
+    navController: NavController,
     viewModel: MainScreenViewModel
 ) {
     val router = rememberPagerRouterScreenState(
         routes = MainScreenRoute.routes,
-        startRoute = MainScreenRoute.Inbox // <-------
+        startRoute = MainScreenRoute.Home // <-------
     )
     val colors = MaterialTheme.colorScheme
 
@@ -119,7 +127,8 @@ private fun MainScreen(
             TopBar(
                 pagerRouter = router,
                 monthTitle = monthTitle,
-                onSettings = onSettings
+                onSettings = onSettings,
+                onNotifications = onNotifications
             )
         },
         bottomBar = {
@@ -136,18 +145,24 @@ private fun MainScreen(
         ) {
             screen(MainScreenRoute.Home) {
                 HomeView(
+                    navController = navController,
                     scaffoldPadding = padding,
                     setMonthTitle = { monthTitle = it }
                 )
             }
-            screen(MainScreenRoute.Chat) { Screen() }
+            screen(MainScreenRoute.Chat) {
+                ChatScreen(
+                    scaffoldPadding = padding
+                )
+            }
             screen(MainScreenRoute.Inbox) { InboxView(
                 scaffoldPadding = padding
             ) }
             screen(MainScreenRoute.Profile) {
                 ProfileView(
                     scaffoldPadding = padding,
-                    onEditClick = onEditProfileClick
+                    onEditClick = onEditProfileClick,
+                    navController = navController
                 )
             }
         }

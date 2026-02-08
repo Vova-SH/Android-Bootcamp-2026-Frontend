@@ -10,4 +10,5 @@ val Context.settingsDataStore by preferencesDataStore(name = "settings")
 object SettingsPreferences {
     val NOTIFICATIONS = booleanPreferencesKey("notifications")
     val THEME = stringPreferencesKey("theme_id")
+    val IS_FIRST_START = booleanPreferencesKey("is_first_start")
 }

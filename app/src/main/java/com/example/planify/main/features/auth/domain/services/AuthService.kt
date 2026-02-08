@@ -6,6 +6,7 @@ import com.example.planify.main.features.auth.domain.entities.AuthState
 import com.example.planify.main.features.auth.domain.entities.AuthTokenPair
 import com.example.planify.main.features.auth.domain.entities.LoginResult
 import com.example.planify.main.features.auth.domain.entities.UserPrivate
+import com.example.planify.main.features.auth.domain.schemas.RegisterUserSchema
 import kotlinx.coroutines.flow.StateFlow
 
 interface AuthService {
@@ -15,7 +16,7 @@ interface AuthService {
 
     fun isAuthenticated(): Boolean
 
-    suspend fun register(username: String, email: String, password: String): Result<LoginResult>
+    suspend fun register(shema: RegisterUserSchema): Result<LoginResult>
     suspend fun login(email: String, password: String): Result<LoginResult>
     suspend fun refresh(): Result<Unit>
 

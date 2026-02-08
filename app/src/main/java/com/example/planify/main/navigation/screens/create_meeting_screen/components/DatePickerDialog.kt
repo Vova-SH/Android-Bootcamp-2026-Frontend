@@ -1,13 +1,15 @@
-import android.app.DatePickerDialog
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import java.time.*
-import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalQueries.zone
-import java.util.Locale
+package com.example.planify.main.navigation.screens.create_meeting_screen.components
+
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,21 +31,21 @@ fun DatePickerDialog(
 
     DatePickerDialog(
         onDismissRequest = onDismiss,
-            confirmButton = {
-                TextButton(
-                    enabled = pickerState.selectedDateMillis != null,
-                    onClick = {
-                        val millis = pickerState.selectedDateMillis ?: return@TextButton
-                        val picked = Instant.ofEpochMilli(millis).atZone(zoneId).toLocalDate()
-                        onConfirm(picked)
-                    }
-                ) { Text("ОК") }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text("Отмена")
+        confirmButton = {
+            TextButton(
+                enabled = pickerState.selectedDateMillis != null,
+                onClick = {
+                    val millis = pickerState.selectedDateMillis ?: return@TextButton
+                    val picked = Instant.ofEpochMilli(millis).atZone(zoneId).toLocalDate()
+                    onConfirm(picked)
                 }
+            ) { Text("ОК") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Отмена")
             }
+        }
     ) {
         DatePicker(state = pickerState)
     }

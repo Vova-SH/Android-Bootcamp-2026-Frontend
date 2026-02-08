@@ -18,8 +18,8 @@ data class MeetingInviteDTO(
     @SerialName("senderId")
     val senderId: Long,
 
-    @SerialName("targetUserId")
-    val targetUserId: Long,
+    @SerialName("targetId")
+    val targetId: Long,
 
     @SerialName("status")
     val status: MeetingInviteStatus,
@@ -36,7 +36,7 @@ data class MeetingInviteDTO(
         uuid = uuid,
         meetingId = meetingId,
         senderId = senderId,
-        targetUserId = targetUserId,
+        targetId = targetId,
         status = status,
         createdAt = createdAt,
         updatedAt = updatedAt

@@ -112,9 +112,44 @@
 
     <string name="incoming">Входящие</string>
     <string name="sent">Отправленные</string>
+    <string name="sent_one">Отправлено</string>
     <string name="waiting_for_response">Ожидают ответа</string>
     <string name="accept">Принять</string>
     <string name="decline">Отклонить</string>
+    <string name="ok">ok</string>
+    <string name="CANCEL">ОТМЕНА</string>
+    <string name="OK">OK</string>
 
+    <string name="authentication_required">Требуется авторизация</string>
+    <string name="authenticate_again">Пожалуйста, авторизируйтесь снова</string>
+
+
+    <string name="smn_invited_you_to_meeting">пригласил(а) вас на встречу</string>
+    <string name="smn_accepted_your_invite">принял приглашение на встречу</string>
+    <string name="was_updated">была обновлена</string>
+    <string name="meeting">Встреча</string>
+    <string name="suggest_reschedule_meeting">предлагает перенести встречу</string>
+
+    <string name="welcome">Добро пожаловать</string>
+    <string name="register_to_start">Зарегистрируйтесь для начала работы</string>
+
+    <string name="register">Начать</string>
+
+    <string name="firstName">Имя</string>
+    <string name="firstName_placeholder">Введите имя</string>
+
+    <string name="lastName">Фамилия</string>
+    <string name="lastName_placeholder">Введите фалимию</string>
+
+    <string name="position_placeholder">Введите должность</string>
+
+    <string name="username_reg">Имя пользователя</string>
+    <string name="username_placeholder">Введите имя пользователя</string>
+
+    <string name="repeat_password">Подтвердите пароль</string>
+    <string name="repeat_password_placeholder">Повторите пароль</string>
+
+    <string name="cant_create">Невозжно создать встречу</string>
+    <string name="cant_create_placeholder">Выберите время в настоящем</string>
 
 </resources>

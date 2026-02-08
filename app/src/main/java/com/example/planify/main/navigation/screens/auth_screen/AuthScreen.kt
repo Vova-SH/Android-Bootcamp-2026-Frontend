@@ -67,6 +67,8 @@ import com.adamglin.phosphoricons.regular.StarFour
 import com.example.planify.R
 import com.example.planify.main.common.themes.Locals
 import com.example.planify.main.common.ui.withShapeBackground
+import com.example.planify.main.navigation.AppRoute
+import com.example.planify.main.navigation.screens.backgrounds.CloudyBackground
 import kotlin.math.max
 
 @Composable
@@ -99,7 +101,9 @@ private fun AuthScreen(
 
     LaunchedEffect(uiState) {
         viewModel.navigation.collect { route ->
-            navHostController.navigate(route.route)
+            navHostController.navigate(route.route) {
+                popUpTo(AppRoute.Auth.route) { inclusive = true }
+            }
         }
     }
 
@@ -294,7 +298,7 @@ private fun LabeledTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .withShapeBackground(
-                    color = colors.background,
+                    color = colors.primaryContainer,
                     shape = shape
                 ),
             value = value,
@@ -328,7 +332,7 @@ private fun LabeledTextField(
     val colors = MaterialTheme.colorScheme
     val shape = Locals.shapes.mediumShape
 
-    var isVisible by remember { mutableStateOf(true) }
+    var isVisible by remember { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
 
@@ -385,107 +389,4 @@ private fun LabeledTextField(
                 else PasswordVisualTransformation()
         )
     }
-}
-
-private data class CloudSpec(
-    val yFrac: Float,     // 0..1
-    val xFrac: Float,     // 0..1 (стартовая позиция)
-    val scale: Float,
-    val alpha: Float,
-    val speed: Float      // px/sec (примерно)
-)
-
-@Composable
-fun CloudyBackground(
-    modifier: Modifier = Modifier,
-    cloudColor: Color = Color.White,
-    tintColor: Color = Color(0xFFEEF4FF), // лёгкий холодный оттенок фона
-    animate: Boolean = true
-) {
-    val clouds = remember {
-        listOf(
-            CloudSpec(yFrac = 0.18f, xFrac = 0.15f, scale = 1.10f, alpha = 0.28f, speed = 12f),
-            CloudSpec(yFrac = 0.28f, xFrac = 0.75f, scale = 0.95f, alpha = 0.22f, speed = 9f),
-            CloudSpec(yFrac = 0.58f, xFrac = 0.10f, scale = 1.25f, alpha = 0.18f, speed = 7f),
-            CloudSpec(yFrac = 0.72f, xFrac = 0.82f, scale = 1.05f, alpha = 0.16f, speed = 6f),
-            CloudSpec(yFrac = 0.88f, xFrac = 0.40f, scale = 1.40f, alpha = 0.14f, speed = 5f),
-        )
-    }
-
-    val t = if (animate) {
-        val tr = rememberInfiniteTransition(label = "clouds")
-        tr.animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 60000, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart
-            ),
-            label = "t"
-        ).value
-    } else 0f
-
-    Canvas(modifier = modifier.fillMaxSize()) {
-        // общий фон-тинт
-        drawRect(color = tintColor)
-
-        val w = size.width
-        val h = size.height
-
-        clouds.forEach { c ->
-            // базовые размеры облака от ширины экрана
-            val baseCloudW = w * 0.42f * c.scale
-            val baseCloudH = baseCloudW * 0.36f
-
-            val y = h * c.yFrac
-
-            // простая “плавающая” анимация по X с wrap-around
-            val drift = if (animate) (t * c.speed * 600f) else 0f // грубо: 60 секунд цикл
-            val startX = w * c.xFrac
-            val xWrapped = ((startX + drift) % (w + baseCloudW)) - baseCloudW * 0.5f
-            val x = max(-baseCloudW, xWrapped)
-
-            drawCloud(
-                center = Offset(x, y),
-                cloudW = baseCloudW,
-                cloudH = baseCloudH,
-                color = cloudColor
-            )
-        }
-    }
-}
-
-private fun DrawScope.drawCloud(
-    center: Offset,
-    cloudW: Float,
-    cloudH: Float,
-    color: Color
-) {
-    // “мягкость”: рисуем 2 слоя (чуть больше и прозрачнее + основной)
-    fun layer(scale: Float, aMul: Float) {
-        val w = cloudW * scale
-        val h = cloudH * scale
-        val left = center.x - w / 2f
-        val top = center.y - h / 2f
-
-        // основание (скруглённый прямоугольник)
-        drawRoundRect(
-            color = color.copy(alpha = color.alpha * aMul),
-            topLeft = Offset(left, top + h * 0.28f),
-            size = Size(w, h * 0.62f),
-            cornerRadius = CornerRadius(h, h)
-        )
-
-        // “пузырьки” сверху
-        val r1 = h * 0.38f
-        val r2 = h * 0.48f
-        val r3 = h * 0.34f
-
-        drawCircle(color = color.copy(alpha = color.alpha * aMul), radius = r1, center = Offset(left + w * 0.30f, top + h * 0.52f))
-        drawCircle(color = color.copy(alpha = color.alpha * aMul), radius = r2, center = Offset(left + w * 0.50f, top + h * 0.42f))
-        drawCircle(color = color.copy(alpha = color.alpha * aMul), radius = r3, center = Offset(left + w * 0.70f, top + h * 0.54f))
-    }
-
-    layer(scale = 1.10f, aMul = 0.65f)
-    layer(scale = 1.00f, aMul = 1.00f)
 }

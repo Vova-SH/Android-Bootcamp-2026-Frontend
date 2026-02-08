@@ -22,6 +22,7 @@ fun NotificationIcon(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+
     val colors = MaterialTheme.colorScheme
     val gradient = Locals.gradients
 

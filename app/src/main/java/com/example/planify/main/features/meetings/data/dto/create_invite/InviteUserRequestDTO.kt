@@ -7,6 +7,6 @@ import kotlinx.serialization.Serializable
 data class InviteUserRequestDTO(
     @SerialName("meetingId")
     val meetingId: Long,
-    @SerialName("targetUserId")
-    val targetUserId: Long
+    @SerialName("targetId")
+    val targetId: Long
 )

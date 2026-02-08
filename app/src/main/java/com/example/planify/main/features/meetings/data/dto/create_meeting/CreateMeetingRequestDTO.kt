@@ -21,8 +21,5 @@ data class CreateMeetingRequestDTO(
     val startsAt: LocalDateTime,
 
     @SerialName("duration")
-    val duration: Int,
-
-    @SerialName("inviteUserIds")
-    val inviteUserIds: List<Long>? = null
+    val duration: Int
 )

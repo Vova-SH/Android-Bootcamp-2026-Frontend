@@ -23,8 +23,8 @@ open class AuthenticatedApiClient @Inject constructor(
         return ApiClientMiddlewareChain.Builder<ApiResponse<T>>()  // TODO: Use InsertBefore and InsertAfter
             .add(ktorMiddleware)
             .add(authMiddleware)
+            .add(retryRequestMiddleware)
             .add(ApiResponseParseMiddleware<T>())
-            .add(exceptionDetailMiddleware)
             .add(autoRefreshTokensMiddleware)
             .add(appCodeValidatorMiddleware)
             .build()

@@ -6,8 +6,8 @@ import com.example.planify.core.network.middleware.ApiClientMiddlewareChain
 import com.example.planify.main.common.entities.ApiResponse
 import com.example.planify.main.common.network.middlewares.ApiResponseParseMiddleware
 import com.example.planify.main.common.network.middlewares.AppCodeValidatorMiddleware
-import com.example.planify.main.common.network.middlewares.ExceptionDetailMiddleware
 import com.example.planify.main.common.network.middlewares.KtorExecuteMiddleware
+import com.example.planify.main.common.network.middlewares.RetryRequestMiddleware
 import com.example.planify.main.common.network.policies.app_code.AppCodeProcessingPolicy
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
@@ -21,16 +21,13 @@ open class ApiClient(
 ) {
     protected val ktorMiddleware = KtorExecuteMiddleware(httpClient)
     protected val appCodeValidatorMiddleware = AppCodeValidatorMiddleware(appCodeProcessingPolicy)
-    protected val exceptionDetailMiddleware = ExceptionDetailMiddleware()
+    protected val retryRequestMiddleware = RetryRequestMiddleware(3)
 
     open fun <T> setupMiddlewareChain(): ApiClientMiddlewareChain<ApiResponse<T>> {
-        // 1. OUTEST Layer: Handles Retries / Validates.
-        // 2. MIDDLE Layer: Handles Parsing.
-        // 3. INNER Layer: Handles Networking.
         return ApiClientMiddlewareChain.Builder<ApiResponse<T>>()
             .add(ktorMiddleware)
+            .add(retryRequestMiddleware)
             .add(ApiResponseParseMiddleware<T>())
-            .add(exceptionDetailMiddleware)
             .add(appCodeValidatorMiddleware)
             .build()
     }

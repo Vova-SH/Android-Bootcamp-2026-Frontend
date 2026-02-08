@@ -5,21 +5,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.planify.main.features.actions.domain.entities.Action
 import com.example.planify.main.features.actions.domain.services.ActionsService
+import com.example.planify.main.features.actions.domain.utils.ActionDataParser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(
-    actionsService: ActionsService
+    private val actionsService: ActionsService
 ) : ViewModel() {
-    init {
-        viewModelScope.launch {
-            actionsService.actionsFlow.collect(::onAction)
-        }
-    }
-
-    fun onAction(action: Action<*>) {
-        Log.i("Actions", "${action.type}: ${action.uuid}")
-    }
+//    init {
+//        viewModelScope.launch {
+//            actionsService.actionsFlow.collect(::onAction)
+//        }
+//    }
+//
+//    @Suppress("UNCHECKED_CAST")
+//    fun onAction(action: Action<*>) {
+//        Log.i("Actions", "${action.type}: ${action.id}")
+//    }
 }

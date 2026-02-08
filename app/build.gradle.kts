@@ -15,6 +15,7 @@ plugins {
     kotlin("plugin.serialization") version "2.2.10"
 
     id("kotlin-kapt")
+    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
 }
 
@@ -79,6 +80,11 @@ kapt {
 }
 
 dependencies {
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
     // Google Tink
     implementation(libs.tink.android)
 

@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.adamglin.PhosphorIcons
 import com.adamglin.phosphoricons.Regular
@@ -52,6 +53,7 @@ import com.example.planify.R
 import com.example.planify.main.common.themes.Locals
 import com.example.planify.main.features.auth.domain.entities.UserPrivate
 import com.example.planify.main.features.profiles.domain.entities.Profile
+import com.example.planify.main.navigation.AppRoute
 import com.example.planify.main.navigation.screens.fixed_screens.ErrorScreen
 import com.example.planify.main.navigation.screens.main_screen.views.profile.ProfileViewModel
 import com.example.planify.main.navigation.screens.main_screen.views.profile.UIState
@@ -60,12 +62,14 @@ import com.example.planify.main.navigation.screens.main_screen.views.profile.com
 @Composable
 fun ProfileView(
     scaffoldPadding: PaddingValues,
-    onEditClick: () -> Unit
+    onEditClick: () -> Unit,
+    navController: NavController
 ) {
     ProfileView(
         viewModel = hiltViewModel(),
         scaffoldPadding = scaffoldPadding,
-        onEditClick = onEditClick
+        onEditClick = onEditClick,
+        navController = navController
     )
 }
 
@@ -73,9 +77,12 @@ fun ProfileView(
 private fun ProfileView(
     viewModel: ProfileViewModel,
     scaffoldPadding: PaddingValues,
-    onEditClick: () -> Unit
+    onEditClick: () -> Unit,
+    navController: NavController
 ) {
     val colors = MaterialTheme.colorScheme
+
+    val myProfile by viewModel.myProfile.collectAsState()
 
     val uiState by viewModel.uiState.collectAsState()
 

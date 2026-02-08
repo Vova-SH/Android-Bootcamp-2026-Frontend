@@ -6,7 +6,7 @@ data class MeetingInvite(
     val uuid: String,
     val meetingId: Long,
     val senderId: Long,
-    val targetUserId: Long,
+    val targetId: Long,
     val status: MeetingInviteStatus,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime

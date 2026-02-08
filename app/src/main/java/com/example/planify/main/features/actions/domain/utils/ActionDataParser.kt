@@ -14,11 +14,19 @@ class ActionDataParser {
 
     @Suppress("UNCHECKED_CAST")
     fun <T> getSerializer(type: String): KSerializer<T> {
-        return serializers[type] as KSerializer<T>
+        return serializers[type]!! as KSerializer<T>
     }
 
     fun deserialize(data: JsonElement, type: String): Any {
         return jsonCore.decodeFromJsonElement(getSerializer(type), data)
+    }
+
+    fun deserialize(data: String, type: String): Any {
+        return jsonCore.decodeFromString(getSerializer(type), data)
+    }
+
+    fun serializeJsonElement(data: JsonElement): String {
+        return jsonCore.encodeToString(data)
     }
 }
 

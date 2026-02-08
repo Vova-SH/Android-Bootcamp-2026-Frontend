@@ -2,7 +2,6 @@ package com.example.planify.main.features.auth.domain.services_impl
 
 import android.util.Log
 import com.example.planify.core.exceptions.UnauthenticatedAppError
-import com.example.planify.main.features.auth.data.local.SecuredAuthInfoStorage
 import com.example.planify.main.features.auth.domain.AuthTokenManager
 import com.example.planify.main.features.auth.domain.entities.AuthContext
 import com.example.planify.main.features.auth.domain.entities.AuthSession
@@ -13,14 +12,12 @@ import com.example.planify.main.features.auth.domain.entities.UserPrivate
 import com.example.planify.main.features.auth.domain.repositories.AuthRepository
 import com.example.planify.main.features.auth.domain.repositories.SessionsRepository
 import com.example.planify.main.features.auth.domain.repositories.UsersRepository
-import com.example.planify.main.features.auth.domain.schemas.AuthLocalInfoSchema
+import com.example.planify.main.features.auth.domain.schemas.RegisterUserSchema
 import com.example.planify.main.features.auth.domain.services.AuthService
 import jakarta.inject.Inject
 import jakarta.inject.Provider
 import jakarta.inject.Singleton
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 
@@ -29,26 +26,25 @@ class AuthServiceImpl @Inject constructor(
     private val authRepository: AuthRepository,
     private val sessionsRepositoryProvider: Provider<SessionsRepository>,
     private val usersRepositoryProvider: Provider<UsersRepository>,
-    private val securedAuthInfoStorage: SecuredAuthInfoStorage
 ) : AuthService, AuthTokenManager {
     private val sessionsRepository get() = sessionsRepositoryProvider.get()
     private val usersRepository get() = usersRepositoryProvider.get()
 
     private val refreshMutex = Mutex()
 
-    private val _authStateFlow: MutableStateFlow<AuthState> = MutableStateFlow(AuthState.Loading)
-    override val authStateFlow: StateFlow<AuthState> = _authStateFlow.asStateFlow()
+    override val authStateFlow: StateFlow<AuthState> = authRepository.authStateFlow
+
+    override fun isAuthenticated(): Boolean = authStateFlow.value is AuthState.Authenticated
 
     override suspend fun localLogout() {
-        securedAuthInfoStorage.clearAuthInfo()
-        _authStateFlow.value = AuthState.Unauthenticated
+        authRepository.localLogout()
     }
 
     override suspend fun readSavedAuthInfo() {
-        val authInfo = securedAuthInfoStorage.authInfoFlow.first()
+        val authInfo = authRepository.localAuthInfoFlow.first()
 
         if (authInfo == null) {
-            _authStateFlow.value = AuthState.Unauthenticated
+            authRepository.setAuthState(AuthState.Unauthenticated)
             return
         }
 
@@ -67,11 +63,13 @@ class AuthServiceImpl @Inject constructor(
                 authContext = fetchActualAuthContext(accessToken)
             }
 
-            _authStateFlow.value = AuthState.Authenticated(
-                context = authContext.getOrThrow(),
-                tokenPair = AuthTokenPair(
-                    accessToken = accessToken,
-                    refreshToken = refreshToken
+            authRepository.setAuthState(
+                AuthState.Authenticated(
+                    context = authContext.getOrThrow(),
+                    tokenPair = AuthTokenPair(
+                        accessToken = accessToken,
+                        refreshToken = refreshToken
+                    )
                 )
             )
         } catch (error: Exception) {
@@ -84,36 +82,24 @@ class AuthServiceImpl @Inject constructor(
         return authRepository.fetchActualAuthContext(accessToken)
     }
 
-    override fun isAuthenticated(): Boolean = authStateFlow.value is AuthState.Authenticated
-
-    override suspend fun register(username: String, email: String, password: String): Result<LoginResult> {
-        return authRepository.register(username, email, password).onSuccess { result ->
-            securedAuthInfoStorage.saveAuthInfo(
-                AuthLocalInfoSchema(
-                    accessToken = result.tokens.accessToken,
-                    refreshToken = result.tokens.refreshToken
+    override suspend fun register(shema: RegisterUserSchema): Result<LoginResult> {
+        return authRepository.register(shema).onSuccess { result ->
+            authRepository.setAuthState(
+                AuthState.Authenticated(
+                    context = result.authContext,
+                    tokenPair = result.tokens
                 )
-            )
-
-            _authStateFlow.value = AuthState.Authenticated(
-                context = result.authContext,
-                tokenPair = result.tokens
             )
         }
     }
 
     override suspend fun login(email: String, password: String): Result<LoginResult> {
         return authRepository.login(email, password).onSuccess { result ->
-            securedAuthInfoStorage.saveAuthInfo(
-                AuthLocalInfoSchema(
-                    accessToken = result.tokens.accessToken,
-                    refreshToken = result.tokens.refreshToken
+            authRepository.setAuthState(
+                AuthState.Authenticated(
+                    context = result.authContext,
+                    tokenPair = result.tokens
                 )
-            )
-
-            _authStateFlow.value = AuthState.Authenticated(
-                context = result.authContext,
-                tokenPair = result.tokens
             )
         }
     }
@@ -123,7 +109,7 @@ class AuthServiceImpl @Inject constructor(
     }
 
     override suspend fun refresh(): Result<Unit> {
-        val state = _authStateFlow.value
+        val state = authStateFlow.value
 
         if (state !is AuthState.Authenticated) return Result.failure(
             UnauthenticatedAppError("Cannot refresh tokens: unauthorized")
@@ -133,22 +119,17 @@ class AuthServiceImpl @Inject constructor(
             refreshMutex.lock()
             refreshMutex.unlock()
 
-            return if (_authStateFlow.value is AuthState.Authenticated) Result.success(Unit)
+            return if (authStateFlow.value is AuthState.Authenticated) Result.success(Unit)
             else Result.failure(UnauthenticatedAppError("Failed to refresh tokens"))
         }
 
         try {
             return refreshUsingToken(state.tokenPair.refreshToken)
                 .onSuccess { tokenPair ->
-                    securedAuthInfoStorage.saveAuthInfo(
-                        AuthLocalInfoSchema(
-                            accessToken = tokenPair.accessToken,
-                            refreshToken = tokenPair.refreshToken
+                    authRepository.setAuthState(
+                        state.copy(
+                            tokenPair = tokenPair
                         )
-                    )
-
-                    _authStateFlow.value = (_authStateFlow.value as AuthState.Authenticated).copy(
-                        tokenPair = tokenPair
                     )
                 }
                 .onFailure { error ->
@@ -189,8 +170,8 @@ class AuthServiceImpl @Inject constructor(
     }
 
     override fun getTokenPair(): AuthTokenPair {
-        if (_authStateFlow.value !is AuthState.Authenticated) throw UnauthenticatedAppError("Cannot get auth tokens: Unauthenticated")
-        return (_authStateFlow.value as AuthState.Authenticated).tokenPair
+        if (authStateFlow.value !is AuthState.Authenticated) throw UnauthenticatedAppError("Cannot get auth tokens: Unauthenticated")
+        return (authStateFlow.value as AuthState.Authenticated).tokenPair
     }
 
     override suspend fun refreshTokens(): Result<Unit> = refresh()
