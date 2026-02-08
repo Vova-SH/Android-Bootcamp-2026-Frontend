@@ -26,10 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.sicampus.bootcamp2026.ui.theme.LightGreen
 
-/*
-TODO: реализовать переход на экран встречи по клику на карточку
-  реализовать динамическое получение данных из ViewModel
- */
 @Composable
 fun HomeMeetingCard(
     title: String,
