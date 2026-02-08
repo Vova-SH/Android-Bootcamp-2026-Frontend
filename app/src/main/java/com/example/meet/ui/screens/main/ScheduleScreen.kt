@@ -3,8 +3,10 @@ package com.example.meet.ui.screens.main
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -85,6 +87,7 @@ sealed class ScheduleUiState {
 @Composable
 fun ScheduleScreen(navController: NavHostController) {
     val ds = remember { DataLocator.userInfoDataSource }
+    val invDs = remember { DataLocator.invitationDataSource }
     val scope = rememberCoroutineScope()
 
     var uiState by remember { mutableStateOf<ScheduleUiState>(ScheduleUiState.Loading) }
@@ -97,7 +100,14 @@ fun ScheduleScreen(navController: NavHostController) {
         scope.launch {
             try {
                 val meetings = ds.loadMeetingsForCurrentUser()
-                uiState = ScheduleUiState.Success(meetings)
+                val user = ds.loadCurrentUser()
+                val invitations = invDs.getInvitations(user.id.toInt()).getOrThrow()
+                val declinedIds = invitations
+                    .filter { it.responseStatus.equals(com.example.meet.data.dto.InvitationResponseStatus.DECLINED, true) }
+                    .map { it.meetingId }
+                    .toSet()
+                val filtered = meetings.filterNot { declinedIds.contains(it.id) }
+                uiState = ScheduleUiState.Success(filtered)
             } catch (e: Exception) {
                 uiState = ScheduleUiState.Error("Не удалось загрузить расписание: ${e.message}")
             }
@@ -195,7 +205,8 @@ fun ScheduleScreen(navController: NavHostController) {
                             ScheduleTab.DAY -> DaySchedule(
                                 meetings = state.meetings,
                                 date = selectedDate,
-                                onDateChange = { selectedDate = it }
+                                onDateChange = { selectedDate = it },
+                                navController = navController
                             )
                             ScheduleTab.WEEK -> WeekSchedule(
                                 meetings = state.meetings,
@@ -204,7 +215,8 @@ fun ScheduleScreen(navController: NavHostController) {
                                 onSelectDay = {
                                     selectedDate = it
                                     selectedTab = ScheduleTab.DAY
-                                }
+                                },
+                                navController = navController
                             )
                             ScheduleTab.MONTH -> MonthSchedule(
                                 meetings = state.meetings,
@@ -281,7 +293,8 @@ private fun DateNavigationHeader(
 private fun DaySchedule(
     meetings: List<MeetingDto>,
     date: LocalDate,
-    onDateChange: (LocalDate) -> Unit
+    onDateChange: (LocalDate) -> Unit,
+    navController: NavHostController
 ) {
     val parsedMeetings = remember(meetings) {
         meetings.mapNotNull { meeting ->
@@ -322,20 +335,22 @@ private fun DaySchedule(
                     val formattedTime = formatMeetingTime(dateTimeRange.first, dateTimeRange.second)
                     EnhancedMeetingCard(
                         meeting = meeting,
-                        formattedTime = formattedTime
+                        formattedTime = formattedTime,
+                        onClick = { navController.navigate("meeting_details/${meeting.id}") }
                     )
                 }
             }
         }
     }
 }
-
+//hahah
 @Composable
 private fun WeekSchedule(
     meetings: List<MeetingDto>,
     weekStart: LocalDate,
     onWeekChange: (LocalDate) -> Unit,
-    onSelectDay: (LocalDate) -> Unit
+    onSelectDay: (LocalDate) -> Unit,
+    navController: NavHostController
 ) {
     val daysOfWeek = (0..6).map { weekStart.plusDays(it.toLong()) }
     val parsedMeetings = remember(meetings) {
@@ -369,19 +384,21 @@ private fun WeekSchedule(
                     day = day,
                     meetings = dayMeetings.map { it.first },
                     dateTimeRanges = dayMeetings.map { it.second },
-                    onSelectDay = onSelectDay
+                    onSelectDay = onSelectDay,
+                    navController = navController
                 )
             }
         }
     }
 }
-
+//sosu
 @Composable
 private fun DaySection(
     day: LocalDate,
     meetings: List<MeetingDto>,
     dateTimeRanges: List<Pair<LocalDateTime, LocalDateTime>>,
-    onSelectDay: (LocalDate) -> Unit
+    onSelectDay: (LocalDate) -> Unit,
+    navController: NavHostController
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -450,7 +467,8 @@ private fun DaySection(
                         )
                         EnhancedMeetingCard(
                             meeting = meeting,
-                            formattedTime = formattedTime
+                            formattedTime = formattedTime,
+                            onClick = { navController.navigate("meeting_details/${meeting.id}") }
                         )
                     }
                 }
@@ -475,10 +493,15 @@ private fun MonthSchedule(
             parseMeetingDateTime(meeting)?.let { meeting to it }
         }
     }
-    val daysWithMeetings = parsedMeetings
-        .map { it.second.first.toLocalDate() }
-        .filter { it.month == monthDate.month && it.year == monthDate.year }
-        .toSet()
+    val meetingsByDate = remember(meetings, monthDate) {
+        parsedMeetings
+            .filter {
+                val d = it.second.first.toLocalDate()
+                d.month == monthDate.month && d.year == monthDate.year
+            }
+            .groupBy { it.second.first.toLocalDate() }
+            .mapValues { entry -> entry.value.map { it.first } }
+    }
 
     val formatter = DateTimeFormatter.ofPattern("MMMM yyyy")
     val monthText = monthDate.format(formatter)
@@ -526,7 +549,8 @@ private fun MonthSchedule(
                         val dayNumber = cellIndex - firstDayOfWeekIndex + 1
                         if (dayNumber in 1..daysInMonth) {
                             val date = yearMonth.atDay(dayNumber)
-                            val hasMeetings = daysWithMeetings.contains(date)
+                            val dayMeetings = meetingsByDate[date].orEmpty()
+                            val hasMeetings = dayMeetings.isNotEmpty()
                             val isToday = date == LocalDate.now()
 
                             Surface(
@@ -568,13 +592,26 @@ private fun MonthSchedule(
                                         }
                                     )
                                     if (hasMeetings) {
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Box(
-                                            modifier = Modifier
-                                                .size(4.dp)
-                                                .clip(RoundedCornerShape(2.dp))
-                                                .background(MaterialTheme.colorScheme.primary)
-                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            dayMeetings.take(8).forEach { m ->
+                                                val dotColor = when (m.meetingPriority.uppercase()) {
+                                                    "HIGH" -> MaterialTheme.colorScheme.error
+                                                    "MEDIUM" -> Color(0xFFFFC107)
+                                                    "LOW" -> Color(0xFF4CAF50)
+                                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                                }
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(6.dp)
+                                                        .clip(RoundedCornerShape(3.dp))
+                                                        .background(dotColor)
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -591,7 +628,8 @@ private fun MonthSchedule(
 @Composable
 private fun EnhancedMeetingCard(
     meeting: MeetingDto,
-    formattedTime: String
+    formattedTime: String,
+    onClick: () -> Unit
 ) {
     val statusColor = when (meeting.status) {
         "SCHEDULED", "PLANNED" -> MaterialTheme.colorScheme.primary
@@ -610,6 +648,11 @@ private fun EnhancedMeetingCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = LocalIndication.current,
+                onClick = onClick
+            )
             .shadow(
                 elevation = 2.dp,
                 shape = RoundedCornerShape(12.dp),

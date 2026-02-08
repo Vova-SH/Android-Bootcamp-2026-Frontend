@@ -31,7 +31,7 @@ fun SplashScreen(navController: NavHostController) {
                 false
             }
 
-            // Пытаемся восстановить сессию
+
             var isLoggedIn = Network.isLoggedIn
 
             if (!isLoggedIn) {

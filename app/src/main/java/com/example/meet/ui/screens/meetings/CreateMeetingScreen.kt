@@ -1,7 +1,7 @@
 package com.example.meet.ui.screens.meetings
 
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -40,9 +40,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -67,6 +69,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 @ExperimentalSerializationApi
@@ -82,8 +85,9 @@ fun CreateMeetingScreen(navController: NavHostController) {
     var description by remember { mutableStateOf("") }
     var date by remember { mutableStateOf(LocalDate.now()) }
     var startTime by remember { mutableStateOf(LocalTime.of(14, 0)) }
-    var durationMinutes by remember { mutableStateOf("60") }
-    var location by remember { mutableStateOf("") }
+    var isOnline by remember { mutableStateOf(true) }
+    var onlineLink by remember { mutableStateOf("") }
+    var offlineAddress by remember { mutableStateOf("") }
     var isCreating by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -94,8 +98,35 @@ fun CreateMeetingScreen(navController: NavHostController) {
     val searchResults by viewModel.searchResults.observeAsState(emptyList())
     val selectedParticipants by viewModel.selectedParticipants.observeAsState(emptyList())
 
+    //агружаем всех пользователей
+    LaunchedEffect(Unit) {
+        try {
+
+            val allUsers = userInfoDataSource.loadAllUsers()
+            viewModel.setAllUsers(allUsers)
+        } catch (e: Exception) {
+            println("DEBUG: Ошибка загрузки пользователей: ${e.message}")
+        }
+    }
+
+    //поиск при изменении запроса
+    LaunchedEffect(searchQuery) {
+        if (searchQuery.isNotEmpty()) {
+            viewModel.searchUsers(searchQuery)
+        } else {
+
+            viewModel.clearSearchResults()
+        }
+    }
+
     val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    val isFormValid = remember(title, date, startTime, isOnline, onlineLink, offlineAddress, selectedParticipants) {
+        val notPastDate = !date.isBefore(LocalDate.now())
+        val notPastTime = if (date == LocalDate.now()) !startTime.isBefore(LocalTime.now()) else true
+        val hasLocation = if (isOnline) onlineLink.isNotBlank() else offlineAddress.isNotBlank()
+        title.isNotBlank() && notPastDate && notPastTime && selectedParticipants.isNotEmpty() && hasLocation
+    }
 
     Scaffold(
         topBar = {
@@ -168,7 +199,10 @@ fun CreateMeetingScreen(navController: NavHostController) {
 
                             OutlinedTextField(
                                 value = title,
-                                onValueChange = { title = it },
+                                onValueChange = {
+                                    title = it
+                                    errorMessage = null
+                                },
                                 label = { Text("Название встречи") },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth(),
@@ -232,7 +266,7 @@ fun CreateMeetingScreen(navController: NavHostController) {
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
-                                            // Цветная точка
+                                            //ветная точка
                                             Box(
                                                 modifier = Modifier
                                                     .size(12.dp)
@@ -261,50 +295,24 @@ fun CreateMeetingScreen(navController: NavHostController) {
                                 color = MaterialTheme.colorScheme.primary
                             )
 
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                Button(
-                                    onClick = {
-                                        DatePickerDialog(
-                                            context,
-                                            { _, year, month, dayOfMonth ->
-                                                date = LocalDate.of(year, month + 1, dayOfMonth)
-                                            },
-                                            date.year,
-                                            date.monthValue - 1,
-                                            date.dayOfMonth
-                                        ).show()
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                                        contentColor = MaterialTheme.colorScheme.primary
-                                    )
-                                ) {
-                                    Text("Выбрать дату")
-                                }
-                                Button(
-                                    onClick = {
-                                        TimePickerDialog(
-                                            context,
-                                            { _, hourOfDay, minute ->
-                                                startTime = LocalTime.of(hourOfDay, minute)
-                                            },
-                                            startTime.hour,
-                                            startTime.minute,
-                                            true
-                                        ).show()
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                                        contentColor = MaterialTheme.colorScheme.primary
-                                    )
-                                ) {
-                                    Text("Выбрать время")
-                                }
+                                DayCalendar(
+                                    selectedDate = date,
+                                    onSelectDate = {
+                                        if (it.isBefore(LocalDate.now())) {
+                                            errorMessage = "Нельзя выбирать прошедшую дату"
+                                        } else {
+                                            date = it
+                                            errorMessage = null
+                                        }
+                                    }
+                                )
+                                HourPicker(
+                                    selectedHour = startTime.hour,
+                                    onSelectHour = { hour -> startTime = LocalTime.of(hour, 0) }
+                                )
                             }
 
                             Box(
@@ -334,21 +342,7 @@ fun CreateMeetingScreen(navController: NavHostController) {
                                 }
                             }
 
-                            OutlinedTextField(
-                                value = durationMinutes,
-                                onValueChange = { new ->
-                                    if (new.all { it.isDigit() } && new.length <= 3) {
-                                        durationMinutes = new
-                                    }
-                                },
-                                label = { Text("Длительность (минуты)") },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                    focusedLabelColor = MaterialTheme.colorScheme.primary
-                                )
-                            )
+                            Spacer(modifier = Modifier.height(8.dp))
 
                             Column {
                                 Row(
@@ -405,10 +399,23 @@ fun CreateMeetingScreen(navController: NavHostController) {
                                     singleLine = true
                                 )
 
-                                if (searchQuery.isNotEmpty() && searchResults.isNotEmpty()) {
+                                //оказываем результаты поиска или всех пользователей
+                                val usersToShow = if (searchQuery.isEmpty()) {
+                                    //оказываем всех пользователей
+                                    viewModel.allUsers.value.filter { user ->
+                                        !selectedParticipants.any { it.id == user.id }
+                                    }
+                                } else {
+                                    //Gоказываем результаты поиска
+                                    searchResults.filter { user ->
+                                        !selectedParticipants.any { it.id == user.id }
+                                    }
+                                }
+
+                                if (usersToShow.isNotEmpty()) {
                                     Spacer(modifier = Modifier.height(12.dp))
                                     Text(
-                                        text = "Результаты поиска:",
+                                        text = if (searchQuery.isEmpty()) "Все сотрудники:" else "Результаты поиска:",
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.primary
@@ -420,10 +427,7 @@ fun CreateMeetingScreen(navController: NavHostController) {
                                             .heightIn(max = 200.dp),
                                         verticalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
-                                        items(searchResults.filter { user ->
-                                            // Показываем только пользователей, которые еще не выбраны
-                                            !selectedParticipants.any { it.id == user.id }
-                                        }) { user ->
+                                        items(usersToShow) { user ->
                                             Surface(
                                                 onClick = { viewModel.addParticipant(user) },
                                                 modifier = Modifier
@@ -451,6 +455,13 @@ fun CreateMeetingScreen(navController: NavHostController) {
                                                             style = MaterialTheme.typography.bodySmall,
                                                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                                         )
+                                                        if (!user.position.isNullOrBlank()) {
+                                                            Text(
+                                                                text = user.position,
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                                            )
+                                                        }
                                                     }
                                                     Box(
                                                         modifier = Modifier
@@ -470,6 +481,13 @@ fun CreateMeetingScreen(navController: NavHostController) {
                                             }
                                         }
                                     }
+                                } else if (searchQuery.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(
+                                        text = "Сотрудники не найдены",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
 
                                 if (selectedParticipants.isNotEmpty()) {
@@ -529,18 +547,72 @@ fun CreateMeetingScreen(navController: NavHostController) {
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            OutlinedTextField(
-                                value = location,
-                                onValueChange = { location = it },
-                                label = { Text("Место проведения (необязательно)") },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                    focusedLabelColor = MaterialTheme.colorScheme.primary
-                                )
+                            Text(
+                                text = "Формат встречи",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
                             )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = if (isOnline) "Онлайн" else "Оффлайн",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Switch(checked = isOnline, onCheckedChange = { isOnline = it })
+                            }
+                            if (isOnline) {
+                                OutlinedTextField(
+                                    value = onlineLink,
+                                    onValueChange = { onlineLink = it },
+                                    label = { Text("Ссылка на конференцию") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                        focusedLabelColor = MaterialTheme.colorScheme.primary
+                                    ),
+                                    singleLine = true
+                                )
+                            } else {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    OutlinedTextField(
+                                        value = offlineAddress,
+                                        onValueChange = { offlineAddress = it },
+                                        label = { Text("Адрес проведения") },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                            focusedLabelColor = MaterialTheme.colorScheme.primary
+                                        ),
+                                        singleLine = true
+                                    )
+                                    Row(
+                                        horizontalArrangement = Arrangement.End,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Button(
+                                            onClick = {
+                                                val uri = Uri.parse("geo:0,0?q=" + Uri.encode(offlineAddress))
+                                                val intent = Intent(Intent.ACTION_VIEW, uri)
+                                                context.startActivity(intent)
+                                            },
+                                            enabled = offlineAddress.isNotBlank(),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.primary,
+                                                contentColor = Color.White
+                                            )
+                                        ) {
+                                            Text("Открыть карту")
+                                        }
+                                    }
+                                }
+                            }
 
-                            // Сообщение об ошибке
+                            //общение об ошибке
                             if (errorMessage != null) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Box(
@@ -589,16 +661,21 @@ fun CreateMeetingScreen(navController: NavHostController) {
 
                 Button(
                     onClick = {
-                        if (title.isBlank()) {
-                            errorMessage = "Введите название встречи"
+                        if (!isFormValid) {
+                            errorMessage =
+                                when {
+                                    title.isBlank() -> "Введите название встречи"
+                                    date.isBefore(LocalDate.now()) -> "Дата не может быть в прошлом"
+                                    date == LocalDate.now() && startTime.isBefore(LocalTime.now()) -> "Время не может быть в прошлом"
+                                    selectedParticipants.isEmpty() -> "Добавьте хотя бы одного участника"
+                                    isOnline && onlineLink.isBlank() -> "Укажите ссылку на конференцию"
+                                    !isOnline && offlineAddress.isBlank() -> "Укажите адрес проведения"
+                                    else -> "Заполните обязательные поля"
+                                }
                             return@Button
                         }
 
-                        val duration = durationMinutes.toIntOrNull() ?: 60
-                        if (duration <= 0) {
-                            errorMessage = "Длительность должна быть больше 0 минут"
-                            return@Button
-                        }
+                        val duration = 60 //Aиксированная длительность 60 минут
 
                         val startDateTime = LocalDateTime.of(date, startTime)
                         val endDateTime = startDateTime.plusMinutes(duration.toLong())
@@ -612,12 +689,20 @@ fun CreateMeetingScreen(navController: NavHostController) {
                             try {
                                 val currentUser = userInfoDataSource.loadCurrentUser()
                                 val participantIds = selectedParticipants.map { it.id }
+                                val locationValue = if (isOnline) onlineLink else offlineAddress
+
+                                println("DEBUG: Создаем встречу...")
+                                println("DEBUG: Название: $title")
+                                println("DEBUG: Организатор ID: ${currentUser.id}")
+                                println("DEBUG: Участники IDs: $participantIds")
+                                println("DEBUG: Начало: $startStr")
+                                println("DEBUG: Конец: $endStr")
 
                                 val dto = CreateMeetingDto(
                                     title = title,
                                     description = description.ifBlank { null },
                                     organizerId = currentUser.id,
-                                    participantIds = participantIds.ifEmpty { emptyList() },
+                                    participantIds = participantIds,
                                     roomId = null,
                                     startTime = startStr,
                                     endTime = endStr,
@@ -625,24 +710,28 @@ fun CreateMeetingScreen(navController: NavHostController) {
                                     status = "SCHEDULED",
                                     recurrencePattern = null,
                                     recurrenceEndDate = null,
-                                    location = location.ifBlank { null }
+                                    location = locationValue.ifBlank { null }
                                 )
 
                                 val result = DataLocator.createMeeting(dto)
 
                                 if (result.isSuccess) {
+                                    println("DEBUG: Встреча успешно создана")
                                     navController.popBackStack()
                                 } else {
                                     errorMessage = "Ошибка создания встречи: ${result.exceptionOrNull()?.message}"
+                                    println("DEBUG: Ошибка создания встречи: ${result.exceptionOrNull()?.message}")
                                 }
                             } catch (e: Exception) {
                                 errorMessage = "Ошибка: ${e.message}"
+                                println("DEBUG: Исключение: ${e.message}")
+                                e.printStackTrace()
                             } finally {
                                 isCreating = false
                             }
                         }
                     },
-                    enabled = !isCreating && title.isNotBlank(),
+                    enabled = !isCreating && isFormValid,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
@@ -668,6 +757,164 @@ fun CreateMeetingScreen(navController: NavHostController) {
                             Text("Создать встречу")
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DayCalendar(
+    selectedDate: LocalDate,
+    onSelectDate: (LocalDate) -> Unit
+) {
+    val monthState = remember(selectedDate) { mutableStateOf(YearMonth.of(selectedDate.year, selectedDate.month)) }
+    val yearMonth = monthState.value
+    val firstOfMonth = yearMonth.atDay(1)
+    val daysInMonth = yearMonth.lengthOfMonth()
+    val firstDayOfWeekIndex = firstOfMonth.dayOfWeek.value % 7
+    val formatter = DateTimeFormatter.ofPattern("MMMM yyyy")
+    val monthText = firstOfMonth.format(formatter).replaceFirstChar { it.uppercase() }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IconButton(
+                onClick = { monthState.value = monthState.value.minusMonths(1) },
+                modifier = Modifier.size(48.dp),
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_arrow_back),
+                    contentDescription = "Предыдущий",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Text(
+                text = monthText,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            IconButton(
+                onClick = { monthState.value = monthState.value.plusMonths(1) },
+                modifier = Modifier.size(48.dp),
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_arrow_forward),
+                    contentDescription = "Следующий",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { day ->
+                Text(
+                    text = day,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+            }
+        }
+        val days = (1..daysInMonth).toList()
+        val padded = List(firstDayOfWeekIndex) { 0 } + days
+        padded.chunked(7).forEach { week ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                week.forEach { day ->
+                    val isEmpty = day == 0
+                    val thisDate = if (!isEmpty) LocalDate.of(yearMonth.year, yearMonth.month, day) else null
+                    val isSelected = thisDate == selectedDate
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .let { base ->
+                                if (!isEmpty) {
+                                    base
+                                } else {
+                                    base
+                                }
+                            }
+                            .padding(8.dp)
+                    ) {
+                        if (!isEmpty) {
+                            Surface(onClick = { onSelectDate(thisDate!!) }) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = day.toString(),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HourPicker(
+    selectedHour: Int,
+    onSelectHour: (Int) -> Unit
+) {
+    val hours = (0..23).toList()
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        items(hours) { hour ->
+            val isSelected = hour == selectedHour
+            Surface(
+                onClick = { onSelectHour(hour) },
+                modifier = Modifier.clip(RoundedCornerShape(8.dp)),
+                color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f),
+                tonalElevation = if (isSelected) 2.dp else 0.dp
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = String.format("%02d:00", hour),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }

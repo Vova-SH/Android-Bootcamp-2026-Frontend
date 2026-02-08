@@ -3,18 +3,16 @@ package com.example.meet.data.source
 import android.os.Build
 import android.util.Log
 import com.example.meet.BuildConfig
-import com.example.meet.data.dto.CreateMeetingDto
 import com.example.meet.data.dto.InvitationDto
 import com.example.meet.data.dto.InvitationPageDto
-import com.example.meet.data.dto.InvitationResponseStatus
 import com.example.meet.data.dto.JwtResponse
 import com.example.meet.data.dto.LoginRequest
 import com.example.meet.data.dto.MeetingDto
-import com.example.meet.data.dto.MeetingPageDto
 import com.example.meet.data.dto.NotificationDto
 import com.example.meet.data.dto.NotificationPageDto
 import com.example.meet.data.dto.RegisterRequest
 import com.example.meet.data.dto.UserDto
+import com.example.meet.data.source.AuthPrefs.getToken
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -25,9 +23,9 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.accept
-import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -36,6 +34,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -59,7 +58,7 @@ object Network {
 
     private const val HOST_EMULATOR = "http://10.0.2.2:8080"
     private const val HOST_CONFIG: String = BuildConfig.BASE_URL
-    val HOST: String =
+    var HOST: String =
         if (isEmulator() && (HOST_CONFIG.contains("localhost") || HOST_CONFIG.contains("127.0.0.1"))) {
             HOST_EMULATOR
         } else {
@@ -115,14 +114,14 @@ object Network {
     }
 
     suspend fun restoreSession(): Boolean {
-        val token = AuthPrefs.getToken()
+        val token = getToken()
         val user = AuthPrefs.getUserData()
 
         if (token != null && user != null) {
             _authToken = token
             _currentUser = user
 
-            //Проверка валидности токена через запрос профиля пользователя
+            //Проверка валидности
             return try {
                 val response: HttpResponse = client.get("/api/users/${user.id}") {
                     timeout {
@@ -157,12 +156,12 @@ object Network {
         if (from >= list.size) return emptyList()
         return list.drop(from).take(size)
     }
-
     suspend fun getUsers(
         page: Int? = null,
         size: Int? = null,
         clientSidePaging: Boolean = true,
     ): List<UserDto> {
+        println("DEBUG: Делаем запрос на /api/users")
         val users: List<UserDto> = client.get("/api/users") {
             timeout {
                 requestTimeoutMillis = 10000
@@ -170,6 +169,7 @@ object Network {
                 socketTimeoutMillis = 10000
             }
         }.body()
+        println("DEBUG: Получено ${users.size} пользователей")
         return if (clientSidePaging && page != null && size != null) paginate(users, page, size) else users
     }
 
@@ -206,26 +206,6 @@ object Network {
                 socketTimeoutMillis = 10000
             }
         }.body()
-    }
-
-    suspend fun updateUser(id: Long, user: UserDto): UserDto =
-        client.put("/api/users/$id") {
-            setBody(user)
-            timeout {
-                requestTimeoutMillis = 8000
-                connectTimeoutMillis = 8000
-                socketTimeoutMillis = 8000
-            }
-        }.body()
-
-    suspend fun deleteUser(id: Long) {
-        client.delete("/api/users/$id") {
-            timeout {
-                requestTimeoutMillis = 5000
-                connectTimeoutMillis = 5000
-                socketTimeoutMillis = 5000
-            }
-        }
     }
 
     suspend fun login(email: String, password: String): UserDto {
@@ -282,45 +262,54 @@ object Network {
         position: String? = null,
         department: String? = null
     ): UserDto {
-        val resp = client.post("/api/auth/register") {
-            setBody(RegisterRequest(
-                email = email,
-                password = password,
-                fullName = fullName,
-                position = position,
-                department = department
-            ))
-            timeout {
-                requestTimeoutMillis = 10000
-                connectTimeoutMillis = 10000
-                socketTimeoutMillis = 10000
+        val requestBody = RegisterRequest(
+            email = email,
+            password = password,
+            fullName = fullName,
+            position = position,
+            department = department
+        )
+        val candidates = listOf(
+            HOST_CONFIG,
+            HOST_EMULATOR,
+            "http://127.0.0.1:8080",
+            "http://localhost:8080"
+        ).distinct()
+        var lastError: Exception? = null
+        for (base in candidates) {
+            try {
+                val resp = client.post("$base/api/auth/register") {
+                    setBody(requestBody)
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
+                    timeout {
+                        requestTimeoutMillis = 10000
+                        connectTimeoutMillis = 10000
+                        socketTimeoutMillis = 10000
+                    }
+                }
+                if (resp.status == HttpStatusCode.OK || resp.status == HttpStatusCode.Created) {
+                    HOST = base
+                    return login(email, password)
+                } else {
+                    val reason = try { resp.body<String>() } catch (_: Exception) { "" }
+                    lastError = Exception(
+                        when {
+                            resp.status == HttpStatusCode.BadRequest && reason.contains("already in use", ignoreCase = true) ->
+                                "Email уже используется"
+                            else -> "Ошибка регистрации (${resp.status}): ${reason.ifBlank { "Неизвестная ошибка" }}"
+                        }
+                    )
+                }
+            } catch (e: Exception) {
+                lastError = e
             }
         }
-        if (resp.status != HttpStatusCode.OK && resp.status != HttpStatusCode.Created) {
-            val reason = try { resp.body<String>() } catch (_: Exception) { "" }
-            throw Exception(
-                when {
-                    resp.status == HttpStatusCode.BadRequest && reason.contains("already in use", ignoreCase = true) ->
-                        "Email уже используется"
-                    else -> "Ошибка регистрации (${resp.status}): ${reason.ifBlank { "Неизвестная ошибка" }}"
-                }
-            )
-        }
-        return login(email, password)
+        throw lastError ?: Exception("Сервер недоступен для регистрации")
     }
 
     suspend fun getMeetings(): List<MeetingDto> {
         return client.get("/api/meetings") {
-            timeout {
-                requestTimeoutMillis = 10000
-                connectTimeoutMillis = 10000
-                socketTimeoutMillis = 10000
-            }
-        }.body()
-    }
-
-    suspend fun getMeetingsForUser(userId: Long): List<MeetingDto> {
-        return client.get("/api/meetings/user/$userId") {
             timeout {
                 requestTimeoutMillis = 10000
                 connectTimeoutMillis = 10000
@@ -356,17 +345,6 @@ object Network {
         return if (clientSidePaging && page != null && size != null) paginate(items, page, size) else items
     }
 
-    suspend fun getActiveInvitations(
-        userId: Long,
-        page: Int? = null,
-        size: Int? = null,
-        clientSidePaging: Boolean = true,
-    ): List<InvitationDto> {
-        val items = getInvitations()
-            .filter { it.userId == userId && it.responseStatus.equals(InvitationResponseStatus.PENDING, ignoreCase = true) }
-        return if (clientSidePaging && page != null && size != null) paginate(items, page, size) else items
-    }
-
     suspend fun getNotifications(
         userId: Long,
         page: Int? = null,
@@ -396,14 +374,20 @@ object Network {
         val filteredItems = items.filter { it.userId == userId }
         return if (clientSidePaging && page != null && size != null) paginate(filteredItems, page, size) else filteredItems
     }
-    suspend fun createMeeting(dto: CreateMeetingDto): MeetingDto {
-        return client.post("/api/meetings") {
-            setBody(dto)
-            timeout {
-                requestTimeoutMillis = 10000
-                connectTimeoutMillis = 10000
-                socketTimeoutMillis = 10000
+
+    suspend fun getInvitations(): List<InvitationDto> {
+        return client.get("/api/invitations").body()
+    }
+
+    suspend fun markNotificationAsRead(notificationId: Long) {
+        val response = client.put("$HOST/api/notifications/$notificationId/read") {
+            headers {
+                append("Authorization", "Bearer ${getToken()}")
             }
-        }.body()
+        }
+
+        if (!response.status.isSuccess()) {
+            throw Exception("Не удалось отметить уведомление как прочитанное")
+        }
     }
 }

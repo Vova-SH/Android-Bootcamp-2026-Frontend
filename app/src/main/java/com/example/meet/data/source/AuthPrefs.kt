@@ -1,7 +1,10 @@
 package com.example.meet.data.source
 
 import android.content.Context
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import androidx.security.crypto.MasterKeys
 import com.example.meet.data.dto.UserDto
 
@@ -26,6 +29,7 @@ object AuthPrefs {
             ) as EncryptedSharedPreferences
         }
     }
+
 
     fun saveLoginData(token: String, user: UserDto) {
         with(encryptedPrefs.edit()) {
@@ -62,5 +66,4 @@ object AuthPrefs {
             apply()
         }
     }
-
 }
