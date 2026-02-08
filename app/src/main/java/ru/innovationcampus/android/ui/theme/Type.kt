@@ -1,4 +1,4 @@
-package ru.sicampus.bootcamp2026.ui.theme
+package ru.innovationcampus.android.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

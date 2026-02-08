@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Android-Bootcamp-2026-Frontend</string>
+    <string name="auth_title">Привет! Давай авторизуемся</string>
+    <string name="auth_label">Логин</string>
+    <string name="auth_pass_label">Пароль</string>
+    <string name="auth_sign_in">Войти</string>
 </resources>
