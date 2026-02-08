@@ -1,7 +1,6 @@
 package ru.sicampus.bootcamp2026.ui.theme.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,45 +50,44 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.data.UserRepository
 import ru.sicampus.bootcamp2026.data.source.MeetingDto
-import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 
-private fun getDefaultInviteMeetings(): List<MeetingDto> = listOf(
-    MeetingDto(
-        id = 1,
-        title = "Рабочая встреча №1",
-        date = "2026-01-30",
-        time = "11:00",
-        members = 4,
-        confirmed = true
-    ),
-    MeetingDto(
-        id = 2,
-        title = "Рабочая встреча №2",
-        date = "2026-02-10",
-        time = "14:00",
-        members = 4,
-        confirmed = true
-    ),
-    MeetingDto(
-        id = 3,
-        title = "Обсуждение дизайна",
-        date = "2026-02-12",
-        time = "16:00",
-        members = 3,
-        confirmed = true
-    )
-)
+//private fun getDefaultInviteMeetings(): List<MeetingDto> = listOf(
+//    MeetingDto(
+//        id = 1,
+//        title = "Рабочая встреча №1",
+//        date = "2026-01-30",
+//        time = "11:00",
+//        members = 4,
+//        confirmed = true
+//    ),
+//    MeetingDto(
+//        id = 2,
+//        title = "Рабочая встреча №2",
+//        date = "2026-02-10",
+//        time = "14:00",
+//        members = 4,
+//        confirmed = true
+//    ),
+//    MeetingDto(
+//        id = 3,
+//        title = "Обсуждение дизайна",
+//        date = "2026-02-12",
+//        time = "16:00",
+//        members = 3,
+//        confirmed = true
+//    )
+//)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InviteScreen(navController: NavController, userRepository: UserRepository? = null) {
     var selectedDate by remember { mutableStateOf<Long?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
-    var meetings by remember { mutableStateOf(getDefaultInviteMeetings()) }
+    var meetings by remember { mutableStateOf(emptyList<MeetingDto>()) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
@@ -210,10 +208,10 @@ fun InviteScreen(navController: NavController, userRepository: UserRepository? =
                     meetings.forEach { meeting ->
                         InviteCard(
                             title = meeting.title,
-                            date = meeting.date,
-                            time = meeting.time,
-                            members = meeting.members?.toString() ?: "0",
-                            confirm = meeting.confirmed ?: false
+                            date = meeting.startTime,
+                            time = meeting.endTime
+                            //members = meeting.members?.toString() ?: "0",
+                            //confirm = meeting.confirmed ?: false
                         )
                     }
                 }
@@ -265,8 +263,8 @@ fun InviteCard(
     title: String,
     date: String,
     time: String,
-    members: String,
-    confirm: Boolean
+    //members: String,
+    //confirm: Boolean
 ) {
     Card(
         modifier = Modifier
@@ -293,31 +291,31 @@ fun InviteCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("👥", modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
-                Text(members + " участников")
+                //Text(members + " участников")
             }
             Spacer(Modifier.height(16.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (confirm) {
-                    ActionButton(
-                        text = "Подтвердить",
-                        color = Color(0xFF33C75A),
-                        modifier = Modifier.weight(1f)
-                    )
-                    ActionButton(
-                        text = "Отклонить",
-                        color = Color(0xFFE53935),
-                        modifier = Modifier.weight(1f)
-                    )
-                } else {
-                    ActionButton(
-                        text = "Отклонить",
-                        color = Color(0xFFE53935),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+//                if (confirm) {
+//                    ActionButton(
+//                        text = "Подтвердить",
+//                        color = Color(0xFF33C75A),
+//                        modifier = Modifier.weight(1f)
+//                    )
+//                    ActionButton(
+//                        text = "Отклонить",
+//                        color = Color(0xFFE53935),
+//                        modifier = Modifier.weight(1f)
+//                    )
+//                } else {
+//                    ActionButton(
+//                        text = "Отклонить",
+//                        color = Color(0xFFE53935),
+//                        modifier = Modifier.fillMaxWidth()
+//                    )
+//                }
             }
         }
     }

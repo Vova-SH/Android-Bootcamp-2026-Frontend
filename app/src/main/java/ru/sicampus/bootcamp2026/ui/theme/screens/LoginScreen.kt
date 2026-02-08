@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.data.UserRepository
 import ru.sicampus.bootcamp2026.data.dto.UserDto
 import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
@@ -48,9 +50,13 @@ fun LoginScreen(
     navController: NavController,
     userRepository: UserRepository
 ) {
-
-    var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    val coroutineScope = rememberCoroutineScope()
+    var email by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         val result = userRepository.getUsers()
@@ -102,9 +108,9 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Username") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 singleLine = true,
@@ -128,17 +134,42 @@ fun LoginScreen(
 
             Button(
                 onClick = {
-                    // Переход на главный экран после логина
-                    navController.navigate("main") {
-                        popUpTo("login") { inclusive = true }
+                    if (username.isBlank() || password.isBlank()) {
+                        errorMessage = "Заполните все поля"
+                        return@Button
+                    }
+
+                    coroutineScope.launch {
+                        isLoading = true
+                        errorMessage = ""
+
+                        userRepository.login(username, password)
+                            .onSuccess {
+                                isLoading = false
+                                navController.navigate("main") { popUpTo("login") { inclusive = true } }
+                            }
+                            .onFailure { exception ->
+                                isLoading = false
+                                errorMessage = "Ошибка: ${exception.message ?: "Неизвестная ошибка"}"
+                            }
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(100.dp)
+                enabled = !isLoading,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Войти")
+                if (isLoading) {
+                    Text("Загрузка...")
+                } else {
+                    Text("Войти")
+                }
+            }
+
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = "Неверный логин или пароль",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -147,7 +178,6 @@ fun LoginScreen(
                 text = "Нет аккаунта? Зарегистрироваться",
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable {
-                    // Переход на экран регистрации
                     navController.navigate("registration")
                 },
                 textAlign = TextAlign.Center

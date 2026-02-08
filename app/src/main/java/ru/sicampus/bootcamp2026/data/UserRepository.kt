@@ -1,10 +1,17 @@
 package ru.sicampus.bootcamp2026.data
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
+import ru.sicampus.bootcamp2026.data.dto.UserDto
 import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
 import ru.sicampus.bootcamp2026.data.source.MeetingDto
+import ru.sicampus.bootcamp2026.data.source.Network
 import ru.sicampus.bootcamp2026.domain.entities.UserEntity
 import ru.sicampus.bootcamp2026.domain.entities.toEntity
 import ru.sicampus.bootcamp2026.domain.entities.toDto
+import java.net.HttpURLConnection
+import java.net.URL
 
 open class UserRepository(
     private val userInfoDataSource: UserInfoDataSource
@@ -38,4 +45,21 @@ open class UserRepository(
     suspend fun getMeetingsByDate(date: String): Result<List<MeetingDto>> {
         return userInfoDataSource.getMeetingsByDate(date)
     }
+
+    suspend fun login(username: String, password: String): Result<UserEntity> {
+        return userInfoDataSource.login(username, password)
+            .map { it.toEntity() }
+    }
 }
+
+@Serializable
+data class LoginRequest(
+    val username: String,
+    val password: String
+)
+
+@Serializable
+data class LoginResponse(
+    val token: String,
+    val user: UserDto
+)
