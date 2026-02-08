@@ -4,6 +4,7 @@ import ru.sicampus.bootcamp2026.data.auth.TokenStorage
 import ru.sicampus.bootcamp2026.data.model.CreateMeetingRequest
 import ru.sicampus.bootcamp2026.data.model.InvitationDecisionRequest
 import ru.sicampus.bootcamp2026.data.model.MeetingDto
+import ru.sicampus.bootcamp2026.data.model.MeetingParticipantDto
 import ru.sicampus.bootcamp2026.data.model.PageResponse
 import ru.sicampus.bootcamp2026.data.model.UpdateUserRequest
 import ru.sicampus.bootcamp2026.data.model.UserDto
@@ -35,6 +36,10 @@ class AppRepository(
 
     suspend fun getMeetings(): Result<List<MeetingDto>> = runCatching {
         api.getMeetings(getAuthHeader())
+    }
+
+    suspend fun getMeetingParticipants(meetingId: Long): Result<List<MeetingParticipantDto>> = runCatching {
+        api.getMeetingParticipants(getAuthHeader(), meetingId)
     }
 
     suspend fun getCurrentUser(): Result<UserDto> = runCatching {
