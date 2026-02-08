@@ -49,67 +49,40 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.data.UserRepository
+import ru.sicampus.bootcamp2026.data.dto.InvitationDto
 import ru.sicampus.bootcamp2026.data.source.MeetingDto
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-
-//private fun getDefaultInviteMeetings(): List<MeetingDto> = listOf(
-//    MeetingDto(
-//        id = 1,
-//        title = "Рабочая встреча №1",
-//        date = "2026-01-30",
-//        time = "11:00",
-//        members = 4,
-//        confirmed = true
-//    ),
-//    MeetingDto(
-//        id = 2,
-//        title = "Рабочая встреча №2",
-//        date = "2026-02-10",
-//        time = "14:00",
-//        members = 4,
-//        confirmed = true
-//    ),
-//    MeetingDto(
-//        id = 3,
-//        title = "Обсуждение дизайна",
-//        date = "2026-02-12",
-//        time = "16:00",
-//        members = 3,
-//        confirmed = true
-//    )
-//)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InviteScreen(navController: NavController, userRepository: UserRepository? = null) {
     var selectedDate by remember { mutableStateOf<Long?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
-    var meetings by remember { mutableStateOf(emptyList<MeetingDto>()) }
+    var invitations by remember { mutableStateOf(emptyList<InvitationDto>()) }
+    var currentUserId by remember { mutableStateOf(1L) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
+
     val coroutineScope = rememberCoroutineScope()
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val displayDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("ru"))
 
     val datePickerState = rememberDatePickerState()
 
-    LaunchedEffect(selectedDate) {
-        if (selectedDate != null && userRepository != null) {
+    LaunchedEffect(Unit) {
+        if (userRepository != null) {
             isLoading = true
             errorMessage = ""
-            val dateString = dateFormat.format(Date(selectedDate!!))
 
             coroutineScope.launch {
-                val result = userRepository.getMeetingsByDate(dateString)
-                result.onSuccess { meetingsList ->
-                    meetings = meetingsList
+                val result = userRepository.getInvitationsByPersonId(currentUserId)
+                result.onSuccess { invitationsList ->
+                    invitations = invitationsList
                 }.onFailure { exception ->
-                    meetings = emptyList()
-                    errorMessage = "Ошибка загрузки: ${exception.message}"
+                    invitations = emptyList()
+                    errorMessage = "Ошибка загрузки приглашений: ${exception.message}"
                 }
                 isLoading = false
             }
@@ -187,14 +160,10 @@ fun InviteScreen(navController: NavController, userRepository: UserRepository? =
             }
 
             if (isLoading) {
+                Text("Загрузка приглашений...")
+            } else if (invitations.isNotEmpty()) {
                 Text(
-                    text = "Загрузка приглашений...",
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    fontSize = 16.sp
-                )
-            } else if (meetings.isNotEmpty()) {
-                Text(
-                    text = if (selectedDate != null) "Приглашения на выбранную дату" else "Требуют ответа",
+                    text = "Мои приглашения",
                     modifier = Modifier.padding(start = 16.dp),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Medium
@@ -205,13 +174,11 @@ fun InviteScreen(navController: NavController, userRepository: UserRepository? =
                     modifier = Modifier.padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    meetings.forEach { meeting ->
+                    invitations.forEach { invitation ->
                         InviteCard(
-                            title = meeting.title,
-                            date = meeting.startTime,
-                            time = meeting.endTime
-                            //members = meeting.members?.toString() ?: "0",
-                            //confirm = meeting.confirmed ?: false
+                            title = "Приглашение от ${invitation.personName}",
+                            date = "Встреча #${invitation.meetingId}",
+                            status = invitation.status
                         )
                     }
                 }
@@ -262,9 +229,7 @@ fun Header() {
 fun InviteCard(
     title: String,
     date: String,
-    time: String,
-    //members: String,
-    //confirm: Boolean
+    status: String
 ) {
     Card(
         modifier = Modifier
@@ -282,42 +247,62 @@ fun InviteCard(
                 Text(date)
             }
             Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("⏰", modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(time)
-            }
-            Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("👥", modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                //Text(members + " участников")
-            }
+
+            // Показываем статус
+            Text(
+                text = "Статус: $status",
+                color = when (status) {
+                    "PENDING" -> Color(0xFFF57C00)
+                    "ACCEPTED" -> Color(0xFF388E3C)
+                    "DECLINED" -> Color(0xFFD32F2F)
+                    else -> Color.Gray
+                }
+            )
+
             Spacer(Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-//                if (confirm) {
-//                    ActionButton(
-//                        text = "Подтвердить",
-//                        color = Color(0xFF33C75A),
-//                        modifier = Modifier.weight(1f)
-//                    )
-//                    ActionButton(
-//                        text = "Отклонить",
-//                        color = Color(0xFFE53935),
-//                        modifier = Modifier.weight(1f)
-//                    )
-//                } else {
-//                    ActionButton(
-//                        text = "Отклонить",
-//                        color = Color(0xFFE53935),
-//                        modifier = Modifier.fillMaxWidth()
-//                    )
-//                }
+
+            if (status == "PENDING") {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ActionButton(
+                        text = "Принять",
+                        color = Color(0xFF33C75A),
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            // TODO: отправить запрос на принятие
+                        }
+                    )
+                    ActionButton(
+                        text = "Отклонить",
+                        color = Color(0xFFE53935),
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            // TODO: отправить запрос на отклонение
+                        }
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+fun ActionButton(
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.height(40.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = color),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(100.dp)
+    ) {
+        Text(text)
     }
 }
 
