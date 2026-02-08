@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.sicampus.bootcamp2026.data.remote.TokenRefreshService
 import ru.sicampus.bootcamp2026.domain.repository.AuthRepository
 import ru.sicampus.bootcamp2026.domain.repository.ProfileRepository
 import ru.sicampus.bootcamp2026.domain.util.Result
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val tokenRefreshService: TokenRefreshService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -241,6 +243,8 @@ class ProfileViewModel @Inject constructor(
             val result = authRepository.logout()
             when (result) {
                 is Result.Success -> {
+                    // Остановить менеджер обновления токенов
+                    tokenRefreshService.onLogout()
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -249,7 +253,8 @@ class ProfileViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    // Даже при ошибке переходим на экран логина, т.к. токены очищены
+                    // Даже при ошибке переходим на экран логина и останавливаем менеджер
+                    tokenRefreshService.onLogout()
                     _uiState.update {
                         it.copy(
                             isLoading = false,

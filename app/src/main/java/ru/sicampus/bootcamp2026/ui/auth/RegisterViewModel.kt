@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.sicampus.bootcamp2026.data.remote.TokenRefreshService
 import ru.sicampus.bootcamp2026.domain.repository.AuthRepository
 import ru.sicampus.bootcamp2026.domain.util.Result
 import javax.inject.Inject
@@ -16,7 +17,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val tokenRefreshService: TokenRefreshService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterUIState())
@@ -101,6 +103,8 @@ class RegisterViewModel @Inject constructor(
 
             when (result) {
                 is Result.Success -> {
+                    // Запустить менеджер обновления токенов
+                    tokenRefreshService.onAuthenticationSuccess()
                     _uiState.update {
                         it.copy(
                             isLoading = false,
