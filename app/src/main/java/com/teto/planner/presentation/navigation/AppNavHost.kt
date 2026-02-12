@@ -6,6 +6,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navigation
 import com.teto.planner.presentation.features.auth.login.LoginScreen
 import com.teto.planner.presentation.features.auth.register.RegisterScreen
 import com.teto.planner.presentation.features.invitations.InvitationScreen
@@ -67,41 +68,46 @@ fun AppNavHost(
             )
         }
 
-        composable(Screen.Schedule.route) {
-            ScheduleScreen(
-                onCreateMeeting = { navController.navigate(Screen.MeetingCreate.route) },
-                onProfileClick = { navController.navigate(Screen.Profile.route) },
-                viewModel = hiltViewModel()
-            )
-        }
+        navigation(
+            startDestination = Screen.Schedule.route,
+            route = "main_graph"
+        ) {
+            composable(Screen.Schedule.route) {
+                ScheduleScreen(
+                    onCreateMeeting = { navController.navigate(Screen.MeetingCreate.route) },
+                    onProfileClick = { navController.navigate(Screen.Profile.route) },
+                    viewModel = hiltViewModel()
+                )
+            }
 
-        composable(Screen.Invitations.route) {
-            InvitationScreen(
-                viewModel = hiltViewModel(),
-                onProfileClick = { navController.navigate(Screen.Profile.route) },
-            )
-        }
+            composable(Screen.Invitations.route) {
+                InvitationScreen(
+                    viewModel = hiltViewModel(),
+                    onProfileClick = { navController.navigate(Screen.Profile.route) },
+                )
+            }
 
-        composable(Screen.Profile.route) {
-            ProfileScreen(
-                onSave = { navController.popBackStack() },
-                onEdit = {},
-                onExit = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                },
-                onBack = { navController.popBackStack() },
-                viewModel = hiltViewModel()
-            )
-        }
+            composable(Screen.Profile.route) {
+                ProfileScreen(
+                    onSave = { navController.popBackStack() },
+                    onEdit = {},
+                    onExit = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    onBack = { navController.popBackStack() },
+                    viewModel = hiltViewModel()
+                )
+            }
 
-        composable(Screen.MeetingCreate.route) {
-            MeetingCreateScreen(
-                viewModel = hiltViewModel(),
-                onBack = { navController.popBackStack() },
-                onSuccess = { navController.popBackStack() }
-            )
+            composable(Screen.MeetingCreate.route) {
+                MeetingCreateScreen(
+                    viewModel = hiltViewModel(),
+                    onBack = { navController.popBackStack() },
+                    onSuccess = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

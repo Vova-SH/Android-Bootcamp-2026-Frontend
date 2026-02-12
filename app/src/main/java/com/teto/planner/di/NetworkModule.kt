@@ -29,6 +29,7 @@ import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import javax.inject.Singleton
+
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
@@ -71,7 +72,7 @@ object NetworkModule {
 
             defaultRequest {
                 url(BASE_URL)
-                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                header(HttpHeaders.Accept, ContentType.Application.Json)
             }
 
             install(HttpTimeout) {
@@ -91,9 +92,19 @@ object NetworkModule {
         }.apply {
             plugin(HttpSend).intercept { request ->
                 val path = request.url.encodedPath
+
+                if (path.contains("/users") && path.contains("/avatar") && request.method.value == "GET") {
+                    request.headers.remove(HttpHeaders.Accept)
+                    request.header(HttpHeaders.Accept, "image/*")
+                }
+
+                if (path == "/api/me/avatar" && request.method.value == "PUT") {
+                    request.headers.remove(HttpHeaders.Accept)
+                    request.header(HttpHeaders.Accept, ContentType.Application.Json)
+                }
+
                 if (!path.contains("login") && !path.contains("register")) {
                     val creds = credentialsHolder.credentialsFlow.value
-
                     if (creds != null) {
                         val authString = "${creds.login}:${creds.pass}"
                         val encodedAuth = Base64.encodeToString(authString.toByteArray(), Base64.NO_WRAP)

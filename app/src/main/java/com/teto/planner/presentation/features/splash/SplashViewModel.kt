@@ -29,7 +29,6 @@ class SplashViewModel @Inject constructor(
 
     private fun checkAuth() {
         viewModelScope.launch {
-            // fixme эту штуку по факту для красоты нужно так долго держать, нужно чтобы был рисунок какой-то здесь
             val minDelay = launch { delay(500) }
 
             val credentials = credentialsHolder.getCredentials()

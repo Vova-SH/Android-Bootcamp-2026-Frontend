@@ -15,11 +15,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.teto.planner.presentation.navigation.AppNavHost
+import com.teto.planner.presentation.navigation.NavigationItem
 import com.teto.planner.presentation.navigation.bottomNavItems
 import com.teto.planner.presentation.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -82,9 +82,8 @@ fun MyBottomNavigationBar(
                 label = { Text(item.label) },
                 selected = isSelected,
                 onClick = {
-                    // fixme экраны не сейвятся при переходе в bottom nav
                     navController.navigate(item.screen.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
+                        popUpTo(NavigationItem.Schedule.screen.route) {
                             saveState = true
                         }
                         launchSingleTop = true

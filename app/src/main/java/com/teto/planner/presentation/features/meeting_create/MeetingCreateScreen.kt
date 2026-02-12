@@ -28,7 +28,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.EditCalendar
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.Button
@@ -79,22 +79,15 @@ import com.teto.planner.domain.model.meeting.IntersectionResponse
 import com.teto.planner.domain.model.meeting.IntersectionSlot
 import com.teto.planner.domain.model.meeting.IntersectionSlotStatus
 import com.teto.planner.domain.model.user.UserSummary
+import com.teto.planner.presentation.common.UserAvatar
+import com.teto.planner.presentation.common.UserDetailsDialog
+import com.teto.planner.presentation.common.getStatusColor
 import com.teto.planner.presentation.theme.AppTheme
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-
-// fixme этот ужас надо чинить, вот список багов:
-// можно выбрать себя из списка
-
-// todo
-// добавить кнопку экстренной брони - взял юзеров - тык - создал встречу на ближайшее время
-// посмотреть как работают пересечения - в очень редких кейсах они появляются
-// в случаях конфликтов сделать кликабельный профиль - тык - alert dialog с инфой по челу и большая кнопка с телегой
-// кэшировать список недавно выбранных пользователей - в datastore подсказки хранить
-// подумать насчет блока чипсов которые не подходят к местному времени
 
 @Composable
 fun MeetingCreateScreen(
@@ -136,6 +129,15 @@ fun MeetingCreateContent(
     onCreateMeeting: () -> Unit,
     onBack: () -> Unit
 ) {
+    var userDetailsToShow by remember { mutableStateOf<UserSummary?>(null) }
+
+    if (userDetailsToShow != null) {
+        UserDetailsDialog(
+            user = userDetailsToShow!!,
+            onDismiss = { userDetailsToShow = null }
+        )
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -182,7 +184,8 @@ fun MeetingCreateContent(
                         onRoomSelected = onRoomSelected,
                         onTitleChanged = onTitleChanged,
                         onDescriptionChanged = onDescriptionChanged,
-                        onCreateMeeting = onCreateMeeting
+                        onCreateMeeting = onCreateMeeting,
+                        onShowUserDetails = { userDetailsToShow = it }
                     )
                 }
             }
@@ -203,7 +206,8 @@ private fun SuccessLayout(
     onRoomSelected: (String) -> Unit,
     onTitleChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
-    onCreateMeeting: () -> Unit
+    onCreateMeeting: () -> Unit,
+    onShowUserDetails: (UserSummary) -> Unit
 ) {
     var searchExpanded by rememberSaveable { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -266,7 +270,7 @@ private fun SuccessLayout(
                 modifier = Modifier.fillMaxWidth(),
                 query = state.searchQuery,
                 onQueryChange = onSearchQueryChanged,
-                onSearch = { searchExpanded = false },
+                onSearch = { },
                 active = searchExpanded,
                 onActiveChange = { searchExpanded = it },
                 placeholder = { Text("Добавить участников") },
@@ -289,50 +293,79 @@ private fun SuccessLayout(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(state.searchResults) { user ->
-                        val isSelected = state.selectedParticipants.any { it.id == user.id }
-
-                        ListItem(
-                            headlineContent = { Text(user.name) },
-                            leadingContent = {
-                                Icon(
-                                    Icons.Default.Person,
-                                    contentDescription = null
+                    if (state.searchQuery.isBlank()) {
+                        if (state.recentUsers.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "Недавние",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(bottom = 8.dp)
                                 )
-                            },
-                            trailingContent = {
-                                if (isSelected) {
-                                    Icon(
-                                        Icons.Default.Check,
-                                        contentDescription = "Уже выбран",
-                                        tint = MaterialTheme.colorScheme.primary
+                            }
+                            items(state.recentUsers) { user ->
+                                val isSelected = state.selectedParticipants.any { it.id == user.id }
+                                UserListItem(
+                                    user = user,
+                                    isSelected = isSelected,
+                                    isRecent = true,
+                                    onSelect = {
+                                        onParticipantSelected(user)
+                                        searchExpanded = false
+                                        onSearchQueryChanged("")
+                                    },
+                                    onShowDetails = onShowUserDetails
+                                )
+                            }
+                        } else {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(32.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Здесь будут ваши частые контакты",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-                            },
-                            modifier = Modifier
-                                .clickable(enabled = !isSelected) {
+                            }
+                        }
+                    } else {
+                        items(state.searchResults) { user ->
+                            val isSelected = state.selectedParticipants.any { it.id == user.id }
+                            UserListItem(
+                                user = user,
+                                isSelected = isSelected,
+                                isRecent = false,
+                                onSelect = {
                                     onParticipantSelected(user)
                                     searchExpanded = false
                                     onSearchQueryChanged("")
-                                }
-                                .alpha(if (isSelected) 0.5f else 1f)
-                        )
-                    }
+                                },
+                                onShowDetails = onShowUserDetails
+                            )
+                        }
 
-                    if (state.canLoadMoreUsers) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    strokeWidth = 2.dp
-                                )
-                                LaunchedEffect(Unit) {
-                                    onLoadMoreUsers()
+                        if (state.canLoadMoreUsers || state.isLoadingMoreUsers) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                    LaunchedEffect(state.searchPage) {
+                                        if (!state.isLoadingMoreUsers && state.canLoadMoreUsers) {
+                                            onLoadMoreUsers()
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -349,7 +382,8 @@ private fun SuccessLayout(
             items(state.selectedParticipants) { user ->
                 ParticipantCard(
                     user = user,
-                    onRemove = { onParticipantRemoved(user.id) }
+                    onRemove = { onParticipantRemoved(user.id) },
+                    onAvatarClick = { onShowUserDetails(user) }
                 )
             }
 
@@ -492,7 +526,66 @@ private fun SuccessLayout(
 }
 
 @Composable
-fun ParticipantCard(user: UserSummary, onRemove: () -> Unit) {
+fun UserListItem(
+    user: UserSummary,
+    isSelected: Boolean,
+    isRecent: Boolean,
+    onSelect: () -> Unit,
+    onShowDetails: (UserSummary) -> Unit
+) {
+    ListItem(
+        headlineContent = { Text(user.name) },
+        leadingContent = {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .border(
+                        width = 2.dp,
+                        color = getStatusColor(user.loadStatus),
+                        shape = CircleShape
+                    )
+                    .padding(2.dp)
+                    .clip(CircleShape)
+                    .clickable { onShowDetails(user) }
+            ) {
+                UserAvatar(
+                    url = user.avatarUrl,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        },
+        trailingContent = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (isRecent) {
+                    Icon(
+                        imageVector = Icons.Default.History,
+                        contentDescription = "Недавний",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                if (isSelected) {
+                    Icon(
+                        Icons.Default.Check,
+                        contentDescription = "Уже выбран",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        },
+        modifier = Modifier
+            .clickable(enabled = !isSelected) { onSelect() }
+            .alpha(if (isSelected) 0.5f else 1f)
+    )
+}
+
+@Composable
+fun ParticipantCard(
+    user: UserSummary,
+    onRemove: () -> Unit,
+    onAvatarClick: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
@@ -505,13 +598,19 @@ fun ParticipantCard(user: UserSummary, onRemove: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .border(width = 2.dp, color = Color.Green, shape = CircleShape)
+                    .border(
+                        width = 2.dp,
+                        color = getStatusColor(user.loadStatus),
+                        shape = CircleShape
+                    )
                     .padding(2.dp)
                     .clip(CircleShape)
-                    .background(color = MaterialTheme.colorScheme.surface),
-                contentAlignment = Alignment.Center
+                    .clickable(onClick = onAvatarClick)
             ) {
-                Icon(imageVector = Icons.Default.Person, contentDescription = null)
+                UserAvatar(
+                    url = user.avatarUrl,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
             Spacer(modifier = Modifier.width(12.dp))
             Text(
@@ -625,7 +724,11 @@ class MeetingCreateStateProvider : PreviewParameterProvider<MeetingCreateUiState
             selectedHour = 10,
             availableRooms = listOf(mockRoom1, mockRoom2),
             title = "Обсуждение проекта",
-            description = "Краткое описание встречи"
+            description = "Краткое описание встречи",
+            recentUsers = listOf(
+                UserSummary("2", "Петр Петров", null),
+                UserSummary("3", "Сидор Сидоров", null)
+            )
         ),
         MeetingCreateUiState.Error("Ошибка сети")
     )

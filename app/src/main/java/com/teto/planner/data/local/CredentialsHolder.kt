@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -56,15 +57,13 @@ class CredentialsHolder @Inject constructor(
             initialValue = null
         )
 
-    fun setCredentials(l: String, p: String) {
-        scope.launch {
-            val encLogin = cryptoManager.encryptString(l)
-            val encPass = cryptoManager.encryptString(p)
+    suspend fun setCredentials(l: String, p: String) = withContext(Dispatchers.IO) {
+        val encLogin = cryptoManager.encryptString(l)
+        val encPass = cryptoManager.encryptString(p)
 
-            context.dataStore.edit { prefs ->
-                prefs[LOGIN_KEY] = encLogin
-                prefs[PASS_KEY] = encPass
-            }
+        context.dataStore.edit { prefs ->
+            prefs[LOGIN_KEY] = encLogin
+            prefs[PASS_KEY] = encPass
         }
     }
 

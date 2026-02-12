@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,68 +27,110 @@ class ProfileViewModel @Inject constructor(
 
     fun loadProfile() {
         viewModelScope.launch {
-            _uiState.value = ProfileScreenUiState.Loading
-            userRepository.getMe().onSuccess { user ->
-                _uiState.value = ProfileScreenUiState.Success(
-                    user = user,
-                    name = user.name,
-                    telegram = user.telegram ?: "",
-                    bio = user.bio ?: ""
-                )
-            }.onFailure { e ->
-                _uiState.value = ProfileScreenUiState.Error(e.message ?: "Unknown error")
+            _uiState.update { ProfileScreenUiState.Loading }
+
+            userRepository.getMe()
+                .onSuccess { user ->
+                    _uiState.update {
+                        ProfileScreenUiState.Success(
+                            user = user,
+                            name = user.name,
+                            telegram = user.telegram ?: "",
+                            bio = user.bio ?: ""
+                        )
+                    }
+                }
+                .onFailure { e ->
+                    _uiState.update { ProfileScreenUiState.Error(e.message ?: "Unknown error") }
+                }
+        }
+    }
+
+    fun updateAvatar(imageBytes: ByteArray) {
+        viewModelScope.launch {
+            _uiState.update { currentState ->
+                if (currentState is ProfileScreenUiState.Success) {
+                    currentState.copy(isAvatarUploading = true)
+                } else currentState
             }
+
+            userRepository.uploadAvatar(imageBytes)
+                .onSuccess { updatedUser ->
+                    _uiState.update { currentState ->
+                        if (currentState is ProfileScreenUiState.Success) {
+                            currentState.copy(
+                                user = updatedUser,
+                                isAvatarUploading = false
+                            )
+                        } else currentState
+                    }
+                }
+                .onFailure {
+                    _uiState.update { currentState ->
+                        if (currentState is ProfileScreenUiState.Success) {
+                            currentState.copy(isAvatarUploading = false)
+                        } else currentState
+                    }
+                }
         }
     }
 
     fun startEditing() {
-        val currentState = _uiState.value
-        if (currentState is ProfileScreenUiState.Success) {
-            _uiState.value = currentState.copy(isEditing = true)
+        _uiState.update { currentState ->
+            if (currentState is ProfileScreenUiState.Success) {
+                currentState.copy(isEditing = true)
+            } else currentState
         }
     }
 
     fun onNameChange(value: String) {
-        val currentState = _uiState.value
-        if (currentState is ProfileScreenUiState.Success) {
-            _uiState.value = currentState.copy(name = value)
+        _uiState.update { currentState ->
+            if (currentState is ProfileScreenUiState.Success) {
+                currentState.copy(name = value)
+            } else currentState
         }
     }
 
     fun onTelegramChange(value: String) {
-        val currentState = _uiState.value
-        if (currentState is ProfileScreenUiState.Success) {
-            _uiState.value = currentState.copy(telegram = value)
+        _uiState.update { currentState ->
+            if (currentState is ProfileScreenUiState.Success) {
+                currentState.copy(telegram = value)
+            } else currentState
         }
     }
 
     fun onBioChange(value: String) {
-        val currentState = _uiState.value
-        if (currentState is ProfileScreenUiState.Success) {
-            _uiState.value = currentState.copy(bio = value)
+        _uiState.update { currentState ->
+            if (currentState is ProfileScreenUiState.Success) {
+                currentState.copy(bio = value)
+            } else currentState
         }
     }
 
     fun saveProfile() {
-        val currentState = _uiState.value
-        if (currentState is ProfileScreenUiState.Success && currentState.canSave) {
+        val currentStateSnapshot = _uiState.value
+
+        if (currentStateSnapshot is ProfileScreenUiState.Success && currentStateSnapshot.canSave) {
             viewModelScope.launch {
-                _uiState.value = currentState.copy(isSubmitting = true)
+                _uiState.update { (it as? ProfileScreenUiState.Success)?.copy(isSubmitting = true) ?: it }
+
                 userRepository.updateMe(
-                    name = currentState.name,
-                    telegram = currentState.telegram.ifBlank { null },
-                    bio = currentState.bio.ifBlank { null }
+                    name = currentStateSnapshot.name,
+                    telegram = currentStateSnapshot.telegram.ifBlank { null },
+                    bio = currentStateSnapshot.bio.ifBlank { null }
                 ).onSuccess { updatedUser ->
-                    _uiState.value = ProfileScreenUiState.Success(
-                        user = updatedUser,
-                        name = updatedUser.name,
-                        telegram = updatedUser.telegram ?: "",
-                        bio = updatedUser.bio ?: "",
-                        isEditing = false,
-                        isSaveSuccessful = true
-                    )
+                    _uiState.update {
+                        ProfileScreenUiState.Success(
+                            user = updatedUser,
+                            name = updatedUser.name,
+                            telegram = updatedUser.telegram ?: "",
+                            bio = updatedUser.bio ?: "",
+                            isEditing = false,
+                            isSaveSuccessful = true
+                        )
+                    }
                 }.onFailure { e ->
-                    _uiState.value = currentState.copy(isSubmitting = false)
+                    _uiState.update { (it as? ProfileScreenUiState.Success)?.copy(isSubmitting = false) ?: it }
                 }
             }
         }

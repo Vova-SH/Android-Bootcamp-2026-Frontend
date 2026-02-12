@@ -2,6 +2,7 @@ package com.teto.planner.presentation.features.meeting_create
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.teto.planner.domain.model.common.PagedList
 import com.teto.planner.domain.model.user.UserSummary
 import com.teto.planner.domain.repository.MeetingRepository
 import com.teto.planner.domain.repository.RoomRepository
@@ -12,6 +13,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -30,7 +33,32 @@ class MeetingCreateViewModel @Inject constructor(
     private var searchJob: Job? = null
     private val pageSize = 20
 
+    init {
+        loadUser()
+        observeRecentContacts()
+    }
+
+    private fun observeRecentContacts() {
+        userRepository.getRecentUsers()
+            .onEach { recentList ->
+                updateSuccessState { it.copy(recentUsers = recentList) }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun loadUser() {
+        viewModelScope.launch {
+            userRepository.getMe().onSuccess { userMe ->
+                updateSuccessState { it.copy(userMe = userMe) }
+            }.onFailure {
+                updateSuccessState { it.copy(userMe = null) }
+            }
+        }
+    }
+
     fun onSearchQueryChanged(query: String) {
+        val trimmedQuery = query.trim()
+
         updateSuccessState {
             it.copy(
                 searchQuery = query,
@@ -39,28 +67,41 @@ class MeetingCreateViewModel @Inject constructor(
             )
         }
 
+        val state = _uiState.value as? MeetingCreateUiState.Success ?: return
+        val userMeId = state.userMe?.id
+
         searchJob?.cancel()
+
+        if (query.isBlank()) {
+            updateSuccessState { it.copy(isSearching = false) }
+            return
+        }
+
         searchJob = viewModelScope.launch {
             delay(300)
-            if (query.isBlank()) {
-                updateSuccessState { it.copy(searchResults = emptyList(), isSearching = false) }
-                return@launch
-            }
 
             updateSuccessState { it.copy(isSearching = true) }
 
-            userRepository.listUsers(query = query, page = 0, size = pageSize).onSuccess { pagedList ->
-                updateSuccessState {
-                    it.copy(
-                        searchResults = pagedList.items,
-                        searchMeta = pagedList.meta,
-                        isSearching = false,
-                        searchPage = 0
+            userRepository.listUsers(query = trimmedQuery, page = 0, size = pageSize)
+                .onSuccess { pagedList ->
+                    val foundMe = pagedList.items.any { it.id == userMeId}
+                    val filteredList = pagedList.items.filterNot { it.id == userMeId }
+                    val filteredPagedList = PagedList(
+                        items = filteredList,
+                        meta = pagedList.meta
                     )
+                    updateSuccessState {
+                        it.copy(
+                            searchResults = filteredPagedList.items,
+                            searchMeta = filteredPagedList.meta,
+                            isSearching = false,
+                            searchPage = 0,
+                            isUserMeDeleted = foundMe
+                        )
+                    }
+                }.onFailure {
+                    updateSuccessState { it.copy(isSearching = false) }
                 }
-            }.onFailure {
-                updateSuccessState { it.copy(isSearching = false) }
-            }
         }
     }
 
@@ -68,22 +109,34 @@ class MeetingCreateViewModel @Inject constructor(
         val state = _uiState.value as? MeetingCreateUiState.Success ?: return
         if (!state.canLoadMoreUsers) return
 
+        val userMeId = state.userMe?.id
         val nextPage = state.searchPage + 1
+        val trimmedQuery = state.searchQuery.trim()
+
+        if (trimmedQuery.isEmpty()) return
 
         updateSuccessState { it.copy(isLoadingMoreUsers = true) }
 
         viewModelScope.launch {
             userRepository.listUsers(
-                query = state.searchQuery,
+                query = trimmedQuery,
                 page = nextPage,
                 size = pageSize
             ).onSuccess { pagedList ->
+                if (pagedList.items.isEmpty()) {
+                    updateSuccessState { it.copy(isLoadingMoreUsers = false) }
+                    return@onSuccess
+                }
+                val foundMeOnThisPage = pagedList.items.any { it.id == userMeId }
+                val filteredList = pagedList.items.filterNot { it.id == userMeId }
+
                 updateSuccessState { currentState ->
                     currentState.copy(
-                        searchResults = currentState.searchResults + pagedList.items,
+                        searchResults = currentState.searchResults + filteredList,
                         searchMeta = pagedList.meta,
                         searchPage = nextPage,
-                        isLoadingMoreUsers = false
+                        isLoadingMoreUsers = false,
+                        isUserMeDeleted = currentState.isUserMeDeleted || foundMeOnThisPage
                     )
                 }
             }.onFailure {
@@ -95,17 +148,17 @@ class MeetingCreateViewModel @Inject constructor(
     fun onParticipantSelected(user: UserSummary) {
         updateSuccessState { state ->
             if (state.selectedParticipants.any { it.id == user.id }) {
-                return@updateSuccessState state.copy(
+                state.copy(
+                    searchQuery = "",
+                    searchResults = emptyList()
+                )
+            } else {
+                state.copy(
+                    selectedParticipants = state.selectedParticipants + user,
                     searchQuery = "",
                     searchResults = emptyList()
                 )
             }
-
-            state.copy(
-                selectedParticipants = state.selectedParticipants + user,
-                searchQuery = "",
-                searchResults = emptyList()
-            )
         }
         updateIntersectionData()
     }
@@ -132,13 +185,13 @@ class MeetingCreateViewModel @Inject constructor(
     }
 
     private fun updateIntersectionData() {
-        val state = _uiState.value as? MeetingCreateUiState.Success ?: return
-        if (state.selectedParticipants.isEmpty()) {
-            updateSuccessState { it.copy(intersectionResponse = null) }
-            return
-        }
-
         viewModelScope.launch {
+            val state = _uiState.value as? MeetingCreateUiState.Success
+            if (state == null || state.selectedParticipants.isEmpty()) {
+                updateSuccessState { it.copy(intersectionResponse = null) }
+                return@launch
+            }
+
             meetingRepository.getIntersection(
                 date = state.selectedDate,
                 userIds = state.selectedParticipants.map { it.id }
@@ -154,11 +207,14 @@ class MeetingCreateViewModel @Inject constructor(
     }
 
     private fun updateAvailableRooms() {
-        val state = _uiState.value as? MeetingCreateUiState.Success ?: return
-        val hour = state.selectedHour ?: return
-
-        updateSuccessState { it.copy(isLoadingRooms = true) }
         viewModelScope.launch {
+            val state = _uiState.value as? MeetingCreateUiState.Success
+            val hour = state?.selectedHour
+
+            if (state == null || hour == null) return@launch
+
+            updateSuccessState { it.copy(isLoadingRooms = true) }
+
             roomRepository.listAvailableRooms(
                 date = state.selectedDate,
                 startHour = hour
@@ -193,6 +249,7 @@ class MeetingCreateViewModel @Inject constructor(
         if (!state.canSubmit) return
 
         updateSuccessState { it.copy(isSubmitting = true) }
+
         viewModelScope.launch {
             meetingRepository.createMeeting(
                 date = state.selectedDate,
@@ -203,6 +260,7 @@ class MeetingCreateViewModel @Inject constructor(
                 roomId = state.selectedRoomId,
                 participantIds = state.selectedParticipants.map { it.id }
             ).onSuccess {
+                userRepository.saveRecentUsers(state.selectedParticipants)
                 onSuccess()
             }.onFailure { error ->
                 updateSuccessState { it.copy(isSubmitting = false) }

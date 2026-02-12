@@ -21,9 +21,25 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            val keystorePath = project.properties["MYAPP_RELEASE_STORE_FILE"] as? String
+
+            if (keystorePath != null) {
+                storeFile = file(keystorePath)
+                storePassword = project.properties["MYAPP_RELEASE_STORE_PASSWORD"] as String
+                keyAlias = project.properties["MYAPP_RELEASE_KEY_ALIAS"] as String
+                keyPassword = project.properties["MYAPP_RELEASE_KEY_PASSWORD"] as String
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+
+            signingConfig = signingConfigs.getByName("release")
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -59,14 +75,14 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.coil.compose)
     implementation(libs.material.icons)
     implementation(libs.material.icons.extended)
     implementation(libs.kizitonwose.calendar)
     implementation(libs.bundles.ktor.client)
+    implementation(libs.bundles.coil)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.crop.kit)
 }
-
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile>().configureEach {
     compilerOptions {

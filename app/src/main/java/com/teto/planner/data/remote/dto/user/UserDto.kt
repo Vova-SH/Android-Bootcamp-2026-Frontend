@@ -43,12 +43,15 @@ fun UserSummaryDto.toDomain() = UserSummary(
     id = id,
     name = name,
     avatarUrl = avatarUrl,
+    telegram = telegramNick,
+    bio = bio,
     busyHours = busyHours ?: 0,
     loadStatus = try {
         LoadStatus.valueOf(loadStatus ?: "LOW")
     } catch (e: Exception) {
         LoadStatus.LOW
-    }
+    },
+    updatedAt = null
 )
 
 
@@ -59,7 +62,8 @@ fun UserMeDto.toDomain() = UserMe(
     bio = bio,
     telegram = telegramNick,
     avatarUrl = avatarUrl,
-    roles = roles?.map { it.toDomain() } ?: emptyList()
+    roles = roles?.map { it.toDomain() } ?: emptyList(),
+    updatedAt = updatedAt
 )
 
 fun RoleDto.toDomain() = Role(

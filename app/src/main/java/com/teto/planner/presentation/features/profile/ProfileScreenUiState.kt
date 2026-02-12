@@ -12,6 +12,7 @@ sealed interface ProfileScreenUiState {
         val bio: String = "",
         val isEditing: Boolean = false,
         val isSubmitting: Boolean = false,
+        val isAvatarUploading: Boolean = false,
         val isSaveSuccessful: Boolean = false
     ) : ProfileScreenUiState {
         val hasChanges: Boolean

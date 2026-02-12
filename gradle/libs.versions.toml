@@ -12,10 +12,11 @@ navigation = "2.9.6"
 hiltNavigationCompose = "1.3.0"
 hilt = "2.58"
 ksp = "2.3.4"
-coil = "2.7.0"
+coil = "3.3.0"
 calendar = "2.10.0"
 ktor = "3.4.0"
 datastore = "1.0.0"
+cropKit = "1.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,7 +37,6 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 material-icons = { group = "androidx.compose.material", name = "material-icons-core" }
 material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 kizitonwose-calendar = { group = "com.kizitonwose.calendar", name = "compose", version.ref = "calendar" }
@@ -47,6 +47,10 @@ ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serializatio
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
 ktor-client-auth = { group = "io.ktor", name = "ktor-client-auth", version.ref = "ktor" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+coil-core = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-ktor = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coil" }
+crop-kit = { group = "com.github.Tanish-Ranjan", name = "crop-kit", version.ref = "cropKit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -64,4 +68,9 @@ ktor-client = [
     "ktor-serialization-kotlinx-json",
     "ktor-client-logging",
     "ktor-client-auth"
+]
+coil = [
+    "coil-core",
+    "coil-compose",
+    "coil-network-ktor"
 ]

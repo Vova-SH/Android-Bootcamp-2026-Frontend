@@ -7,8 +7,10 @@ import com.teto.planner.data.remote.dto.meeting.InvitationResponseRequest
 import com.teto.planner.data.remote.dto.meeting.MeetingCreateRequest
 import com.teto.planner.data.remote.dto.meeting.MeetingDto
 import com.teto.planner.data.remote.dto.meeting.MeetingParticipantDto
+import com.teto.planner.data.remote.dto.meeting.MeetingUpdateRequest
 import com.teto.planner.data.remote.dto.meeting.toDomain
 import com.teto.planner.data.remote.dto.toDomain
+import com.teto.planner.data.remote.dto.user.UserMeDto
 import com.teto.planner.domain.model.common.PageMeta
 import com.teto.planner.domain.model.common.PagedList
 import com.teto.planner.domain.model.meeting.IntersectionResponse
@@ -22,6 +24,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
@@ -36,17 +39,21 @@ class MeetingRepositoryImpl @Inject constructor(
     override suspend fun getMeetings(
         startDate: LocalDate,
         endDate: LocalDate,
-        includePending: Boolean
+        includePending: Boolean,
+        page: Int,
+        size: Int
     ): Result<PagedList<Meeting>> = runCatching {
         val response = client.get("api/meetings") {
             parameter("startDate", startDate.toString())
             parameter("endDate", endDate.toString())
             parameter("includePending", includePending)
+            parameter("page", page)
+            parameter("size", size)
         }.body<MeetingsPageDto>()
 
         PagedList(
             items = response.items.map { it.toDomain() },
-            meta = response.meta?.toDomain() ?: PageMeta(0, 50, response.items.size.toLong())
+            meta = response.meta?.toDomain() ?: PageMeta(0, size, response.items.size.toLong())
         )
     }
 
@@ -75,6 +82,26 @@ class MeetingRepositoryImpl @Inject constructor(
             participantIds = participantIds
         )
         client.post("api/meetings") {
+            contentType(Json)
+            setBody(request)
+        }.body<MeetingDto>().toDomain()
+    }
+
+    override suspend fun updateMeeting(
+        meetingId: String,
+        title: String?,
+        description: String?,
+        roomId: String?,
+        status: String?
+    ): Result<Meeting> = runCatching {
+        val request = MeetingUpdateRequest(
+            title = title,
+            description = description,
+            roomId = roomId,
+            status = status
+        )
+
+        client.patch("api/meetings/$meetingId") {
             contentType(Json)
             setBody(request)
         }.body<MeetingDto>().toDomain()
@@ -116,5 +143,9 @@ class MeetingRepositoryImpl @Inject constructor(
             contentType(Json)
             setBody(request)
         }.body<MeetingParticipantDto>().toDomain()
+    }
+
+    override suspend fun getCurrentUserId(): Result<String> = runCatching {
+        client.get("api/me").body<UserMeDto>().id
     }
 }

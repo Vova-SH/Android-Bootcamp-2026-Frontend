@@ -8,3 +8,6 @@
 .cxx
 local.properties
 app/build/
+*.jks
+*.keystore
+gradle.properties

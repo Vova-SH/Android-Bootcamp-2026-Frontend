@@ -14,7 +14,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,21 +40,30 @@ import java.util.Locale
 fun SharedCalendar(
     selectedDate: LocalDate,
     onDateSelected: (LocalDate) -> Unit,
+    onMonthChanged: (LocalDate) -> Unit,
     meetingsByDate: Map<LocalDate, List<Meeting>>,
     modifier: Modifier = Modifier
 ) {
-    val currentMonth = remember { YearMonth.now() }
-    val startMonth = remember { currentMonth.minusMonths(12) }
-    val endMonth = remember { currentMonth.plusMonths(12) }
+    val initialMonth = remember { YearMonth.from(selectedDate) }
+
+    val startMonth = remember { initialMonth.minusMonths(24) }
+    val endMonth = remember { initialMonth.plusMonths(24) }
     val firstDayOfWeek = remember { firstDayOfWeekFromLocale() }
 
     val state = rememberCalendarState(
         startMonth = startMonth,
         endMonth = endMonth,
-        firstVisibleMonth = currentMonth,
+        firstVisibleMonth = initialMonth,
         firstDayOfWeek = firstDayOfWeek,
         outDateStyle = OutDateStyle.EndOfGrid
     )
+
+    LaunchedEffect(state) {
+        snapshotFlow { state.firstVisibleMonth.yearMonth }
+            .collect { yearMonth ->
+                onMonthChanged(yearMonth.atDay(1))
+            }
+    }
 
     HorizontalCalendar(
         state = state,
@@ -101,27 +112,31 @@ private fun DayCell(
 ) {
     val isCurrentMonthDay = day.position == DayPosition.MonthDate
 
-    val textColor = if (isCurrentMonthDay) MaterialTheme.colorScheme.onSurface else Color.LightGray.copy(alpha = 0.5f)
+    val textColor =
+        if (isCurrentMonthDay) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(
+            alpha = 0.3f
+        )
 
     Box(
         modifier = Modifier
             .aspectRatio(1f)
             .padding(4.dp)
             .clip(CircleShape)
-            .background(if (isSelected && isCurrentMonthDay) MaterialTheme.colorScheme.primary else Color.Transparent)
-            .clickable(enabled = isCurrentMonthDay) { onClick(day) },
+            .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
+            .clickable { onClick(day) },
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = day.date.dayOfMonth.toString(),
-                color = if (isSelected && isCurrentMonthDay) MaterialTheme.colorScheme.onPrimary else textColor,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else textColor,
                 style = MaterialTheme.typography.bodyLarge
             )
 
-            if (hasMeeting && isCurrentMonthDay) {
+            if (hasMeeting) {
                 Box(
                     modifier = Modifier
+                        .padding(top = 2.dp)
                         .size(4.dp)
                         .clip(CircleShape)
                         .background(if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary)

@@ -41,12 +41,12 @@ class LoginViewModel @Inject constructor(
     )
 
     fun onLoginInputChange(newValue: String) {
-        sharedState.login.value = newValue
+        sharedState.login.update { newValue }
         clearError()
     }
 
     fun onPasswordInputChange(newValue: String) {
-        sharedState.password.value = newValue
+        sharedState.password.update { newValue }
         clearError()
     }
 
@@ -63,6 +63,7 @@ class LoginViewModel @Inject constructor(
             repository.login(currentLogin, currentPassword)
                 .fold(
                     onSuccess = {
+                        sharedState.clear()
                         _localState.update { it.copy(isSubmitting = false, isSuccess = true) }
                     },
                     onFailure = { error ->

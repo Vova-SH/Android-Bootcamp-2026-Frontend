@@ -1,7 +1,10 @@
 package com.teto.planner.domain.repository
 
 import com.teto.planner.domain.model.common.PagedList
-import com.teto.planner.domain.model.meeting.*
+import com.teto.planner.domain.model.meeting.IntersectionResponse
+import com.teto.planner.domain.model.meeting.Invitation
+import com.teto.planner.domain.model.meeting.Meeting
+import com.teto.planner.domain.model.meeting.MeetingParticipant
 import com.teto.planner.domain.model.user.ParticipantStatus
 import java.time.LocalDate
 
@@ -9,7 +12,9 @@ interface MeetingRepository {
     suspend fun getMeetings(
         startDate: LocalDate,
         endDate: LocalDate,
-        includePending: Boolean = false
+        includePending: Boolean = false,
+        page: Int = 0,
+        size: Int = 50
     ): Result<PagedList<Meeting>>
 
     suspend fun getMeeting(id: String): Result<Meeting>
@@ -24,6 +29,14 @@ interface MeetingRepository {
         participantIds: List<String>
     ): Result<Meeting>
 
+    suspend fun updateMeeting(
+        meetingId: String,
+        title: String? = null,
+        description: String? = null,
+        roomId: String? = null,
+        status: String? = null
+    ): Result<Meeting>
+
     suspend fun getIntersection(
         date: LocalDate,
         userIds: List<String>
@@ -31,12 +44,12 @@ interface MeetingRepository {
 
     suspend fun cancelMeeting(id: String): Result<Unit>
 
-    suspend fun listInvitations(
-        status: ParticipantStatus = ParticipantStatus.PENDING
-    ): Result<PagedList<Invitation>>
+    suspend fun listInvitations(status: ParticipantStatus): Result<PagedList<Invitation>>
 
     suspend fun respondToInvitation(
         meetingId: String,
         status: ParticipantStatus
     ): Result<MeetingParticipant>
+
+    suspend fun getCurrentUserId(): Result<String>
 }

@@ -45,22 +45,22 @@ class RegisterViewModel @Inject constructor(
     )
 
     fun onNameChange(newValue: String) {
-        sharedState.name.value = newValue
+        sharedState.name.update { newValue }
         clearError()
     }
 
     fun onLoginChange(newValue: String) {
-        sharedState.login.value = newValue
+        sharedState.login.update { newValue }
         clearError()
     }
 
     fun onPasswordChange(newValue: String) {
-        sharedState.password.value = newValue
+        sharedState.password.update { newValue }
         clearError()
     }
 
     fun onTelegramNickChange(newValue: String) {
-        sharedState.telegramNick.value = newValue
+        sharedState.telegramNick.update { newValue }
         clearError()
     }
 
@@ -83,6 +83,7 @@ class RegisterViewModel @Inject constructor(
                 telegramNick = telegram
             ).fold(
                 onSuccess = {
+                    sharedState.clear()
                     _localState.update { it.copy(isSubmitting = false, isSuccess = true) }
                 },
                 onFailure = { error ->
