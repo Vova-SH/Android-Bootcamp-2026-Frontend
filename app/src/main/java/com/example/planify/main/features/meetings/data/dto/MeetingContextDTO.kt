@@ -7,6 +7,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MeetingContextDTO(
+    @SerialName("invitedUserProfiles")
+    val invitedUserProfiles: List<ProfileDTO>,
+
     @SerialName("participantProfiles")
     val participantProfiles: List<ProfileDTO>,
 
@@ -17,6 +20,7 @@ data class MeetingContextDTO(
     val meeting: MeetingDTO
 ) {
     fun toEntity(): MeetingContext = MeetingContext(
+        invitedUserProfiles = invitedUserProfiles.map { it.toEntity() },
         participantProfiles = participantProfiles.map { it.toEntity() },
         invites = invites.map { it.toEntity() },
         meeting = meeting.toEntity(),

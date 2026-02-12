@@ -33,7 +33,7 @@ import com.example.planify.main.common.themes.Locals
 
 @Composable
 fun TopBar(
-    onBack: () -> Unit,
+    onBack: () -> Unit
     ) {
     val colors = MaterialTheme.colorScheme
 

@@ -1,7 +1,6 @@
 package com.example.planify.main.features.meetings.domain.repositories
 
 import com.example.planify.main.features.meetings.domain.entities.MeetingInvite
-import com.example.planify.main.features.meetings.domain.entities.Participant
 import java.time.LocalDateTime
 
 interface MeetingInvitesRepository {

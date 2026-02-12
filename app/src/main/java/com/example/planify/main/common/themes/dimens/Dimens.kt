@@ -37,5 +37,12 @@ data class Dimens(
     val editProfileBottomBarButtonHeight: Dp = 56.dp,
     val editProfileCardHeight: Dp = 200.dp,
     val authButtonHeight: Dp = 56.dp,
-    val inboxBoxTopNavBarHeight: Dp = 72.dp
+    val inboxBoxTopNavBarHeight: Dp = 72.dp,
+    val meetingInboxCardHeight: Dp = 280.dp,
+    val buttonMeetingInboxCardHeight: Dp = 44.dp,
+    val meetingInboxCardHeightShort: Dp = 160.dp,
+    val dotCalendarSize: Dp = 4.dp,
+    val notificationCardHeight: Dp = 100.dp,
+    val dotContainerSize: Dp = 18.dp,
+    val dotCalendarContainerSize: Dp = 14.dp
 )

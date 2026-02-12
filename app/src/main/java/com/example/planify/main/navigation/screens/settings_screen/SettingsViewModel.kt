@@ -17,13 +17,11 @@ import kotlinx.coroutines.launch
 class SettingsViewModel @Inject constructor(
     val settingsService: SettingsService
 ): ViewModel() {
-
     private val _uiState: MutableStateFlow<UIState> = MutableStateFlow(UIState.Loading)
 
     val uiState: StateFlow<UIState> = _uiState.asStateFlow()
 
     init {
-        Log.d("VIEWMODEL", "I AM ALIVE!!!")
         viewModelScope.launch {
             _uiState.emit(UIState.Loading)
 

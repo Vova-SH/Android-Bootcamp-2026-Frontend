@@ -7,6 +7,5 @@ data class CreateMeetingSchema(
     val description: String,
     val location: String,
     val startsAt: LocalDateTime,
-    val duration: Int,
-    val inviteUserIds: List<Long>? = null
+    val duration: Int
 )

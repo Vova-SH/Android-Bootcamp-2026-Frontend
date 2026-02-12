@@ -13,9 +13,9 @@ data class ProfileDTO(
     @SerialName("lastName")
     val lastName: String,
     @SerialName("position")
-    val position: String,
+    val position: String?,
     @SerialName("department")
-    val department: String,
+    val department: String?,
     @SerialName("profileImageUrl")
     val profileImageUrl: String
 ) {
@@ -23,8 +23,8 @@ data class ProfileDTO(
         userId = userId,
         firstName = firstName,
         lastName = lastName,
-        position = position,
-        department = department,
+        position = position ?: "",
+        department = department ?: "",
         profileImageUrl = profileImageUrl
     )
 }

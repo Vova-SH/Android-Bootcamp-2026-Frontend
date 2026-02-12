@@ -1,117 +1,81 @@
 package com.example.planify.main.features.auth.data.repositories_impl
 
-import com.example.planify.main.common.network.api_client.ApiClient
-import com.example.planify.main.features.auth.data.dto.get_actual_auth_context.GetActualAuthContextDTO
-import com.example.planify.main.features.auth.data.dto.login.LoginRequestDTO
-import com.example.planify.main.features.auth.data.dto.login.LoginResponseDTO
-import com.example.planify.main.features.auth.data.dto.refresh.RefreshRequestDTO
-import com.example.planify.main.features.auth.data.dto.refresh.RefreshResponseDTO
-import com.example.planify.main.features.auth.data.dto.register.RegisterRequestDTO
-import com.example.planify.main.features.auth.data.dto.register.RegisterResponseDTO
+import com.example.planify.main.features.auth.data.sources.AuthLocalDataSource
+import com.example.planify.main.features.auth.data.sources.AuthRemoteDataSource
 import com.example.planify.main.features.auth.domain.entities.AuthContext
+import com.example.planify.main.features.auth.domain.entities.AuthState
 import com.example.planify.main.features.auth.domain.entities.AuthTokenPair
 import com.example.planify.main.features.auth.domain.entities.LoginResult
 import com.example.planify.main.features.auth.domain.repositories.AuthRepository
-import io.ktor.client.request.headers
-import io.ktor.client.request.setBody
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
-import io.ktor.http.path
+import com.example.planify.main.features.auth.domain.schemas.AuthLocalInfoSchema
+import com.example.planify.main.features.auth.domain.schemas.RegisterUserSchema
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
 
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
-    private val apiClient: ApiClient
+    private val remoteDatasource: AuthRemoteDataSource,
+    private val localDatasource: AuthLocalDataSource
 ) : AuthRepository {
-    private val authFeaturePath = "/auth"
+    private val _authStateFlow: MutableStateFlow<AuthState> = MutableStateFlow(AuthState.Loading)
+    override val authStateFlow: StateFlow<AuthState> = _authStateFlow.asStateFlow()
 
-    private val registerPath = "$authFeaturePath/register"
-    private val loginPath = "$authFeaturePath/login"
-    private val refreshPath = "$authFeaturePath/refresh"
-    private val fetchActualAuthContextPath = "$authFeaturePath/context"
+    override val localAuthInfoFlow: Flow<AuthLocalInfoSchema?> = localDatasource.authInfoFlow
 
-    override suspend fun register(username: String, email: String, password: String): Result<LoginResult> = withContext(Dispatchers.IO) {
-        val requestDto = RegisterRequestDTO(
-            username = username,
-            email = email,
-            password = password
-        )
+    override suspend fun setAuthState(state: AuthState, syncLocal: Boolean) {
+        if (syncLocal) {
+            when (state) {
+                is AuthState.Loading -> {}
 
-        return@withContext runCatching {
-            val responseDTO = apiClient.requestNotNull<RegisterResponseDTO> {
-                method = HttpMethod.Post
-                url { path(registerPath) }
-                setBody(requestDto)
-            }
+                is AuthState.Authenticated -> {
+                    saveLocalAuthInfo(
+                        AuthLocalInfoSchema(
+                            accessToken = state.tokenPair.accessToken,
+                            refreshToken = state.tokenPair.refreshToken
+                        )
+                    )
+                }
 
-            LoginResult(
-                authContext = AuthContext(
-                    session = responseDTO.session.toEntity(),
-                    user = responseDTO.user.toEntity(),
-                    accessInfo = responseDTO.accessInfo.toEntity()
-                ),
-                tokens = responseDTO.tokens.toEntity()
-            )
-        }
-    }
-
-    override suspend fun login(email: String, password: String): Result<LoginResult> = withContext(Dispatchers.IO) {
-        val requestDto = LoginRequestDTO(
-            email = email,
-            password = password
-        )
-
-        return@withContext runCatching {
-            val responseDTO = apiClient.requestNotNull<LoginResponseDTO> {
-                method = HttpMethod.Post
-                url { path(loginPath) }
-                setBody(requestDto)
-            }
-
-            LoginResult(
-                authContext = AuthContext(
-                    session = responseDTO.session.toEntity(),
-                    user = responseDTO.user.toEntity(),
-                    accessInfo = responseDTO.accessInfo.toEntity()
-                ),
-                tokens = responseDTO.tokens.toEntity()
-            )
-        }
-    }
-
-    override suspend fun refresh(refreshToken: String): Result<AuthTokenPair> = withContext(Dispatchers.IO) {
-        val requestDto = RefreshRequestDTO(
-            refreshToken = refreshToken
-        )
-
-        return@withContext runCatching {
-            val responseDTO = apiClient.requestNotNull<RefreshResponseDTO> {
-                method = HttpMethod.Post
-                url { path(refreshPath) }
-                setBody(requestDto)
-            }
-
-            AuthTokenPair(
-                accessToken = responseDTO.accessToken,
-                refreshToken = responseDTO.refreshToken
-            )
-        }
-    }
-
-    override suspend fun fetchActualAuthContext(accessToken: String): Result<AuthContext> = withContext(Dispatchers.IO) {
-        return@withContext runCatching {
-            val response = apiClient.requestNotNull<GetActualAuthContextDTO> {
-                method = HttpMethod.Get
-                url { path(fetchActualAuthContextPath) }
-                headers {
-                    set(HttpHeaders.Authorization, "Bearer $accessToken")
+                is AuthState.Unauthenticated -> {
+                    clearLocalAuthInfo()
                 }
             }
-
-            response.context.toEntity()
         }
+
+        _authStateFlow.value = state
+    }
+
+    override suspend fun register(shema: RegisterUserSchema): Result<LoginResult> {
+        return remoteDatasource.register(shema)
+    }
+
+    override suspend fun login(email: String, password: String): Result<LoginResult> {
+        return remoteDatasource.login(email, password)
+    }
+
+    override suspend fun refresh(refreshToken: String): Result<AuthTokenPair> {
+        return remoteDatasource.refresh(refreshToken)
+    }
+
+    override suspend fun fetchActualAuthContext(accessToken: String): Result<AuthContext> {
+        return remoteDatasource.fetchActualAuthContext(accessToken)
+    }
+
+    override suspend fun clearLocalAuthInfo() {
+        localDatasource.clearAuthInfo()
+    }
+
+    override suspend fun saveLocalAuthInfo(schema: AuthLocalInfoSchema) {
+        localDatasource.saveAuthInfo(info = schema)
+    }
+
+    override suspend fun localLogout() {
+        localDatasource.clearAuthInfo()
+        _authStateFlow.value = AuthState.Unauthenticated
     }
 }

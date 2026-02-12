@@ -1,8 +1,6 @@
 package com.example.planify.main.features.meetings.data.repositories_impl
 
-import androidx.compose.material3.Divider
 import com.example.planify.main.features.auth.domain.utils.network.AuthenticatedApiClient
-import com.example.planify.main.features.meetings.data.dto.MeetingInviteDTO
 import com.example.planify.main.features.meetings.data.dto.create_invite.InviteUserRequestDTO
 import com.example.planify.main.features.meetings.data.dto.create_invite.InviteUserResponseDTO
 import com.example.planify.main.features.meetings.data.dto.get_invite.GetInviteDTO
@@ -36,7 +34,7 @@ class MeetingInvitesRepositoryImpl @Inject constructor(
     override suspend fun inviteUser(meetingId: Long, targetUserId: Long): Result<MeetingInvite> = withContext(Dispatchers.IO) {
         val requestDTO = InviteUserRequestDTO(
             meetingId = meetingId,
-            targetUserId = targetUserId
+            targetId = targetUserId
         )
 
         return@withContext runCatching {

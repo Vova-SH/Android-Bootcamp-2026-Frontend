@@ -13,3 +13,8 @@ fun LocalDate.weekBounds(
     val weekEnd = weekStart.plusDays(6).toLocalDate().atTime(LocalTime.MAX)
     return weekStart to weekEnd
 }
+
+infix fun LocalDate.until(end: LocalDate): Sequence<LocalDate> =
+    generateSequence(this) { current ->
+        current.plusDays(1).takeIf { it <= end }
+    }

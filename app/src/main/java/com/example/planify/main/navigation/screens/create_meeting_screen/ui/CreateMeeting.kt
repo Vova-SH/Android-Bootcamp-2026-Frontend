@@ -8,25 +8,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.planify.core.ui.pager_router_screen.PagerRouterScreen
 import com.example.planify.core.ui.pager_router_screen.rememberPagerRouterScreenState
-import com.example.planify.main.features.meetings.domain.entities.Participant
 import com.example.planify.main.navigation.screens.create_meeting_screen.CreateMeetingRoute
 import com.example.planify.main.navigation.screens.create_meeting_screen.CreateMeetingViewModel
+import com.example.planify.main.navigation.screens.create_meeting_screen.UIEffect
+import com.example.planify.main.navigation.screens.create_meeting_screen.components.BottomBar
+import com.example.planify.main.navigation.screens.create_meeting_screen.components.TopBar
 import com.example.planify.main.navigation.screens.create_meeting_screen.ui.steps.CreateMeetingStep1
 import com.example.planify.main.navigation.screens.create_meeting_screen.ui.steps.CreateMeetingStep2
 import com.example.planify.main.navigation.screens.create_meeting_screen.ui.steps.CreateMeetingStep3
-import com.example.planify.main.navigation.screens.create_meeting_screen.components.BottomBar
-import com.example.planify.main.navigation.screens.create_meeting_screen.components.TopBar
 
 @Composable
 fun CreateMeeting(
@@ -47,21 +41,19 @@ private fun CreateMeeting(
     onBack: () -> Unit
 ) {
     LaunchedEffect(Unit) {
-        viewModel.navigation.collect { route ->
-            navController.navigate(route.route)
+        viewModel.effects.collect { event ->
+            when (event) {
+                is UIEffect.Navigate -> navController.navigate(event.route.route)
+            }
         }
     }
 
-    val router = rememberPagerRouterScreenState(
+    val pagerRouterState = rememberPagerRouterScreenState(
         routes = CreateMeetingRoute.routes,
         startRoute = CreateMeetingRoute.Info
     )
 
     val colors = MaterialTheme.colorScheme
-
-    var selectedId by remember { mutableStateOf("00") }
-
-    var selectedParticipants by remember { mutableStateOf(setOf<Participant>()) }
 
     Scaffold(
         modifier = Modifier
@@ -69,17 +61,13 @@ private fun CreateMeeting(
         containerColor = colors.background,
         bottomBar = {
             BottomBar(
-                currentPage = router.currentRouteIndex,
-                onBackButton = { router.navigateTo(router.currentRouteIndex - 1) },
-                onButtonClick = { router.navigateTo(router.currentRouteIndex + 1) },
-                onCreate = {
-                    // viewModel.createMeeting()
-                }
+                navigator = pagerRouterState,
+                viewModel = viewModel
             )
         },
         topBar = {
             TopBar(
-                currentPage = router.currentRouteIndex,
+                currentPage = pagerRouterState.currentRouteIndex,
                 onBack = onBack
             )
         }
@@ -90,22 +78,16 @@ private fun CreateMeeting(
                 .wrapContentHeight()
                 .animateContentSize(),
             userScrollEnabled = false,
-            state = router
+            state = pagerRouterState
         ) {
             screen(CreateMeetingRoute.Info) {
-                CreateMeetingStep1()
+                CreateMeetingStep1(viewModel)
             }
             screen(CreateMeetingRoute.Time) {
-                CreateMeetingStep2(
-                    onSelected = { selectedId = it.id },
-                    selectedId = selectedId
-                )
+                CreateMeetingStep2(viewModel)
             }
             screen(CreateMeetingRoute.Participants) {
-                CreateMeetingStep3(
-                    onSelectedChanged = { },
-                    selectedParticipants = selectedParticipants
-                )
+                CreateMeetingStep3(viewModel)
             }
         }
     }

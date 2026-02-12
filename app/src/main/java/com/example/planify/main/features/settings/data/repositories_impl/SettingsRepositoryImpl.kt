@@ -23,13 +23,15 @@ class SettingsRepositoryImpl @Inject constructor (
 
     private fun fromPrimitives(
         theme: String?,
-        notifications: Boolean?
+        notifications: Boolean?,
+        isFirstStart: Boolean?
     ): LocalSettings {
-        val themeId = ThemeId.entries.firstOrNull { it.name == theme } ?: ThemeId.SYSTEM
+        val themeId = ThemeId.entries.firstOrNull { it.name == theme }
 
         return LocalSettings(
             theme = themeId,
-            notifications = notifications
+            notifications = notifications,
+            isFirstStart = isFirstStart
         )
     }
 
@@ -38,7 +40,8 @@ class SettingsRepositoryImpl @Inject constructor (
         .map { preferences ->
             fromPrimitives(
                 theme = preferences[SettingsPreferences.THEME],
-                notifications = preferences[SettingsPreferences.NOTIFICATIONS]
+                notifications = preferences[SettingsPreferences.NOTIFICATIONS],
+                isFirstStart = preferences[SettingsPreferences.IS_FIRST_START]
             )
         }
 
@@ -48,5 +51,9 @@ class SettingsRepositoryImpl @Inject constructor (
 
     override suspend fun setNotificationsEnabled(enabled: Boolean): Result<Unit> = runCatching {
         dataStore.edit { it[SettingsPreferences.NOTIFICATIONS] = enabled }
+    }
+
+    override suspend fun setIsFirstStart(isFirstStart: Boolean): Result<Unit> = runCatching {
+        dataStore.edit { it[SettingsPreferences.IS_FIRST_START] = isFirstStart }
     }
 }

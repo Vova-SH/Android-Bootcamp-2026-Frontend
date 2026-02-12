@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
                 )
             )
 
-            val darkTheme = when(settings.theme as ThemeId) {
+            val darkTheme = when(settings.theme) {
                 ThemeId.DARK -> true
                 ThemeId.LIGHT -> false
                 ThemeId.SYSTEM -> isSystemInDarkTheme()

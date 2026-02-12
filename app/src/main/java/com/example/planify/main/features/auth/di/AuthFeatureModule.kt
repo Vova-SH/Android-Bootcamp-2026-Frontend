@@ -2,7 +2,8 @@ package com.example.planify.main.features.auth.di
 
 import android.content.Context
 import com.example.planify.main.common.network.policies.app_code.AppCodeProcessingPolicy
-import com.example.planify.main.features.auth.data.local.SecuredAuthInfoStorage
+import com.example.planify.main.features.auth.data.sources.AuthLocalDataSource
+import com.example.planify.main.features.auth.data.sources_impl.AuthLocalDataSourceImpl
 import com.example.planify.main.features.auth.domain.AuthTokenManager
 import com.example.planify.main.features.auth.domain.utils.network.AuthenticatedApiClient
 import com.google.crypto.tink.Aead
@@ -29,10 +30,13 @@ object AuthFeatureModule {
 
     @Provides
     @Singleton
-    fun provideSecureAuthInfoStorage(
+    fun provideAuthLocalDataSource(
         @ApplicationContext context: Context,
         aead: Aead
-    ): SecuredAuthInfoStorage {
-        return SecuredAuthInfoStorage(context, aead)
+    ): AuthLocalDataSource {
+        return AuthLocalDataSourceImpl(
+            context = context,
+            aead = aead
+        )
     }
 }

@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -103,7 +106,6 @@ fun HomeTopBar(
 ) {
     Row(
         modifier = Modifier
-            .statusBarsPadding()
             .fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -135,7 +137,6 @@ fun ChatTopBar(
 
     Row(
         modifier = Modifier
-            .statusBarsPadding()
             .fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -165,7 +166,6 @@ fun InboxTopBar(
 ) {
     Row(
         modifier = Modifier
-            .statusBarsPadding()
             .fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -195,7 +195,6 @@ fun ProfileTopBar(
 ) {
     Row(
         modifier = Modifier
-            .statusBarsPadding()
             .fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -220,6 +219,7 @@ fun ProfileTopBar(
 fun TopBar(
     pagerRouter: PagerRouterNavigator,
     monthTitle: String,
+    onNotifications: () -> Unit,
     onSettings: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
@@ -234,9 +234,12 @@ fun TopBar(
     ) {
         Row(
             modifier = Modifier
-                .statusBarsPadding()
-                .padding(horizontal = Locals.spacing.m,
-                    vertical = Locals.spacing.xs)
+                .padding(
+                    top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+                    start = Locals.spacing.m,
+                    end = Locals.spacing.m,
+                    bottom = Locals.spacing.s
+                )
                 .fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
@@ -249,12 +252,14 @@ fun TopBar(
                 when(pagerRouter.currentRoute.key) {
                     MainScreenRoute.Home.key -> HomeTopBar(
                         title = stringResource(R.string.schedule),
-                        description = monthTitle
-                    ) { }
+                        description = monthTitle,
+                        onClick = onNotifications
+                    )
                     MainScreenRoute.Inbox.key -> InboxTopBar(
                         title = stringResource(R.string.inbox),
-                        description = countUnread
-                    ) { }
+                        description = countUnread,
+                        onClick = onNotifications
+                    )
                     MainScreenRoute.Chat.key -> ChatTopBar(
                         title = stringResource(R.string.chats)
                     )

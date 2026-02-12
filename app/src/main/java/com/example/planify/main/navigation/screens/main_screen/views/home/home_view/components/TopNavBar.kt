@@ -1,5 +1,8 @@
 package com.example.planify.main.navigation.screens.main_screen.views.home.home_view.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,11 +40,23 @@ fun TopNavBarItem(
     val extras = Locals.extras
     val shape = RectangleShape
 
-    val borderColor = if (isSelected) colors.primary
-        else Color.Transparent
+    val borderColor by animateColorAsState(
+        targetValue = if (isSelected) colors.primary
+        else Color.Transparent,
+        animationSpec = tween(
+            durationMillis = 300,
+            easing = FastOutSlowInEasing
+        ),
+    )
 
-    val backgroundColor = if (isSelected)
-        extras.secondary else colors.surface
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isSelected)
+            extras.secondary else colors.surface,
+        animationSpec = tween(
+            durationMillis = 300,
+            easing = FastOutSlowInEasing
+        )
+    )
 
     Column(
         modifier = modifier
