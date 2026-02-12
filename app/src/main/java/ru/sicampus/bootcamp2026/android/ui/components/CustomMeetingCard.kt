@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -31,8 +32,9 @@ data class MeetingUi(
     val organizerName: String,
     val title: String,
     val description: String,
-    val dateText: String,      // 01.11.2018
-    val timeText: String       // 09:00 - 10:00
+    val dateText: String,
+    val timeText: String,
+    val isMyMeeting: Boolean
 )
 
 sealed interface MeetingCardActions {
@@ -59,13 +61,23 @@ fun MeetingCard(
             .background(cardBg)
             .padding(16.dp)
     ) {
-        // Орг
-        Text(
-            text = meeting.organizerName,
-            fontSize = 14.sp,
-            color = DarkBlue,
-            fontFamily = FontFamily(Font(R.font.open_sans_semibold))
-        )
+        if (meeting.isMyMeeting) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.you_are_organizer),
+                fontSize = 14.sp,
+                color = Color(0xFF86CD62),
+                fontFamily = FontFamily(Font(R.font.open_sans_extrabold))
+            )
+        }
+        else{
+            Text(
+                text = meeting.organizerName,
+                fontSize = 14.sp,
+                color = DarkBlue,
+                fontFamily = FontFamily(Font(R.font.open_sans_semibold))
+            )
+        }
 
         Spacer(Modifier.height(6.dp))
 
@@ -142,14 +154,14 @@ fun MeetingCard(
                 ) {
                     ActionButton(
                         modifier = Modifier.weight(1f),
-                        bg = Color(0xFF86CD62), // зеленый
+                        bg = Color(0xFF86CD62),
                         icon = { Icon(Icons.Default.ThumbUp, contentDescription = "Принять", tint = Color.White) },
                         onClick = actions.onAccept
                     )
 
                     ActionButton(
                         modifier = Modifier.weight(1f),
-                        bg = Color(0xFFDF8484), // красный
+                        bg = Color(0xFFDF8484),
                         icon = { Icon(Icons.Default.ThumbDown, contentDescription = "Отклонить", tint = Color.White) },
                         onClick = actions.onDecline
                     )
@@ -192,7 +204,8 @@ private fun MeetingCardHomePreview() {
                     title = "Жесткий просмотр тиктоков",
                     description = "Хотим добить огонечек за 300 днееей",
                     dateText = "03.02.2026",
-                    timeText = "09:00 - 10:00"
+                    timeText = "09:00 - 10:00",
+                    isMyMeeting = true
                 ),
                 actions = MeetingCardActions.None
             )
@@ -212,7 +225,8 @@ private fun MeetingCardNotificationsPreview() {
                     title = "Время работать",
                     description = "Имитация работы в старбаксе у окна",
                     dateText = "04.02.2026",
-                    timeText = "14:00 - 15:00"
+                    timeText = "14:00 - 15:00",
+                    isMyMeeting = false
                 ),
                 actions = MeetingCardActions.InviteActions(
                     onAccept = {},

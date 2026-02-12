@@ -14,7 +14,6 @@ class AuthRepository(
         authLocalDataSource.setToken(login, password)
         return authNetworkDataSource.checkAuth()
             .mapCatching { personResponse ->
-                // Сохраняем ID пользователя из principal
                 authLocalDataSource.setUserId(personResponse.id)
                 true
             }

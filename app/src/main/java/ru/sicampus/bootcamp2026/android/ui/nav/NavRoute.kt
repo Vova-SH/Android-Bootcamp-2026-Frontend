@@ -1,21 +1,20 @@
 package ru.sicampus.bootcamp2026.android.ui.nav
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import ru.sicampus.bootcamp2026.android.data.source.AuthLocalDataSource
 import ru.sicampus.bootcamp2026.android.ui.testScreens.auth.AuthScreen
 import ru.sicampus.bootcamp2026.android.ui.testScreens.home.HomeScreen
-import ru.sicampus.bootcamp2026.android.ui.testScreens.home.CreateMeetingScreen
+import ru.sicampus.bootcamp2026.android.ui.testScreens.createMeeting.CreateMeetingScreen
 import ru.sicampus.bootcamp2026.android.ui.testScreens.home.HomeViewModel
-import ru.sicampus.bootcamp2026.android.ui.testScreens.home.NotificationScreen
+import ru.sicampus.bootcamp2026.android.ui.testScreens.home.NotificationsScreen
+import ru.sicampus.bootcamp2026.android.ui.testScreens.home.NotificationsViewModel
 import ru.sicampus.bootcamp2026.android.ui.testScreens.profile.ProfileScreen
 import ru.sicampus.bootcamp2026.android.ui.testScreens.signUp.SignUpScreen
 
@@ -71,11 +70,12 @@ fun NavigationGraph(
             )
         }
 
-        composable<NotificationsRoute> {
-            NotificationScreen(
-                onExitClick = {
-                    navController.popBackStack()
-                }
+        // Экран уведомлений о приглашениях на встречи
+        composable<NotificationsRoute> { backStackEntry ->
+            val vm: NotificationsViewModel = viewModel(backStackEntry)
+            NotificationsScreen(
+                onExitClick = { navController.popBackStack() },
+                viewModel = vm
             )
         }
     }

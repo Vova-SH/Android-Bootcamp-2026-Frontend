@@ -6,6 +6,7 @@ plugins {
     kotlin("plugin.serialization") version "2.3.0"
 }
 
+
 android {
     namespace = "ru.sicampus.bootcamp2026"
     compileSdk = 36

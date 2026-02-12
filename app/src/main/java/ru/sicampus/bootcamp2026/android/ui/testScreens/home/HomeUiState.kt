@@ -13,5 +13,7 @@ data class HomeUiState(
     val error: String? = null,
     val weekCountsByDate: Map<LocalDate, Int> = emptyMap(),
     val monthCountsByDate: Map<LocalDate, Int> = emptyMap(),
-    val organizerNames: Map<Long, String> = emptyMap()
+    val organizerNames: Map<Long, String> = emptyMap(),
+    val pendingInvitesCount: Int = 0,
+    val hasPendingInvites: Boolean = false
 )

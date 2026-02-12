@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.sicampus.bootcamp2026.App
+import ru.sicampus.bootcamp2026.R
 import ru.sicampus.bootcamp2026.android.data.ProfileRepository
 import ru.sicampus.bootcamp2026.android.data.source.AuthLocalDataSource
 import ru.sicampus.bootcamp2026.android.data.source.ProfileNetworkDataSource
@@ -34,6 +36,8 @@ class ProfileViewModel : ViewModel() {
 
     private val _actionFlow = MutableSharedFlow<ProfileAction>()
     val actionFlow = _actionFlow.asSharedFlow()
+
+    private fun str(id: Int): String = App.context.getString(id)
 
     init {
         loadProfile()
@@ -70,7 +74,7 @@ class ProfileViewModel : ViewModel() {
                         onFailure = { error ->
                             updateStateIfData { oldState ->
                                 oldState.copy(
-                                    error = error.message ?: "Ошибка обновления профиля",
+                                    error = error.message ?: str(R.string.update_profile_error),
                                     isEditMode = true
                                 )
                             }
@@ -109,7 +113,7 @@ class ProfileViewModel : ViewModel() {
                         department = "",
                         position = "",
                         isEditMode = false,
-                        error = error.message ?: "Ошибка загрузки профиля"
+                        error = error.message ?: str(R.string.loading_profile_error)
                     )
                 }
             )

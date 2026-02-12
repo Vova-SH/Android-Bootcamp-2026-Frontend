@@ -21,9 +21,7 @@ class SignUpRepository(
             department = department,
             position = position
         ).mapCatching { personResponse ->
-            // Сохраняем токен
             authLocalDataSource.setToken(email, password)
-            // Сохраняем ID пользователя
             authLocalDataSource.setUserId(personResponse.id)
             true
         }

@@ -1,30 +1,31 @@
 package ru.sicampus.bootcamp2026.android.ui.utils
 
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 private val RU = Locale("ru")
 
-private val DATE_FORMAT: DateTimeFormatter =
+private val DATE_FORMAT =
     DateTimeFormatter.ofPattern("dd.MM.yyyy", RU)
 
-private val TIME_FORMAT: DateTimeFormatter =
+private val TIME_FORMAT =
     DateTimeFormatter.ofPattern("HH:mm", RU)
 
-private fun parseIsoToZdt(iso: String): ZonedDateTime {
-    // Поддерживает строки вида "2026-02-04T20:00:14.167Z"
-    val instant = Instant.parse(iso)
-    return instant.atZone(ZoneId.systemDefault())
+private fun parseIsoToLocal(iso: String): LocalDateTime {
+    return Instant
+        .parse(iso)
+        .atZone(ZoneId.systemDefault())
+        .toLocalDateTime()
 }
 
 fun formatDateDdMmYyyy(iso: String): String =
-    DATE_FORMAT.format(parseIsoToZdt(iso))
+    DATE_FORMAT.format(parseIsoToLocal(iso))
 
 fun formatTimeHm(iso: String): String =
-    TIME_FORMAT.format(parseIsoToZdt(iso))
+    TIME_FORMAT.format(parseIsoToLocal(iso))
 
 fun formatTimeRange(startIso: String, endIso: String): String =
     "${formatTimeHm(startIso)} – ${formatTimeHm(endIso)}"

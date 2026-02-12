@@ -5,6 +5,6 @@ sealed interface SignUpState {
     data class Data(
         val isEnabledSend: Boolean,
         val error: String?,
-        val validationHint: String? = null  // Подсказка о том, что нужно исправить
+        val validationHint: String? = null
     ) : SignUpState
 }

@@ -37,11 +37,12 @@ fun CustomTextField(
     focusRequester: FocusRequester? = null,
     keyboardActionOnNext: (KeyboardActionScope.() -> Unit)? = null,
     keyboardActionOnDone: (KeyboardActionScope.() -> Unit)? = null,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     TextField(
         value = value,
         onValueChange = onValueChange,
+        readOnly = false,
         enabled = enabled,
 
         label = {
@@ -66,7 +67,7 @@ fun CustomTextField(
 
         modifier = modifier
             .let { if (focusRequester != null) it.focusRequester(focusRequester) else it }
-            .padding(start = 25.dp, end = 25.dp)
+            .padding(horizontal = 25.dp)
             .fillMaxWidth(),
 
         singleLine = true,
@@ -77,7 +78,11 @@ fun CustomTextField(
             focusedContainerColor = Grey,
             unfocusedContainerColor = Grey,
             focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledContainerColor = Grey,
+            disabledTextColor = TextGrey,
+            disabledLabelColor = Black,
+            disabledIndicatorColor = Color.Transparent
         ),
 
         shape = RoundedCornerShape(40.dp)

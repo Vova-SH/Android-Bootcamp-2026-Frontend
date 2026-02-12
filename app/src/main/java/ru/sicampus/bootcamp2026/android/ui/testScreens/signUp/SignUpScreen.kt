@@ -20,20 +20,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import ru.sicampus.bootcamp2026.R
-import ru.sicampus.bootcamp2026.android.ui.components.CustomButton
 import ru.sicampus.bootcamp2026.android.ui.components.CustomTextField
+import ru.sicampus.bootcamp2026.android.ui.nav.AuthRoute
+import ru.sicampus.bootcamp2026.android.ui.nav.HomeRoute
 import ru.sicampus.bootcamp2026.android.ui.theme.AppTheme
 import ru.sicampus.bootcamp2026.android.ui.theme.DarkBlue
 import ru.sicampus.bootcamp2026.android.ui.theme.ErrorRed
 import ru.sicampus.bootcamp2026.android.ui.theme.TextGrey
 import ru.sicampus.bootcamp2026.android.ui.theme.White
+import androidx.compose.ui.res.stringResource
+
 
 @Composable
 fun SignUpScreen(
@@ -46,8 +48,24 @@ fun SignUpScreen(
     LaunchedEffect(Unit) {
         viewModel.actionFlow.collect { action ->
             when (action) {
-                is SignUpAction.OpenScreen -> navController.navigate(action.route)
-                is SignUpAction.NavigateBack -> navController.popBackStack()
+                is SignUpAction.OpenScreen -> {
+                    when (action.route) {
+                        is HomeRoute -> {
+                            navController.navigate(HomeRoute) {
+                                popUpTo(AuthRoute) {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                            }
+                        }
+                        else -> {
+                            navController.navigate(action.route)
+                        }
+                    }
+                }
+                is SignUpAction.NavigateBack -> {
+                    navController.popBackStack()
+                }
             }
         }
     }
@@ -70,7 +88,7 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(87.dp))
 
         Text(
-            text = "Регистрация",
+            text = stringResource(R.string.sign_up_activity),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily(Font(R.font.open_sans_bold))
@@ -106,7 +124,6 @@ private fun Content(
     val focusCreatePasswordRequester = remember { FocusRequester() }
     val focusConfirmPasswordRequester = remember { FocusRequester() }
 
-    // Функция для обновления валидации
     fun updateValidation() {
         viewModel.onIntent(
             SignUpIntent.TextInput(
@@ -120,7 +137,6 @@ private fun Content(
         )
     }
 
-    // Функция для отправки (только если валидация пройдена)
     fun trySendRegistration() {
         if (state.isEnabledSend) {
             viewModel.onIntent(
@@ -145,7 +161,7 @@ private fun Content(
             fullName = newFullName
             updateValidation()
         },
-        label = "ФИО",
+        label = stringResource(R.string.fullname_text),
         modifier = Modifier,
         textColor = TextGrey,
         keyboardType = KeyboardType.Text,
@@ -164,7 +180,7 @@ private fun Content(
             department = newDepartment
             updateValidation()
         },
-        label = "Отдел",
+        label = stringResource(R.string.department),
         modifier = Modifier,
         textColor = TextGrey,
         keyboardType = KeyboardType.Text,
@@ -184,7 +200,7 @@ private fun Content(
             position = newPosition
             updateValidation()
         },
-        label = "Должность",
+        label = stringResource(R.string.employee_position),
         modifier = Modifier,
         textColor = TextGrey,
         keyboardType = KeyboardType.Text,
@@ -204,7 +220,7 @@ private fun Content(
             email = newEmail
             updateValidation()
         },
-        label = "Электронная почта",
+        label = stringResource(R.string.email_text),
         modifier = Modifier,
         textColor = TextGrey,
         keyboardType = KeyboardType.Email,
@@ -224,7 +240,7 @@ private fun Content(
             createPassword = newPassword
             updateValidation()
         },
-        label = "Придумайте пароль",
+        label = stringResource(R.string.create_password),
         modifier = Modifier,
         textColor = TextGrey,
         keyboardType = KeyboardType.Password,
@@ -245,7 +261,7 @@ private fun Content(
             confirmPassword = newConfirmPassword
             updateValidation()
         },
-        label = "Подтвердите пароль",
+        label = stringResource(R.string.confirm_password),
         modifier = Modifier,
         textColor = TextGrey,
         keyboardType = KeyboardType.Password,
@@ -253,14 +269,12 @@ private fun Content(
         visualTransformation = PasswordVisualTransformation(),
         focusRequester = focusConfirmPasswordRequester,
         keyboardActionOnDone = {
-            // КРИТИЧНО: проверяем валидацию перед отправкой
             trySendRegistration()
         }
     )
 
     Spacer(modifier = Modifier.height(24.dp))
 
-    // LIVE VALIDATION FEEDBACK - показываем текущие проблемы валидации
     if (state.validationHint != null && !state.isEnabledSend) {
         Box(
             modifier = Modifier
@@ -283,7 +297,6 @@ private fun Content(
         Spacer(modifier = Modifier.height(24.dp))
     }
 
-    // Кнопка регистрации - используем стандартный Button для гарантированной работы enabled
     Button(
         onClick = {
             trySendRegistration()
@@ -301,12 +314,11 @@ private fun Content(
         )
     ) {
         Text(
-            text = "Зарегистрироваться",
+            text = stringResource(R.string.sign_up_button),
             fontWeight = FontWeight.Bold
         )
     }
 
-    // Показываем ошибку после попытки отправки
     if (state.error != null) {
         Spacer(modifier = Modifier.height(24.dp))
 

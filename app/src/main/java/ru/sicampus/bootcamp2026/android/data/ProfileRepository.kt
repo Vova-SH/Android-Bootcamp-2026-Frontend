@@ -19,7 +19,7 @@ class ProfileRepository(
         department: String,
         position: String
     ): Result<PersonResponse> {
-        val userId = authLocalDataSource.getUserId() 
+        val userId = authLocalDataSource.getUserId()
             ?: return Result.failure(Exception("User ID not found"))
         return profileNetworkDataSource.updateProfile(
             userId = userId,

@@ -15,6 +15,9 @@ import ru.sicampus.bootcamp2026.android.data.source.SignUpNetworkDataSource
 import ru.sicampus.bootcamp2026.android.domain.signUp.CheckSignUpFormatUseCase
 import ru.sicampus.bootcamp2026.android.domain.signUp.RegisterAndSaveAuthUseCase
 import ru.sicampus.bootcamp2026.android.ui.nav.HomeRoute
+import ru.sicampus.bootcamp2026.App
+import ru.sicampus.bootcamp2026.R
+
 
 class SignUpViewModel : ViewModel() {
     private val checkSignUpFormatUseCase by lazy { CheckSignUpFormatUseCase() }
@@ -42,7 +45,6 @@ class SignUpViewModel : ViewModel() {
     fun onIntent(intent: SignUpIntent) {
         when (intent) {
             is SignUpIntent.Send -> {
-                // КРИТИЧНО: Дополнительная проверка перед отправкой
                 val isValid = checkSignUpFormatUseCase.invoke(
                     fullName = intent.fullName,
                     department = intent.department,
@@ -53,7 +55,6 @@ class SignUpViewModel : ViewModel() {
                 )
 
                 if (!isValid) {
-                    // Если валидация не прошла, показываем ошибку
                     updateStateIfData { oldState ->
                         oldState.copy(
                             error = getValidationError(
@@ -86,7 +87,7 @@ class SignUpViewModel : ViewModel() {
                         onFailure = { error ->
                             updateStateIfData { oldState ->
                                 oldState.copy(
-                                    error = error.message ?: "Ошибка регистрации"
+                                    error = error.message ?: App.context.getString(R.string.su_error_registration)
                                 )
                             }
                         }
@@ -130,7 +131,6 @@ class SignUpViewModel : ViewModel() {
         }
     }
 
-    // Подсказка для live feedback (мягкая форма)
     private fun getValidationHint(
         fullName: String,
         department: String,
@@ -140,23 +140,23 @@ class SignUpViewModel : ViewModel() {
         confirmPassword: String
     ): String? {
         return when {
-            fullName.trim().isBlank() -> "Заполните ФИО"
-            fullName.trim().length < 2 -> "ФИО: минимум 2 символа"
-            department.trim().isBlank() -> "Заполните отдел"
-            department.trim().length < 2 -> "Отдел: минимум 2 символа"
-            position.trim().isBlank() -> "Заполните должность"
-            position.trim().length < 2 -> "Должность: минимум 2 символа"
-            email.trim().isBlank() -> "Заполните email"
-            !email.trim().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()) -> "Некорректный формат email"
-            password.isBlank() -> "Придумайте пароль"
-            password.length < 6 -> "Пароль: минимум 6 символов"
-            confirmPassword.isBlank() -> "Подтвердите пароль"
-            password != confirmPassword -> "Пароли не совпадают"
+            fullName.trim().isBlank() -> App.context.getString(R.string.su_hint_fill_fullname)
+            fullName.trim().length < 2 -> App.context.getString(R.string.su_hint_fullname_min_2)
+            department.trim().isBlank() -> App.context.getString(R.string.su_hint_fill_department)
+            department.trim().length < 2 -> App.context.getString(R.string.su_hint_department_min_2)
+            position.trim().isBlank() -> App.context.getString(R.string.su_hint_fill_position)
+            position.trim().length < 2 -> App.context.getString(R.string.su_hint_position_min_2)
+            email.trim().isBlank() -> App.context.getString(R.string.su_hint_fill_email)
+            !email.trim().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()) ->
+                App.context.getString(R.string.su_hint_email_invalid)
+            password.isBlank() -> App.context.getString(R.string.su_hint_password_create)
+            password.length < 6 -> App.context.getString(R.string.su_hint_password_min_6)
+            confirmPassword.isBlank() -> App.context.getString(R.string.su_hint_password_confirm)
+            password != confirmPassword -> App.context.getString(R.string.su_hint_passwords_not_match)
             else -> null
         }
     }
 
-    // Ошибка после попытки отправки (строгая форма)
     private fun getValidationError(
         fullName: String,
         department: String,
@@ -166,19 +166,21 @@ class SignUpViewModel : ViewModel() {
         confirmPassword: String
     ): String {
         return when {
-            fullName.trim().isBlank() -> "Ошибка: заполните поле ФИО"
-            department.trim().isBlank() -> "Ошибка: заполните поле Отдел"
-            position.trim().isBlank() -> "Ошибка: заполните поле Должность"
-            email.trim().isBlank() -> "Ошибка: заполните поле Email"
-            password.isBlank() -> "Ошибка: заполните поле Пароль"
-            confirmPassword.isBlank() -> "Ошибка: подтвердите пароль"
-            fullName.trim().length < 2 -> "ФИО должно содержать минимум 2 символа"
-            department.trim().length < 2 -> "Отдел должен содержать минимум 2 символа"
-            position.trim().length < 2 -> "Должность должна содержать минимум 2 символа"
-            !email.trim().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()) -> "Некорректный формат email"
-            password.length < 6 -> "Пароль должен содержать минимум 6 символов"
-            password != confirmPassword -> "Пароли не совпадают"
-            else -> "Проверьте правильность заполнения полей"
+            fullName.trim().isBlank() -> App.context.getString(R.string.su_error_fill_fullname)
+            department.trim().isBlank() -> App.context.getString(R.string.su_error_fill_department)
+            position.trim().isBlank() -> App.context.getString(R.string.su_error_fill_position)
+            email.trim().isBlank() -> App.context.getString(R.string.su_error_fill_email)
+            password.isBlank() -> App.context.getString(R.string.su_error_fill_password)
+            confirmPassword.isBlank() -> App.context.getString(R.string.su_error_confirm_password)
+
+            fullName.trim().length < 2 -> App.context.getString(R.string.su_error_fullname_min_2)
+            department.trim().length < 2 -> App.context.getString(R.string.su_error_department_min_2)
+            position.trim().length < 2 -> App.context.getString(R.string.su_error_position_min_2)
+            !email.trim().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()) ->
+                App.context.getString(R.string.su_error_email_invalid)
+            password.length < 6 -> App.context.getString(R.string.su_error_password_min_6)
+            password != confirmPassword -> App.context.getString(R.string.su_hint_passwords_not_match)
+            else -> App.context.getString(R.string.su_error_check_fields)
         }
     }
 

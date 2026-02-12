@@ -15,8 +15,8 @@ import kotlinx.serialization.json.Json
 
 object Network {
     //const val HOST = "http://10.0.2.2:8080" // вариант для эмулятора
-    const val HOST = "http://192.168.1.66:8080" // вариант для телефона по usb, это у НастиВ
-    //    const val HOST = "http://192.168.1.102:8080" // вариант для телефона по usb, это у НастиБ
+//  const val HOST = "http://192.168.43.82:8080" // вариант для телефона по usb, это у НастиВ
+    const val HOST = "http://shkillers.ru:8080" // вариант для телефона по usb, это у НастиБ
     const val BASE_URL = "$HOST/api"
 
 

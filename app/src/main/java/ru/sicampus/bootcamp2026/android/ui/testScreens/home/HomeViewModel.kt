@@ -5,35 +5,48 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import ru.sicampus.bootcamp2026.android.data.InvitationsRepository
 import ru.sicampus.bootcamp2026.android.data.MeetingsRepository
-import ru.sicampus.bootcamp2026.android.data.PersonsRepository
+import ru.sicampus.bootcamp2026.android.data.dto.InvitationStatusDto
 import ru.sicampus.bootcamp2026.android.data.dto.MeetingResponse
+import ru.sicampus.bootcamp2026.android.data.source.InvitationsNetworkDataSource
 import ru.sicampus.bootcamp2026.android.data.source.MeetingsNetworkDataSource
 import ru.sicampus.bootcamp2026.android.data.source.PersonsNetworkDataSource
-import ru.sicampus.bootcamp2026.android.domain.meetings.GetMyMeetingsForDayUseCase
+import ru.sicampus.bootcamp2026.android.domain.notifications_invite.GetMyInvitesWithMeetingUseCase
+import ru.sicampus.bootcamp2026.android.domain.meetings.GetMyMeetingsForMonthUseCase
 import ru.sicampus.bootcamp2026.android.domain.meetings.GetMyMeetingsForWeekUseCase
+import ru.sicampus.bootcamp2026.android.domain.meetings.GetMyMeetingsForDayUseCase
 import java.time.LocalDate
+import java.time.format.DateTimeParseException
 
 class HomeViewModel : ViewModel() {
 
+    private val userInfo = PersonsNetworkDataSource()
+
     private val repo = MeetingsRepository(MeetingsNetworkDataSource())
     private val getDayUseCase = GetMyMeetingsForDayUseCase(repo)
-
     private val getWeekUseCase = GetMyMeetingsForWeekUseCase(repo)
-
+    private val getMonthUseCase = GetMyMeetingsForMonthUseCase(repo)
     private val pageSize = 5
 
     private val _state = MutableStateFlow(HomeUiState())
     val state = _state.asStateFlow()
 
+    private val invitesRepo = InvitationsRepository(InvitationsNetworkDataSource())
+    private val getInvites = GetMyInvitesWithMeetingUseCase(invitesRepo)
+
     fun loadFirstPage(date: LocalDate) {
-        _state.value = HomeUiState(
+        _state.value = _state.value.copy(
             selectedDate = date,
-            isLoading = true
+            meetings = emptyList(),
+            page = 0,
+            isLast = false,
+            isLoading = true,
+            isLoadingMore = false,
+            error = null
         )
 
         viewModelScope.launch {
-
             val result = getDayUseCase(
                 date = date.toString(),
                 page = 0,
@@ -41,15 +54,13 @@ class HomeViewModel : ViewModel() {
             )
 
             result.onSuccess { page ->
-
-                _state.value = HomeUiState(
-                    selectedDate = date,
+                _state.value = _state.value.copy(
                     meetings = page.content,
                     page = page.number,
                     isLast = page.last,
                     isLoading = false
                 )
-                ensureOrganizerNamesLoaded(page.content)
+                fetchOrganizerNamesFor(page.content)
             }.onFailure {
                 _state.value = _state.value.copy(
                     isLoading = false,
@@ -61,13 +72,11 @@ class HomeViewModel : ViewModel() {
 
     fun loadNextPage() {
         val s = _state.value
+        if (s.isLast || s.isLoadingMore || s.isLoading) return
 
-        if (s.isLast || s.isLoadingMore) return
+        _state.value = s.copy(isLoadingMore = true, error = null)
 
         viewModelScope.launch {
-
-            _state.value = s.copy(isLoadingMore = true)
-
             val nextPage = s.page + 1
 
             val result = getDayUseCase(
@@ -77,14 +86,13 @@ class HomeViewModel : ViewModel() {
             )
 
             result.onSuccess { page ->
-
                 _state.value = _state.value.copy(
                     meetings = s.meetings + page.content,
                     page = page.number,
                     isLast = page.last,
                     isLoadingMore = false
                 )
-                ensureOrganizerNamesLoaded(page.content)
+                fetchOrganizerNamesFor(page.content)
             }.onFailure {
                 _state.value = _state.value.copy(
                     isLoadingMore = false,
@@ -95,47 +103,90 @@ class HomeViewModel : ViewModel() {
     }
 
     fun loadWeek(start: LocalDate) {
-
         viewModelScope.launch {
-
-            val result = getWeekUseCase(start.toString())
+            val result = getWeekUseCase(start = start.toString())
 
             result.onSuccess { list ->
-
-                val map = list.associate {
-                    LocalDate.parse(it.date) to it.count
-                }
+                val map = list.mapNotNull { dto ->
+                    try {
+                        LocalDate.parse(dto.date) to dto.count
+                    } catch (_: DateTimeParseException) {
+                        null
+                    }
+                }.toMap()
 
                 _state.value = _state.value.copy(
                     weekCountsByDate = map
                 )
-
             }.onFailure {
+                _state.value = _state.value.copy(error = it.message)
+            }
+        }
+    }
+
+    fun loadMonth(month: String) { // "2026-02"
+        viewModelScope.launch {
+            val result = getMonthUseCase(month = month)
+
+            result.onSuccess { list ->
+                val map = list.mapNotNull { dto ->
+                    try {
+                        LocalDate.parse(dto.date) to dto.count
+                    } catch (_: DateTimeParseException) {
+                        null
+                    }
+                }.toMap()
+
                 _state.value = _state.value.copy(
-                    error = it.message
+                    monthCountsByDate = map
+                )
+            }.onFailure {
+                _state.value = _state.value.copy(error = it.message)
+            }
+        }
+    }
+
+    private fun fetchOrganizerNamesFor(meetings: List<MeetingResponse>) {
+        val existing = _state.value.organizerNames
+        val needIds = meetings
+            .map { it.organizerId }
+            .distinct()
+            .filter { it !in existing.keys }
+
+        if (needIds.isEmpty()) return
+
+        viewModelScope.launch {
+            val updates = mutableMapOf<Long, String>()
+
+            needIds.forEach { id ->
+                userInfo.getPerson(id)
+                    .onSuccess { person ->
+                        updates[id] = person.fullName
+                    }
+            }
+
+            if (updates.isNotEmpty()) {
+                _state.value = _state.value.copy(
+                    organizerNames = _state.value.organizerNames + updates
                 )
             }
         }
     }
 
-    private val personsRepo = PersonsRepository(PersonsNetworkDataSource())
-
-    private fun ensureOrganizerNamesLoaded(meetings: List<MeetingResponse>) {
-        val existing = _state.value.organizerNames
-        val needIds = meetings.map { it.organizerId }.distinct().filter { it !in existing.keys }
-
-        if (needIds.isEmpty()) return
-
+    fun refreshPendingInvitesBadge() {
         viewModelScope.launch {
-            val newMap = existing.toMutableMap()
+            val result = getInvites(
+                status = InvitationStatusDto.PENDING,
+                page = 0,
+                size = 1
+            )
 
-            needIds.forEach { id ->
-                personsRepo.getPerson(id).onSuccess { person ->
-                    newMap[id] = person.fullName
-                }
+            result.onSuccess { page ->
+                _state.value = _state.value.copy(
+                    hasPendingInvites = page.content.isNotEmpty()
+                )
+            }.onFailure {
             }
-
-            _state.value = _state.value.copy(organizerNames = newMap)
         }
     }
 }

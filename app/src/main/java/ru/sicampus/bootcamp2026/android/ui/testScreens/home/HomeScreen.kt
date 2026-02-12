@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,8 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -37,10 +36,12 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -55,16 +56,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.R
+import ru.sicampus.bootcamp2026.android.data.source.AuthLocalDataSource
 import ru.sicampus.bootcamp2026.android.ui.components.CustomNavigationBar
 import ru.sicampus.bootcamp2026.android.ui.components.MeetingCard
 import ru.sicampus.bootcamp2026.android.ui.components.MeetingCardActions
-import ru.sicampus.bootcamp2026.android.ui.components.MeetingUi
-import ru.sicampus.bootcamp2026.android.ui.mappers.toMeetingUi
+import ru.sicampus.bootcamp2026.android.ui.utils.toMeetingUi
 import ru.sicampus.bootcamp2026.android.ui.theme.DarkBlue
 import ru.sicampus.bootcamp2026.android.ui.theme.IconsGrey
 import ru.sicampus.bootcamp2026.android.ui.theme.TextGrey
@@ -73,10 +77,13 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
 
-private enum class HomeViewType(val title: String) {
-    WEEK("Неделя"),
-    MONTH("Месяц")
+
+private enum class HomeViewType(@StringRes val titleRes: Int) {
+    WEEK(R.string.week),
+    MONTH(R.string.month)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -89,8 +96,6 @@ fun HomeScreen(
     var viewType by remember { mutableStateOf(HomeViewType.WEEK) }
     var showViewTypeMenu by remember { mutableStateOf(false) }
 
-    val pendingInvitesCount by remember { mutableStateOf(2) }
-
     var anchorDate by remember { mutableStateOf(LocalDate.now()) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
 
@@ -99,6 +104,23 @@ fun HomeScreen(
     val listState = rememberLazyListState()
 
     val scope = rememberCoroutineScope()
+
+    val hasPending = state.hasPendingInvites
+
+    val myUserId by produceState<Long?>(initialValue = null) {
+        value = AuthLocalDataSource.getUserId()
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val obs = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshPendingInvitesBadge()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(obs)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
+    }
 
     fun scrollToTop() {
         scope.launch {
@@ -111,9 +133,20 @@ fun HomeScreen(
     }
 
     LaunchedEffect(Unit) {
-        val start = startOfWeek(anchorDate)
-        viewModel.loadWeek(start)
         viewModel.loadFirstPage(selectedDate)
+    }
+
+    LaunchedEffect(viewType, anchorDate) {
+        when (viewType) {
+            HomeViewType.WEEK -> {
+                viewModel.loadWeek(startOfWeek(anchorDate))
+            }
+            HomeViewType.MONTH -> {
+                val ym = YearMonth.from(anchorDate)
+                val monthParam = "%04d-%02d".format(ym.year, ym.monthValue) // "2026-02"
+                viewModel.loadMonth(monthParam)
+            }
+        }
     }
 
     // ПАГИНАЦИЯ
@@ -168,8 +201,8 @@ fun HomeScreen(
                                 .padding(horizontal = 12.dp, vertical = 8.dp)
                         ) {
                             Text(
-                                text = viewType.title,
-                                fontSize = 16.sp,
+                                text = stringResource(viewType.titleRes),
+                                        fontSize = 16.sp,
                                 fontFamily = FontFamily(Font(R.font.open_sans_semibold)),
                                 color = DarkBlue
                             )
@@ -186,7 +219,7 @@ fun HomeScreen(
                                 DropdownMenuItem(
                                     text = {
                                         Text(
-                                            option.title,
+                                            text = stringResource(option.titleRes),
                                             color = DarkBlue,
                                             fontFamily = FontFamily(Font(R.font.open_sans_semibold))
                                         )
@@ -197,12 +230,7 @@ fun HomeScreen(
 
                                         selectedDate = anchorDate
                                         viewModel.loadFirstPage(selectedDate)
-
-                                        if (viewType == HomeViewType.WEEK) {
-                                            viewModel.loadWeek(startOfWeek(anchorDate))
-                                        } else {
-                                            // TODO: loadMonth потом
-                                        }
+                                        scrollToTop()
                                     },
                                     colors = MenuDefaults.itemColors(
                                         textColor = DarkBlue,
@@ -216,26 +244,32 @@ fun HomeScreen(
                     }
 
                     IconButton(onClick = onNotificationsClick) {
-                        if (pendingInvitesCount > 0) {
-                            BadgedBox(badge = {
-                                Badge(containerColor = Color.Red, contentColor = Color.White) {}
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Notifications,
-                                    contentDescription = "Notifications",
-                                    tint = DarkBlue,
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            }
-                        } else {
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .padding(end = 4.dp, top = 2.dp)
+                        ) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notifications",
-                                tint = IconsGrey,
-                                modifier = Modifier.size(30.dp)
+                                contentDescription = stringResource(R.string.home_cd_notifications),
+                                tint = if (hasPending) DarkBlue else IconsGrey,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .size(30.dp)
                             )
+                            if (hasPending) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .offset(x = 2.dp, y = (-2).dp)
+                                        .size(10.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.Red)
+                                )
+                            }
                         }
                     }
+
                 }
             }
 
@@ -261,7 +295,6 @@ fun HomeScreen(
                                 scrollToTop()
                             }
                             HomeViewType.MONTH -> {
-                                // TODO: viewModel.loadMonth(YearMonth.from(newAnchor))
                                 viewModel.loadFirstPage(newSelected)
                                 scrollToTop()
                             }
@@ -284,7 +317,6 @@ fun HomeScreen(
                                 scrollToTop()
                             }
                             HomeViewType.MONTH -> {
-                                // TODO: viewModel.loadMonth(YearMonth.from(newAnchor))
                                 viewModel.loadFirstPage(newSelected)
                                 scrollToTop()
                             }
@@ -317,7 +349,7 @@ fun HomeScreen(
                         MonthCalendar(
                             anchorDate = anchorDate,
                             selectedDate = selectedDate,
-                            meetingsCountByDate = state.weekCountsByDate, // TODO:заменить на monthCounts
+                            meetingsCountByDate = state.monthCountsByDate,
                             onSelectDate = { date ->
                                 selectedDate = date
                                 viewModel.loadFirstPage(date)
@@ -343,8 +375,10 @@ fun HomeScreen(
                 items = state.meetings,
                 key = { it.id }
             ) { meeting ->
-                val name = state.organizerNames[meeting.organizerId] ?: "Организатор #${meeting.organizerId}"
-                val ui = meeting.toMeetingUi(organizerName = name)
+                val name = state.organizerNames[meeting.organizerId]
+                    ?: stringResource(R.string.home_organizer_fallback, meeting.organizerId)
+
+                val ui = meeting.toMeetingUi(organizerName = name, myUserId = myUserId)
 
                 MeetingCard(
                     meeting = ui,
@@ -397,7 +431,7 @@ private fun PeriodNavRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = onPrev) {
-            Icon(Icons.Default.ChevronLeft, contentDescription = "Prev", tint = DarkBlue)
+            Icon(Icons.Default.ChevronLeft, contentDescription = stringResource(R.string.home_cd_prev), tint = DarkBlue)
         }
 
         Text(
@@ -410,10 +444,11 @@ private fun PeriodNavRow(
         )
 
         IconButton(onClick = onNext) {
-            Icon(Icons.Default.ChevronRight, contentDescription = "Next", tint = DarkBlue)
+            Icon(Icons.Default.ChevronRight, contentDescription = stringResource(R.string.home_cd_next), tint = DarkBlue)
         }
     }
 }
+
 
 // Неделя
 @Composable
@@ -496,7 +531,7 @@ private fun WeekDayItem(
         ) {
             if (count > 0) {
                 Text(
-                    text = if (count > 9) "9+" else count.toString(),
+                    text = if (count > 9) stringResource(R.string.home_more_9) else count.toString(),
                     fontSize = 10.sp,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
@@ -584,7 +619,15 @@ private fun MonthWeekHeader() {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        val days = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+        val days = listOf(
+            stringResource(R.string.home_day_mon),
+            stringResource(R.string.home_day_tue),
+            stringResource(R.string.home_day_wed),
+            stringResource(R.string.home_day_thu),
+            stringResource(R.string.home_day_fri),
+            stringResource(R.string.home_day_sat),
+            stringResource(R.string.home_day_sun),
+        )
         days.forEach { d ->
             Text(
                 text = d,

@@ -3,8 +3,6 @@ package ru.sicampus.bootcamp2026.android.ui.testScreens.profile
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,7 +11,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,7 +21,6 @@ import ru.sicampus.bootcamp2026.android.ui.components.CustomNavigationBar
 import ru.sicampus.bootcamp2026.android.ui.components.CustomTextField
 import ru.sicampus.bootcamp2026.android.ui.theme.Black
 import ru.sicampus.bootcamp2026.android.ui.theme.DarkBlue
-import ru.sicampus.bootcamp2026.android.ui.theme.TextGrey
 import ru.sicampus.bootcamp2026.android.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,7 +66,6 @@ fun ProfileScreen(
                 ProfileContent(
                     state = currentState,
                     paddingValues = paddingValues,
-                    onEditClick = { viewModel.onIntent(ProfileIntent.ToggleEditMode) },
                     onExitClick = { viewModel.onIntent(ProfileIntent.Logout) },
                     onSaveClick = { fullName, department, position ->
                         viewModel.onIntent(
@@ -91,7 +86,6 @@ fun ProfileScreen(
 private fun ProfileContent(
     state: ProfileState.Data,
     paddingValues: PaddingValues,
-    onEditClick: () -> Unit,
     onExitClick: () -> Unit,
     onSaveClick: (String, String, String) -> Unit
 )
@@ -117,20 +111,11 @@ private fun ProfileContent(
                 .padding(16.dp),
             horizontalArrangement = Arrangement.End,
         ) {
-            IconButton(onClick = onEditClick) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = if (state.isEditMode) "Отменить" else "Изменить профиль",
-                    tint = Black,
-                    modifier = Modifier.size(30.dp)
-                )
-            }
-
             Spacer(modifier = Modifier.width(30.dp))
 
             IconButton(onClick = onExitClick) {
                 Icon(
-                    painter = painterResource(R.drawable.close_icon),
+                    painter = painterResource(R.drawable.log_out_icon),
                     contentDescription = "Выйти",
                     tint = Black,
                     modifier = Modifier.size(30.dp)
@@ -145,6 +130,7 @@ private fun ProfileContent(
             fontSize = 24.sp,
             fontFamily = FontFamily(Font(R.font.open_sans_bold)),
             color = Black,
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
 
         Spacer(modifier = Modifier.height(50.dp))

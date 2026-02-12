@@ -9,7 +9,6 @@ import ru.sicampus.bootcamp2026.android.domain.entities.UserEntity
 class AppRepository(
     private val api: ApiDataSource
 ) {
-
     suspend fun getUsers(): Result<List<UserEntity>> =
         api.getUsers().map { list -> list.map { it.toEntity() } }
 

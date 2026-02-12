@@ -20,7 +20,7 @@
     <string name="month">Месяц</string>
     <string name="year">Год</string>
     <string name="no_meetings">У вас пока нет запланированных встреч</string>
-    <string name="create_meeting">Запланировать?</string>
+    <string name="create_meeting">Создание встречи</string>
 
     <string name="create_meeting_activity">Создание встречи</string>
     <string name="meeting_name">Название встречи</string>
@@ -31,5 +31,75 @@
     <string name="notifications">Уведомления</string>
     <string name="no_notifications">У вас пока нет уведомлений</string>
 
+    <string name="you_are_organizer">Вы организатор</string>
+    <string name="neRakov_Meet">neRakov MEET</string>
+
+    <string name="email_employee">Email сотрудника</string>
+    <string name="search_employee">Поиск</string>
+    <string name="no_results">Нет результатов</string>
+    <string name="add_participant">Добавленные участники</string>
+
+    <string name="week">Неделя</string>
+
+
+    <string name="cm_error_create_failed">Ошибка создания встречи</string>
+    <string name="cm_error_unknown">Неизвестная ошибка</string>
+
+    <string name="cm_validation_title">Введите название встречи</string>
+    <string name="cm_validation_description">Введите описание</string>
+    <string name="cm_validation_date">Выберите дату</string>
+    <string name="cm_validation_start_time">Выберите время начала</string>
+    <string name="cm_validation_end_time">Выберите время окончания</string>
+    <string name="cm_validation_end_after_start">Время окончания должно быть больше времени начала</string>
+    <string name="cm_validation_add_participant">Добавьте хотя бы одного участника</string>
+
+    <string name="update_profile_error">Ошибка обновления профиля</string>
+    <string name="loading_profile_error">Ошибка загрузки профиля</string>
+
+    <string name="su_error_registration">Ошибка регистрации</string>
+
+    <string name="su_hint_fill_fullname">Заполните ФИО</string>
+    <string name="su_hint_fullname_min_2">ФИО: минимум 2 символа</string>
+    <string name="su_hint_fill_department">Заполните отдел</string>
+    <string name="su_hint_department_min_2">Отдел: минимум 2 символа</string>
+    <string name="su_hint_fill_position">Заполните должность</string>
+    <string name="su_hint_position_min_2">Должность: минимум 2 символа</string>
+    <string name="su_hint_fill_email">Заполните email</string>
+    <string name="su_hint_email_invalid">Некорректный формат email</string>
+    <string name="su_hint_password_create">Придумайте пароль</string>
+    <string name="su_hint_password_min_6">Пароль: минимум 6 символов</string>
+    <string name="su_hint_password_confirm">Подтвердите пароль</string>
+    <string name="su_hint_passwords_not_match">Пароли не совпадают</string>
+
+    <string name="su_error_fill_fullname">Ошибка: заполните поле ФИО</string>
+    <string name="su_error_fill_department">Ошибка: заполните поле Отдел</string>
+    <string name="su_error_fill_position">Ошибка: заполните поле Должность</string>
+    <string name="su_error_fill_email">Ошибка: заполните поле Email</string>
+    <string name="su_error_fill_password">Ошибка: заполните поле Пароль</string>
+    <string name="su_error_confirm_password">Ошибка: подтвердите пароль</string>
+
+    <string name="su_error_fullname_min_2">ФИО должно содержать минимум 2 символа</string>
+    <string name="su_error_department_min_2">Отдел должен содержать минимум 2 символа</string>
+    <string name="su_error_position_min_2">Должность должна содержать минимум 2 символа</string>
+    <string name="su_error_email_invalid">Некорректный формат email</string>
+    <string name="su_error_password_min_6">Пароль должен содержать минимум 6 символов</string>
+    <string name="su_error_check_fields">Проверьте правильность заполнения полей</string>
+
+
+    <string name="home_cd_notifications">Уведомления</string>
+    <string name="home_cd_prev">Назад</string>
+    <string name="home_cd_next">Вперёд</string>
+
+    <string name="home_organizer_fallback">Организатор #%1$d</string>
+
+    <string name="home_day_mon">Пн</string>
+    <string name="home_day_tue">Вт</string>
+    <string name="home_day_wed">Ср</string>
+    <string name="home_day_thu">Чт</string>
+    <string name="home_day_fri">Пт</string>
+    <string name="home_day_sat">Сб</string>
+    <string name="home_day_sun">Вс</string>
+
+    <string name="home_more_9">9+</string>
 
 </resources>
