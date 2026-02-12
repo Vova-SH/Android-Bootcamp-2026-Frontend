@@ -8,6 +8,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Notifications
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.sicampus.bootcamp2026.data.model.MeetingDto
+import ru.sicampus.bootcamp2026.data.model.MeetingParticipantDto
 import ru.sicampus.bootcamp2026.ui.theme.BackgroundColor
 import ru.sicampus.bootcamp2026.ui.theme.PrimaryPurple
 import ru.sicampus.bootcamp2026.ui.theme.TextWhite
@@ -52,6 +55,9 @@ fun MainScreen(
     val selectedDate by viewModel.selectedDate.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val avatarUrl by viewModel.avatarUrl.collectAsState()
+    val selectedMeeting by viewModel.selectedMeeting.collectAsState()
+    val meetingParticipants by viewModel.meetingParticipants.collectAsState()
+    val participantsLoading by viewModel.participantsLoading.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -68,28 +74,42 @@ fun MainScreen(
             }
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
-            HeaderSection(onInvitesClicked, onProfileClicked, avatarUrl)
-            Spacer(modifier = Modifier.height(16.dp))
+            Column(modifier = Modifier.fillMaxSize()) {
+                HeaderSection(onInvitesClicked, onProfileClicked, avatarUrl)
+                Spacer(modifier = Modifier.height(16.dp))
 
-            DaysSelectorSection(
-                selectedDate = selectedDate,
-                onDateSelected = { viewModel.selectDate(it) }
-            )
+                DaysSelectorSection(
+                    selectedDate = selectedDate,
+                    onDateSelected = { viewModel.selectDate(it) }
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            if (isLoading) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = PrimaryPurple)
+                if (isLoading) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = PrimaryPurple)
+                    }
+                } else {
+                    ScheduleGridSection(
+                        meetings = meetings,
+                        onMeetingClick = viewModel::openMeetingDetail
+                    )
                 }
-            } else {
-                ScheduleGridSection(meetings = meetings)
+            }
+
+            if (selectedMeeting != null) {
+                MeetingParticipantsOverlay(
+                    meeting = selectedMeeting!!,
+                    participants = meetingParticipants,
+                    isLoading = participantsLoading,
+                    onDismiss = viewModel::closeMeetingDetail
+                )
             }
         }
     }
@@ -149,7 +169,10 @@ fun DayCard(date: LocalDate, isSelected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun ScheduleGridSection(meetings: List<MeetingDto>) {
+fun ScheduleGridSection(
+    meetings: List<MeetingDto>,
+    onMeetingClick: (MeetingDto) -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -171,14 +194,22 @@ fun ScheduleGridSection(meetings: List<MeetingDto>) {
                 } catch (e: Exception) { false }
             }
 
-            TimeSlotRow(time = timeString, meeting = meetingAtThisHour)
+            TimeSlotRow(
+                time = timeString,
+                meeting = meetingAtThisHour,
+                onMeetingClick = onMeetingClick
+            )
         }
         Spacer(modifier = Modifier.height(80.dp))
     }
 }
 
 @Composable
-fun TimeSlotRow(time: String, meeting: MeetingDto?) {
+fun TimeSlotRow(
+    time: String,
+    meeting: MeetingDto?,
+    onMeetingClick: (MeetingDto) -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -218,7 +249,10 @@ fun TimeSlotRow(time: String, meeting: MeetingDto?) {
                     colors = CardDefaults.cardColors(containerColor = cardColor),
                     shape = RoundedCornerShape(12.dp),
                     elevation = CardDefaults.cardElevation(0.dp),
-                    modifier = Modifier.fillMaxSize().padding(1.dp)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(1.dp)
+                        .clickable { onMeetingClick(meeting) }
                 ) {
                     Row(modifier = Modifier.fillMaxSize()) {
                         Box(
@@ -280,5 +314,171 @@ fun HeaderSection(onInvitesClicked: () -> Unit, onProfileClicked: () -> Unit, av
                 }
             }
         }
+    }
+}
+
+@Composable
+fun MeetingParticipantsOverlay(
+    meeting: MeetingDto,
+    participants: List<MeetingParticipantDto>,
+    isLoading: Boolean,
+    onDismiss: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(onClick = onDismiss)
+            .background(Color.Black.copy(alpha = 0.5f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .fillMaxHeight(0.7f)
+                .padding(24.dp)
+                .clickable { /* клик по карточке не закрывает окно */ },
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(8.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = meeting.title ?: "Встреча",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    TextButton(onClick = onDismiss) {
+                        Text("Закрыть", color = PrimaryPurple)
+                    }
+                }
+                if (!meeting.description.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = meeting.description,
+                        fontSize = 13.sp,
+                        color = Color.Black.copy(alpha = 0.7f)
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Участники",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black.copy(alpha = 0.8f)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = PrimaryPurple)
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(participants) { participant ->
+                            ParticipantRow(participant = participant)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ParticipantRow(participant: MeetingParticipantDto) {
+    val statusText = when (participant.invitationStatus?.uppercase()) {
+        "ACCEPTED" -> "Принял"
+        "REJECTED" -> "Отклонил"
+        "PENDING" -> "Ожидает"
+        else -> participant.invitationStatus ?: ""
+    }
+    val statusColor = when (participant.invitationStatus?.uppercase()) {
+        "ACCEPTED" -> Color(0xFF22C55E)
+        "REJECTED" -> Color(0xFFEF4444)
+        else -> Color.Black.copy(alpha = 0.5f)
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xFFF5F5F5))
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (!participant.avatarUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = participant.avatarUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = (participant.name?.firstOrNull()?.uppercase() ?: "?").toString(),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = participant.name ?: "—",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
+            )
+            if (!participant.position.isNullOrBlank()) {
+                Text(
+                    text = participant.position,
+                    fontSize = 12.sp,
+                    color = Color.Black.copy(alpha = 0.6f)
+                )
+            }
+            if (!participant.email.isNullOrBlank()) {
+                Text(
+                    text = participant.email,
+                    fontSize = 12.sp,
+                    color = Color.Black.copy(alpha = 0.5f)
+                )
+            }
+            if (!participant.phone.isNullOrBlank()) {
+                Text(
+                    text = participant.phone,
+                    fontSize = 12.sp,
+                    color = Color.Black.copy(alpha = 0.5f)
+                )
+            }
+        }
+        Text(
+            text = statusText,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = statusColor
+        )
     }
 }

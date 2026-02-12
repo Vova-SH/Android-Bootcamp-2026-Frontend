@@ -34,8 +34,8 @@ class InvitesViewModel(app: Application) : AndroidViewModel(app) {
     private fun loadInvites() {
         viewModelScope.launch {
             val me = repository.getCurrentUser().getOrNull() ?: return@launch
-            repository.getInvites(me.id)
-                .onSuccess { _invites.value = it }
+            repository.getInvites(me.id, 0)
+                .onSuccess { pageResponse -> _invites.value = pageResponse.content }
         }
     }
 

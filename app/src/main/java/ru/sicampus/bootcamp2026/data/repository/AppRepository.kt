@@ -4,6 +4,7 @@ import ru.sicampus.bootcamp2026.data.auth.TokenStorage
 import ru.sicampus.bootcamp2026.data.model.CreateMeetingRequest
 import ru.sicampus.bootcamp2026.data.model.InvitationDecisionRequest
 import ru.sicampus.bootcamp2026.data.model.MeetingDto
+import ru.sicampus.bootcamp2026.data.model.MeetingParticipantDto
 import ru.sicampus.bootcamp2026.data.model.PageResponse
 import ru.sicampus.bootcamp2026.data.model.UpdateUserRequest
 import ru.sicampus.bootcamp2026.data.model.UserDto
@@ -37,6 +38,10 @@ class AppRepository(
         api.getMeetings(getAuthHeader())
     }
 
+    suspend fun getMeetingParticipants(meetingId: Long): Result<List<MeetingParticipantDto>> = runCatching {
+        api.getMeetingParticipants(getAuthHeader(), meetingId)
+    }
+
     suspend fun getCurrentUser(): Result<UserDto> = runCatching {
         api.getMe(getAuthHeader())
     }
@@ -54,10 +59,6 @@ class AppRepository(
         api.updateUser(getAuthHeader(), id, req)
     }
 
-    suspend fun getInvites(userId: Long) = runCatching {
-        api.getInvites(getAuthHeader(), userId, "PENDING")
-    }
-
     suspend fun answerInvite(userId: Long, meetingId: Long, isAccepted: Boolean) = runCatching {
         val status = if (isAccepted) "ACCEPTED" else "REJECTED"
         api.decideInvitation(getAuthHeader(), userId, meetingId, InvitationDecisionRequest(status))
@@ -65,5 +66,9 @@ class AppRepository(
 
     suspend fun getUsers(page: Int, size: Int, search: String?): Result<PageResponse<UserDto>> = runCatching {
         api.getUsers(getAuthHeader(), page, size, search)
+    }
+
+    suspend fun getInvites(userId: Long, page: Int) = runCatching {
+        api.getInvites(getAuthHeader(), userId, "PENDING", page, 10)
     }
 }

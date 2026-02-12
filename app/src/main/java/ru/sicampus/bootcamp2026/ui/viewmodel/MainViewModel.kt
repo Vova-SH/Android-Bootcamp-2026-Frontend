@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.data.auth.NetworkClient
 import ru.sicampus.bootcamp2026.data.auth.TokenStorage
 import ru.sicampus.bootcamp2026.data.model.MeetingDto
+import ru.sicampus.bootcamp2026.data.model.MeetingParticipantDto
 import ru.sicampus.bootcamp2026.data.model.SharedEvents
 import ru.sicampus.bootcamp2026.data.repository.AppRepository
 import java.time.LocalDate
@@ -47,6 +48,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val _avatarUrl = MutableStateFlow<String?>(null)
     val avatarUrl = _avatarUrl.asStateFlow()
 
+    private val _selectedMeeting = MutableStateFlow<MeetingDto?>(null)
+    val selectedMeeting = _selectedMeeting.asStateFlow()
+
+    private val _meetingParticipants = MutableStateFlow<List<MeetingParticipantDto>>(emptyList())
+    val meetingParticipants = _meetingParticipants.asStateFlow()
+
+    private val _participantsLoading = MutableStateFlow(false)
+    val participantsLoading = _participantsLoading.asStateFlow()
+
     init {
         loadMeetings()
         loadCurrentUser()
@@ -74,6 +84,23 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun selectDate(date: LocalDate) {
         _selectedDate.value = date
+    }
+
+    fun openMeetingDetail(meeting: MeetingDto) {
+        _selectedMeeting.value = meeting
+        _meetingParticipants.value = emptyList()
+        viewModelScope.launch {
+            _participantsLoading.value = true
+            repository.getMeetingParticipants(meeting.id)
+                .onSuccess { _meetingParticipants.value = it }
+                .onFailure { Log.e("MainViewModel", "Failed to load participants", it) }
+            _participantsLoading.value = false
+        }
+    }
+
+    fun closeMeetingDetail() {
+        _selectedMeeting.value = null
+        _meetingParticipants.value = emptyList()
     }
 
     private fun loadCurrentUser() {
