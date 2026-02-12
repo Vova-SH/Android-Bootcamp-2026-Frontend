@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.domain.RegisterUseCase
+import ru.sicampus.bootcamp2026.util.ErrorUtils
 
 class RegistrationViewModel : ViewModel() {
     private val registerUseCase by lazy { RegisterUseCase() }
@@ -49,10 +50,11 @@ class RegistrationViewModel : ViewModel() {
                             _uiState.update { it.copy(isLoading = false, isRegistered = true) }
                         },
                         onFailure = { error ->
+                            val errorMessage = ErrorUtils.translateError(error, "Ошибка регистрации")
                             _uiState.update { 
                                 it.copy(
                                     isLoading = false, 
-                                    error = error.message ?: "Ошибка регистрации"
+                                    error = errorMessage
                                 ) 
                             }
                         }

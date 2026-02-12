@@ -6,7 +6,7 @@ import ru.sicampus.bootcamp2026.data.dto.PageDto
 import ru.sicampus.bootcamp2026.data.dto.UserDto
 
 class UserApiService {
-    private val client = Network.client
+    private val client get() = Network.client
 
     suspend fun getUsers(page: Int = 0, size: Int = 20, search: String? = null): List<UserDto> {
         val response: PageDto<UserDto> = client.get("${Network.HOST}/api/users") {

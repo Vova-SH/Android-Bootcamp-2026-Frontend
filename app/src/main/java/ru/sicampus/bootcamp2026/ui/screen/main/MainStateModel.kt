@@ -1,5 +1,6 @@
 package ru.sicampus.bootcamp2026.ui.screen.main
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,8 +11,10 @@ import ru.sicampus.bootcamp2026.domain.CreateMeetingUseCase
 import ru.sicampus.bootcamp2026.domain.GetCurrentUserUseCase
 import ru.sicampus.bootcamp2026.domain.GetUsersUseCase
 import ru.sicampus.bootcamp2026.domain.entities.UserEntity
+import ru.sicampus.bootcamp2026.util.ErrorUtils
 import java.time.LocalDate
 
+@SuppressLint("NewApi")
 class MainStateModel(
     private val getUsersUseCase: GetUsersUseCase = GetUsersUseCase(),
     private val getCurrentUserUseCase: GetCurrentUserUseCase = GetCurrentUserUseCase(),
@@ -43,7 +46,7 @@ class MainStateModel(
 
     fun onUserSelect(user: UserEntity) {
         _uiState.update { state ->
-            if (state.selectedUsers.any { it.id == user.id }) {
+            if (state.selectedUsers.any { it.id == user.id } || user.id == state.currentUser?.id) {
                 state
             } else {
                 state.copy(
@@ -69,9 +72,14 @@ class MainStateModel(
             }
             
             getUsersUseCase(page = 0, query = query).onSuccess { users ->
-                _uiState.update { it.copy(foundUsers = users) }
+                _uiState.update { state ->
+                    val filteredUsers = users.filter { user ->
+                        state.selectedUsers.none { it.id == user.id } && user.id != state.currentUser?.id
+                    }
+                    state.copy(foundUsers = filteredUsers)
+                }
             }.onFailure { e ->
-                _uiState.update { it.copy(error = e.message) }
+                _uiState.update { it.copy(error = ErrorUtils.translateError(e, "Ошибка при поиске пользователей")) }
             }
         }
     }
@@ -80,7 +88,7 @@ class MainStateModel(
         viewModelScope.launch {
             val state = _uiState.value
             if (state.meetingName.isBlank() || state.meetingDate.isBlank() || state.meetingTime.isBlank()) {
-                _uiState.update { it.copy(error = "Please fill all fields") }
+                _uiState.update { it.copy(error = "Пожалуйста, заполните все поля") }
                 return@launch
             }
 
@@ -110,10 +118,10 @@ class MainStateModel(
                         ) 
                     }
                 }.onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message) }
+                    _uiState.update { it.copy(isLoading = false, error = ErrorUtils.translateError(e, "Ошибка при создании встречи")) }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = "Invalid date or time format") }
+                _uiState.update { it.copy(isLoading = false, error = "Неверный формат даты или времени") }
             }
         }
     }
@@ -122,19 +130,18 @@ class MainStateModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
-            // Parallel loading of users and current user
             val currentUserResult = getCurrentUserUseCase()
             
             currentUserResult.onSuccess { user ->
                 _uiState.update { it.copy(currentUser = user) }
             }.onFailure { e ->
-                _uiState.update { it.copy(error = "Failed to load current user: ${e.message}") }
+                _uiState.update { it.copy(error = "Ошибка при загрузке данных пользователя: ${ErrorUtils.translateError(e, "")}") }
             }
 
             getUsersUseCase(page = 0).onSuccess { users ->
                 _uiState.update { it.copy(isLoading = false) }
             }.onFailure { e ->
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = ErrorUtils.translateError(e, "Ошибка при загрузке пользователей")) }
             }
         }
     }

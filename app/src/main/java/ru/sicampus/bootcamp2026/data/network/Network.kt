@@ -17,31 +17,46 @@ import android.util.Log
 
 object Network {
     const val HOST = "http://10.0.2.2:8080"
-    val client by lazy {
-        HttpClient(CIO){
-            install(ContentNegotiation){
-                json(
-                    Json {
-                        isLenient = true
-                        ignoreUnknownKeys = true
-                    }
-                )
+    
+    private var _client: HttpClient? = null
+    
+    val client: HttpClient
+        get() {
+            if (_client == null) {
+                _client = createClient()
             }
-            install(Logging){
-                logger = object: Logger {
-                    override fun log(message: String) {
-                        Log.d("Ktor", message)
-                    }
+            return _client!!
+        }
+
+    fun resetClient() {
+        Log.d("Network", "Resetting Ktor client to update headers")
+        _client?.close()
+        _client = null
+    }
+
+    private fun createClient() = HttpClient(CIO) {
+        expectSuccess = true
+        install(ContentNegotiation) {
+            json(
+                Json {
+                    isLenient = true
+                    ignoreUnknownKeys = true
                 }
-                level = LogLevel.ALL
+            )
+        }
+        install(Logging) {
+            logger = object : Logger {
+                override fun log(message: String) {
+                    Log.d("Ktor", message)
+                }
             }
-            defaultRequest { 
-                contentType(ContentType.Application.Json)
-                AuthLocalDataSource.token?.let {
-                    Log.d("Network", "Adding Authorization header: $it")
-                    header(HttpHeaders.Authorization, it)
-                } ?: Log.d("Network", "No token found in AuthLocalDataSource")
-            }
+            level = LogLevel.ALL
+        }
+        defaultRequest {
+            AuthLocalDataSource.token?.let {
+                Log.d("Network", "Adding Authorization header: $it")
+                header(HttpHeaders.Authorization, it)
+            } ?: Log.d("Network", "No token found in AuthLocalDataSource")
         }
     }
 }

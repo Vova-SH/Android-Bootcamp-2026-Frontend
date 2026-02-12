@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.data.source.AuthApiService
+import ru.sicampus.bootcamp2026.util.ErrorUtils
 
 class ProfileStateModel : ViewModel() {
     private val authApiService = AuthApiService()
@@ -30,29 +31,19 @@ class ProfileStateModel : ViewModel() {
                     )
                 }
             } catch (e: Exception) {
-                _uiState.update { ProfileState.Error(e.message ?: "Неизвестная ошибка") }
+                _uiState.update { ProfileState.Error(ErrorUtils.translateError(e, "Неизвестная ошибка")) }
             }
         }
     }
 
-    fun updateName(newName: String) {
-        _uiState.update { state ->
-            if (state is ProfileState.Content) {
-                state.copy(fullName = newName)
-            } else state
-        }
-    }
-
-    fun saveProfile() {
-        val currentState = _uiState.value
-        if (currentState is ProfileState.Content) {
-            viewModelScope.launch {
-                try {
-                    authApiService.updateUser(currentState.fullName)
-                    getData()
-                } catch (e: Exception) {
-                    _uiState.update { ProfileState.Error(e.message ?: "Ошибка при сохранении") }
-                }
+    fun uploadImage(bytes: ByteArray, fileName: String) {
+        viewModelScope.launch {
+            _uiState.update { ProfileState.Loading }
+            try {
+                authApiService.uploadPfp(bytes, fileName)
+                getData()
+            } catch (e: Exception) {
+                _uiState.update { ProfileState.Error(ErrorUtils.translateError(e, "Ошибка при загрузке фото")) }
             }
         }
     }

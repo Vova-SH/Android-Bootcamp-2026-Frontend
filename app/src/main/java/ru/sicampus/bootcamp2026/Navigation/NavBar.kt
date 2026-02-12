@@ -25,10 +25,9 @@ fun NavBar(
 ) {
     val currentDestination = navController.currentDestination
     val selectedTab = when (currentDestination?.route) {
-        Routes.Invitations.route -> 0
+        Routes.Schedule.route -> 0
         Routes.Home.route -> 1
-        Routes.Schedule.route -> 2
-        Routes.Profile.route -> 3
+        Routes.Profile.route -> 2
         else -> 1
     }
 
@@ -47,7 +46,7 @@ fun NavBar(
             selected = selectedTab == 0,
             onClick = {
                 if (selectedTab != 0) {
-                    navController.navigate(Routes.Invitations.route) {
+                    navController.navigate(Routes.Schedule.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
                         }
@@ -58,13 +57,13 @@ fun NavBar(
             },
             icon = {
                 Icon(
-                    Icons.Default.Email,
+                    Icons.Default.DateRange,
                     contentDescription = null,
                     modifier = Modifier.size(30.dp)
                 )
             },
             label = {
-                Text("Приглашения", fontSize = 12.sp)
+                Text("Расписание", fontSize = 12.sp)
             },
             colors = colors
         )
@@ -99,32 +98,6 @@ fun NavBar(
             selected = selectedTab == 2,
             onClick = {
                 if (selectedTab != 2) {
-                    navController.navigate(Routes.Schedule.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-            },
-            icon = {
-                Icon(
-                    Icons.Default.DateRange,
-                    contentDescription = null,
-                    modifier = Modifier.size(30.dp)
-                )
-            },
-            label = {
-                Text("Расписание", fontSize = 12.sp)
-            },
-            colors = colors
-        )
-
-        NavigationBarItem(
-            selected = selectedTab == 3,
-            onClick = {
-                if (selectedTab != 3) {
                     navController.navigate(Routes.Profile.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true

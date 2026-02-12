@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.domain.CheckAndSaveAuthUseCase
 import ru.sicampus.bootcamp2026.domain.CheckAuthFormatUseCase
+import ru.sicampus.bootcamp2026.util.ErrorUtils
 
 class AuthViewModel : ViewModel() {
     private val checkAuthFormatUseCase by lazy { CheckAuthFormatUseCase() }
@@ -27,10 +28,11 @@ class AuthViewModel : ViewModel() {
                             _uiState.update { it.copy(isLoading = false, isAuthorized = true) }
                         },
                         onFailure = { error ->
+                            val errorMessage = ErrorUtils.translateError(error, "Ошибка авторизации")
                             _uiState.update { 
                                 it.copy(
                                     isLoading = false, 
-                                    error = error.message ?: "Ошибка авторизации"
+                                    error = errorMessage
                                 ) 
                             }
                         }

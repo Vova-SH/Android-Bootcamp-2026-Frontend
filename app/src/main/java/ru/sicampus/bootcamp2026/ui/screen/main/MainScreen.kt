@@ -1,5 +1,6 @@
 package ru.sicampus.bootcamp2026.ui.screen.main
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -36,6 +37,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+@SuppressLint("NewApi")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
@@ -58,6 +60,7 @@ fun MainScreen(
     )
 }
 
+@SuppressLint("NewApi")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainScreenContent(
@@ -136,6 +139,46 @@ private fun MainScreenContent(
     }
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Создание встречи",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigate(Routes.Invitations.route) }) {
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = "Приглашения",
+                            modifier = Modifier.size(28.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { 
+                        navController.navigate(Routes.Auth.route) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.ExitToApp,
+                            contentDescription = "Выйти",
+                            modifier = Modifier.size(28.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        },
         bottomBar = {
             NavBar(navController = navController)
         },
@@ -154,16 +197,9 @@ private fun MainScreenContent(
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = "Создание встречи",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 SimpleTextField(
                     value = state.meetingName,
@@ -189,7 +225,6 @@ private fun MainScreenContent(
                                 )
                             }
                         )
-                        // Overlay to capture clicks even if SimpleTextField doesn't
                         Box(modifier = Modifier.matchParentSize().clickable { showDatePicker = true })
                     }
                     
@@ -209,7 +244,6 @@ private fun MainScreenContent(
                                 )
                             }
                         )
-                        // Overlay to capture clicks
                         Box(modifier = Modifier.matchParentSize().clickable { showTimePicker = true })
                     }
                 }
@@ -342,36 +376,32 @@ private fun MainScreenContent(
                 SimpleButton("Создать встречу") {
                     onCreateMeetingClick()
                 }
+
+                if (state.error != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = state.error ?: "",
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                }
                 
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            IconButton(
-                onClick = { 
-                    navController.navigate(Routes.Auth.route) {
-                        popUpTo(navController.graph.id) { inclusive = true }
-                    }
-                },
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 16.dp, end = 16.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ExitToApp,
-                    contentDescription = "Выход",
-                    tint = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
-
             if (state.isSuccess) {
                 androidx.compose.material3.AlertDialog(
-                    onDismissRequest = { /* No-op */ },
+                    onDismissRequest = {  },
                     confirmButton = {
-                        SimpleButton("OK") {
-                            onRefresh() // This will clear the success state and reload data
+                    SimpleButton("OK") {
+                        onRefresh()
+                        navController.navigate(Routes.Schedule.route) {
+                            popUpTo(Routes.Home.route) { inclusive = true }
                         }
-                    },
+                    }
+                },
                     title = { Text("Успех") },
                     text = { Text("Встреча успешно создана!") }
                 )

@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.domain.GetMyInvitationsUseCase
 import ru.sicampus.bootcamp2026.domain.UpdateInvitationUseCase
 import ru.sicampus.bootcamp2026.domain.entities.InvitationEntity
+import ru.sicampus.bootcamp2026.util.ErrorUtils
 
 class InvitingStateModel(
     private val getMyInvitationsUseCase: GetMyInvitationsUseCase = GetMyInvitationsUseCase(),
@@ -26,7 +27,7 @@ class InvitingStateModel(
             getMyInvitationsUseCase().onSuccess { invitations ->
                 _uiState.emit(InvitingState.Content(invitations = invitations))
             }.onFailure { e ->
-                _uiState.emit(InvitingState.Error(e.message ?: "Unknown error"))
+                _uiState.emit(InvitingState.Error(ErrorUtils.translateError(e, "Неизвестная ошибка")))
             }
         }
     }
@@ -35,9 +36,9 @@ class InvitingStateModel(
         viewModelScope.launch {
             val updatedInvitation = invitation.copy(status = status)
             updateInvitationUseCase(updatedInvitation).onSuccess {
-                getData() // Refresh list
+                getData() 
             }.onFailure { e ->
-                _uiState.emit(InvitingState.Error(e.message ?: "Failed to update invitation"))
+                _uiState.emit(InvitingState.Error(ErrorUtils.translateError(e, "Не удалось обновить приглашение")))
             }
         }
     }

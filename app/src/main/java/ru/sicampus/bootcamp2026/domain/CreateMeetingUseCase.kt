@@ -35,7 +35,7 @@ class CreateMeetingUseCase(
                         id = -1L,
                         meetingId = meeting.id,
                         inviteeId = inviteeId,
-                        status = 0, // Pending
+                        status = 0, 
                         invitedAt = null,
                         respondedAt = null
                     )

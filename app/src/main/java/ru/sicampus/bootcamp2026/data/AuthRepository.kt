@@ -22,15 +22,24 @@ class AuthRepository(
         email: String?
     ): Result<Unit> {
         return try {
-            val response = authApiService.register(
+            val registrationEmail = if (email.isNullOrBlank()) login else email
+            authApiService.register(
                 RegistrationRequestDto(
-                    email = login,
+                    email = registrationEmail,
                     password = password,
                     fullName = name
                 )
             )
-            authLocalDataSource.setToken(login, password)
-            Result.success(Unit)
+            // Важно: Сначала устанавливаем токен, чтобы Network.resetClient() сработал
+            authLocalDataSource.setToken(registrationEmail, password)
+            
+            // Проверяем авторизацию, чтобы убедиться, что всё ок
+            val isAuthOk = authApiService.checkAuth()
+            if (isAuthOk) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Ошибка авторизации после регистрации"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -5,11 +5,13 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import ru.sicampus.bootcamp2026.data.dto.InvitationDto
 import ru.sicampus.bootcamp2026.data.dto.PageDto
 
 class InvitationApiService {
-    private val client = Network.client
+    private val client get() = Network.client
 
     suspend fun getInvitations(page: Int = 0, size: Int = 20): List<InvitationDto> {
         val response: PageDto<InvitationDto> = client.get("${Network.HOST}/api/invitations") {
@@ -33,12 +35,14 @@ class InvitationApiService {
 
     suspend fun createInvitation(invitation: InvitationDto): InvitationDto {
         return client.post("${Network.HOST}/api/invitations") {
+            contentType(ContentType.Application.Json)
             setBody(invitation)
         }.body()
     }
 
     suspend fun updateInvitation(id: Long, invitation: InvitationDto): InvitationDto {
         return client.put("${Network.HOST}/api/invitations/$id") {
+            contentType(ContentType.Application.Json)
             setBody(invitation)
         }.body()
     }
