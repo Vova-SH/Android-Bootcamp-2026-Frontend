@@ -4,7 +4,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -44,6 +48,9 @@ class AddViewModel: ViewModel() {
     private val _createState: MutableStateFlow<CreateState> = MutableStateFlow(CreateState.Loading)
     val createState = _createState.asStateFlow()
 
+    private val _navigateBack = MutableSharedFlow<Unit>()
+    val navigateBack: SharedFlow<Unit> = _navigateBack.asSharedFlow()
+
     init {
         getData()
     }
@@ -78,8 +85,8 @@ class AddViewModel: ViewModel() {
 
     fun createEvent(
         organizerId: Int,
-        title: TextFieldValue,
-        description: TextFieldValue,
+        title: String,
+        description: String,
         date: String,
         startTime: String,
         endTime: String,
@@ -87,9 +94,11 @@ class AddViewModel: ViewModel() {
     ){
         viewModelScope.launch {
             _createState.emit(CreateState.Loading)
-            createEventUseCase.invoke(organizerId, title.toString(), description.toString(), date, startTime, endTime, participantsId).fold(
+            createEventUseCase.invoke(organizerId, title, description, date, startTime, endTime, participantsId).fold(
                 onSuccess = { user ->
                     _createState.emit(CreateState.Content(user))
+                    delay(1500)
+                    _navigateBack.emit(Unit)
                 },
                 onFailure = { error ->
                     _createState.emit(CreateState.Error(error.message.orEmpty()))

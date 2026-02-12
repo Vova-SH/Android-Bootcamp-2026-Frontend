@@ -1,5 +1,6 @@
 package ru.sicampus.bootcamp2026.ui.screen.add
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -29,6 +31,7 @@ import ru.sicampus.bootcamp2026.data.dto.UserDto
 import ru.sicampus.bootcamp2026.data.source.AuthLocalDataSource
 import ru.sicampus.bootcamp2026.domain.add.entities.TimeSlotEntity
 import ru.sicampus.bootcamp2026.domain.home.entities.UserEntity
+import ru.sicampus.bootcamp2026.ui.screen.home.HomeViewModel
 import ru.sicampus.bootcamp2026.ui.theme.*
 import java.time.Instant
 import java.time.LocalDate
@@ -37,11 +40,29 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddScreen(onReturnBack: () -> Unit, viewModel: AddViewModel = viewModel(), ) {
+fun AddScreen(onReturnBack: () -> Unit, viewModel: AddViewModel = viewModel(), homeViewModel: HomeViewModel = viewModel() ) {
     val user = remember { mutableStateOf<UserDto?>(null) }
 
     LaunchedEffect(Unit) {
         user.value = AuthLocalDataSource.getCurrentUser()
+    }
+    val context = LocalContext.current
+
+    val createState by viewModel.createState.collectAsState()
+
+    when (createState) {
+        is CreateState.Content -> {
+            homeViewModel.getData()
+            Toast.makeText(context,"Встреча создана", Toast.LENGTH_LONG).show()
+        }
+        is CreateState.Error -> Toast.makeText(context,"Ошибка создания встречи", Toast.LENGTH_LONG).show()
+        CreateState.Loading -> {}
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.navigateBack.collect {
+            onReturnBack()
+        }
     }
 
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
@@ -59,6 +80,7 @@ fun AddScreen(onReturnBack: () -> Unit, viewModel: AddViewModel = viewModel(), )
             currentState,
             user,
             viewModel,
+            homeViewModel,
             onReturnBack,
             selectedDate = selectedDate,
             onDateChange = { newDate -> selectedDate = newDate },
@@ -106,6 +128,7 @@ private fun AddContentState(
     state: AddState.Content,
     user: MutableState<UserDto?>,
     viewModel: AddViewModel,
+    homeViewModel: HomeViewModel,
     onReturnBack: () -> Unit,
     selectedDate: LocalDate?,
     onDateChange: (LocalDate?) -> Unit,
@@ -142,10 +165,12 @@ private fun AddContentState(
 
     val toggleParticipant: (Int) -> Unit = remember {
         { userId ->
-            selectedParticipantIds = if (selectedParticipantIds.contains(userId)) {
-                selectedParticipantIds - userId
-            } else {
-                selectedParticipantIds + userId
+            if(userId != user.value?.id){ //TODO сделать по умному
+                selectedParticipantIds = if (selectedParticipantIds.contains(userId)) {
+                    selectedParticipantIds - userId
+                } else {
+                    selectedParticipantIds + userId
+                }
             }
         }
     }
@@ -202,13 +227,14 @@ private fun AddContentState(
                     color = Color.Black,
                     style = CustomTypography.displayMedium
                 )
-
+                val title = meetingTitle.text
+                val description = meetingDescription.text
                 IconButton(
                     onClick = {
                         viewModel.createEvent(
                             organizerId!!,
-                            meetingTitle,
-                            meetingDescription,
+                            title,
+                            description,
                             selectedDate.toString(),
                             selectedTimeSlot?.startTime ?: "00:00:00",
                             selectedTimeSlot?.endTime ?: "00:00:00",

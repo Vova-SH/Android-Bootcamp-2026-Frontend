@@ -42,3 +42,5 @@ val Red = Color(0xFFC33636)
 val Green = Color(0xFFABC45D)
 
 val DarkGray1 = Color(0xFFC8C8C8)
+
+val PlashkaColor = Color(0xFFBFBEC1)

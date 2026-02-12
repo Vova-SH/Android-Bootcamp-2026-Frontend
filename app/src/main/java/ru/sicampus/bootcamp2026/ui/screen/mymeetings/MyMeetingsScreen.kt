@@ -1,4 +1,10 @@
-package ru.sicampus.bootcamp2026.ui.screen.list
+package ru.sicampus.bootcamp2026.ui.screen.mymeetings
+
+import androidx.compose.foundation.lazy.items
+import ru.sicampus.bootcamp2026.ui.screen.list.ListIntent
+import ru.sicampus.bootcamp2026.ui.screen.list.ListState
+import ru.sicampus.bootcamp2026.ui.screen.list.ListViewModel
+
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,7 +16,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -20,8 +25,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +51,7 @@ import ru.sicampus.bootcamp2026.data.dto.UserDto
 import ru.sicampus.bootcamp2026.data.source.AuthLocalDataSource
 import ru.sicampus.bootcamp2026.domain.home.entities.EventEntity
 import ru.sicampus.bootcamp2026.ui.screen.home.HomeViewModel
+import ru.sicampus.bootcamp2026.ui.theme.Black
 import ru.sicampus.bootcamp2026.ui.theme.CustomTypography
 import ru.sicampus.bootcamp2026.ui.theme.Green
 import ru.sicampus.bootcamp2026.ui.theme.MediumGray
@@ -55,7 +61,12 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun ListScreen(viewModel : ListViewModel = viewModel<ListViewModel>()) {
+fun MyMeetingsScreen(
+    viewModel : MyMeetingViewModel = viewModel<MyMeetingViewModel>(),
+    onDetailClick: () -> Unit,
+    homeViewModel: HomeViewModel,
+    onReturnToHome: () -> Unit
+) {
 
     val user = remember { mutableStateOf<UserDto?>(null) }
 
@@ -63,18 +74,23 @@ fun ListScreen(viewModel : ListViewModel = viewModel<ListViewModel>()) {
         user.value = AuthLocalDataSource.getCurrentUser()
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.getData()
+    }
+
     val state by viewModel.uiState.collectAsState()
 
     when(val currentState = state){
-        is ListState.Error -> ListErrorState(currentState, onRefresh = { viewModel.getData() })
-        is ListState.Loading -> ListLoadingState()
-        is ListState.Content -> ListContentState(viewModel, currentState, user)
+        is MyMeetingsState.Error -> MeetingErrorState(currentState, onRefresh = { viewModel.getData() })
+        is MyMeetingsState.Loading -> MeetingLoadingState()
+        is MyMeetingsState.Content -> MeetingContentState(
+            viewModel, homeViewModel, currentState, user, onDetailClick, onReturnToHome)
     }
 
 }
 
 @Composable
-private  fun ListLoadingState(){
+private  fun MeetingLoadingState(){
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -86,7 +102,7 @@ private  fun ListLoadingState(){
 }
 
 @Composable
-private  fun ListErrorState( state: ListState.Error, onRefresh: () -> Unit ){
+private  fun MeetingErrorState( state: MyMeetingsState.Error, onRefresh: () -> Unit ){
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -105,52 +121,66 @@ private  fun ListErrorState( state: ListState.Error, onRefresh: () -> Unit ){
 }
 
 @Composable
-private fun ListContentState(viewModel: ListViewModel, state: ListState.Content, user: MutableState<UserDto?>){
+private fun MeetingContentState(
+    viewModel: MyMeetingViewModel,
+    homeViewModel: HomeViewModel,
+    state: MyMeetingsState.Content,
+    user: MutableState<UserDto?>,
+    onDetailClick: () -> Unit,
+    onReturnToHome: () -> Unit
+){
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .safeDrawingPadding()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 56.dp)
+        modifier = Modifier.fillMaxSize()
+            .padding(start = 16.dp, end = 16.dp, top = 48.dp, bottom = 56.dp)
     ) {
-        Text(
-            text = "cписок приглашений",
-            color = Color.Black,
-            style = CustomTypography.displayMedium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 32.dp)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = CenterVertically
+        ) {
+            IconButton(
+                onClick = { onReturnToHome() },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.arrow_left),
+                    contentDescription = "Назад",
+                    tint = Black,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Text(
+                text = "созданные Вами встречи",
+                color = Black,
+                style = CustomTypography.displayMedium,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
 
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(state.invitations) { item ->
-                InvitationCard(viewModel, item = item, user, onCardClick = {
-                    //TODO переход на detail screen
-                })
+            items(state.meetings) { item ->
+                InvitationCard(viewModel, homeViewModel,item, user, onDetailClick )
             }
         }
     }
 }
 
 @Composable
-fun InvitationCard(viewModel: ListViewModel, item: EventEntity , user: MutableState<UserDto?>, onCardClick: () -> Unit) {
+fun InvitationCard(viewModel: MyMeetingViewModel, homeViewModel: HomeViewModel, item: EventEntity , user: MutableState<UserDto?>, onDetailClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .border(
-                width = 1.dp,
-                color = MediumGray,
-                shape = RoundedCornerShape(30.dp)
-            )
+            .border(width = 1.dp, color = MediumGray, shape = RoundedCornerShape(30.dp))
             .padding(
                 horizontal = 10.dp,
                 vertical = 16.dp
             )
-            .clickable { onCardClick() }
+            .clickable {
+                homeViewModel.selectEvent(item)
+                onDetailClick()
+            }
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -204,7 +234,7 @@ fun InvitationCard(viewModel: ListViewModel, item: EventEntity , user: MutableSt
                     )
                 }
             }
-            // Кнопки принятия/отклонения
+
             Row(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = CenterVertically
@@ -220,7 +250,7 @@ fun InvitationCard(viewModel: ListViewModel, item: EventEntity , user: MutableSt
                         )
                         .clickable {
                             val id = user.value?.id ?: 0
-                            viewModel.onIntent(ListIntent.Send(item.id, id, false))
+                            viewModel.onIntent(MyMeetingIntent.Send(item.id, id, false))
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -229,31 +259,6 @@ fun InvitationCard(viewModel: ListViewModel, item: EventEntity , user: MutableSt
                         contentDescription = "Отклонить",
                         tint = Red,
                         modifier = Modifier.size(24.dp).padding(2.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(30.dp))
-                        .border(
-                            width = 1.dp,
-                            color = Green,
-                            shape = RoundedCornerShape(30.dp)
-                        )
-                        .clickable {
-                            val id = user.value?.id ?: 0
-                            viewModel.onIntent(ListIntent.Send(item.id, id, true))
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.check),
-                        contentDescription = "Принять",
-                        tint = Green,
-                        modifier = Modifier.size(24.dp).padding(0.dp)
                     )
                 }
             }
@@ -268,6 +273,6 @@ fun InvitationCard(viewModel: ListViewModel, item: EventEntity , user: MutableSt
 //    MaterialTheme(
 //        typography = CustomTypography
 //    ) {
-//        ListScreen()
+//        MyMeetingsScreen()
 //    }
 //}

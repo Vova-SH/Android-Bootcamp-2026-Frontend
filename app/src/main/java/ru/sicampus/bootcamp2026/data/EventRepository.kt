@@ -85,4 +85,33 @@ class EventRepository(
             participantsId = participantsId
         )
     }
+
+    suspend fun getMeetings(): Result<List<EventEntity>>{
+        return eventInfoDataSource.getMeetings().map{ listDto ->
+            listDto.mapNotNull { eventDto ->
+                EventEntity(
+                    id = eventDto.id ?: return@mapNotNull null,
+                    title = eventDto.title ?: return@mapNotNull null,
+                    description = eventDto.description ?: return@mapNotNull null,
+                    organizerName = eventDto.organizerName ?: return@mapNotNull null,
+                    date = eventDto.date ?: return@mapNotNull null,
+                    startTime = eventDto.startTime ?: return@mapNotNull null,
+                    endTime = eventDto.endTime ?: return@mapNotNull null,
+                    participants = eventDto.participants?.map { participantDto ->
+                        ParticipantEntity(
+                            id = participantDto.id ?: return@mapNotNull null,
+                            fullName = participantDto.fullName ?: return@mapNotNull null,
+                            status = participantDto.status ?: return@mapNotNull null
+                        )
+                    } ?: emptyList()
+                )
+            }
+        }
+    }
+
+    suspend fun deleteMeeting(
+        meetingId: Int
+    ): Result<Unit> {
+        return eventInfoDataSource.deleteMeeting(meetingId)
+    }
 }

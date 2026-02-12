@@ -47,6 +47,9 @@ import ru.sicampus.bootcamp2026.ui.theme.Red
 import ru.sicampus.bootcamp2026.ui.theme.SineyIney
 import ru.sicampus.bootcamp2026.ui.theme.SoftWhite
 import ru.sicampus.bootcamp2026.ui.theme.Yellow
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 
 @Composable
@@ -148,9 +151,9 @@ private fun DetailContentState(onReturnToHome: () -> Unit , event: EventEntity){
 
                 InfoRow(label = "описание", value = event.description, modifier = Modifier.padding(bottom = 16.dp))
 
-                InfoRow(label = "дата", value = event.date, modifier = Modifier.padding(bottom = 8.dp))
+                InfoRowDate(label = "дата", value = event.date, modifier = Modifier.padding(bottom = 8.dp))
 
-                InfoRow(label = "время", value = event.startTime, modifier = Modifier.padding(bottom = 0.dp))
+                InfoRowTime(label = "время", value = event.startTime, modifier = Modifier.padding(bottom = 0.dp))
             }
         }
         Spacer(modifier = Modifier.height(24.dp))
@@ -199,9 +202,11 @@ private fun DetailContentState(onReturnToHome: () -> Unit , event: EventEntity){
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Text(
-                        text = event.organizerName,
+                        text = event.organizerName.split(" ").get(0) + " " + event.organizerName.split(" ").get(1),
                         style = CustomTypography.labelMedium,
-                        color = Black
+                        color = Black,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
@@ -267,6 +272,43 @@ fun InfoRow(
 }
 
 @Composable
+fun InfoRowTime(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            style = CustomTypography.labelMedium,
+            color = SoftWhite.copy(alpha = 0.5f)
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+        val time = LocalTime.parse(value).format(DateTimeFormatter.ofPattern("HH:mm"))
+        Text(text = time, style = CustomTypography.labelMedium, color = SoftWhite)
+    }
+}
+@Composable
+fun InfoRowDate(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            style = CustomTypography.labelMedium,
+            color = SoftWhite.copy(alpha = 0.5f)
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+        val date = LocalDate.parse(value).format(DateTimeFormatter.ofPattern("dd-MM"))
+        Text(text = date, style = CustomTypography.labelMedium, color = SoftWhite)
+    }
+}
+
+@Composable
 fun ParticipantCard(participant: ParticipantEntity) {
     val response = participant.status
 
@@ -317,7 +359,8 @@ fun ParticipantCard(participant: ParticipantEntity) {
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 // Имя участника
-                Text(text = participant.fullName, fontSize = 16.sp, color = Color.Black, fontWeight = FontWeight.Medium)
+                val nameAndSurname = participant.fullName.split(" ").get(0) + " " + participant.fullName.split(" ").get(1)
+                Text(text = nameAndSurname, fontSize = 16.sp, color = Color.Black, fontWeight = FontWeight.Medium)
             }
 
             Row(

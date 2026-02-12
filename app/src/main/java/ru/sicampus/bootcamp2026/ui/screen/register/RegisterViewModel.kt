@@ -21,6 +21,49 @@ class RegisterViewModel: ViewModel() {
     private val _uiState: MutableStateFlow<RegisterState> = MutableStateFlow(RegisterState.Initial)
     val uiState = _uiState.asStateFlow()
 
+    fun validateAndRegister(
+        email: String,
+        password: String,
+        confirmPassword: String,
+        name: String,
+        surname: String,
+        patronymic: String,
+        onValidationError: (String) -> Unit,
+        onSuccess: () -> Unit
+    ) {
+        when {
+            name.isEmpty() -> {
+                onValidationError("Укажите имя")
+                return
+            }
+            surname.isEmpty() -> {
+                onValidationError("Укажите фамилию")
+                return
+            }
+            patronymic.isEmpty() -> {
+                onValidationError("Укажите отчество")
+                return
+            }
+            email.isEmpty() -> {
+                onValidationError("Укажите email")
+                return
+            }
+            password.isEmpty() -> {
+                onValidationError("Укажите пароль")
+                return
+            }
+            confirmPassword.isEmpty() -> {
+                onValidationError("Подтвердите пароль")
+                return
+            }
+            password != confirmPassword -> {
+                onValidationError("Пароли должны совпадать")
+                return
+            }
+        }
+        register(email, password, "$surname $name $patronymic".trim())
+    }
+
     fun register(email: String, password: String, fullName: String){
         viewModelScope.launch {
             _uiState.emit(RegisterState.Loading)

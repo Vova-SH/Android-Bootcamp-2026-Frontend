@@ -41,4 +41,12 @@ class UserRepository(
             )
         }
     }
+
+    suspend fun changeUser(
+        id: Int,
+        email: String,
+        fullname: String
+    ): Result<Unit> {
+        return userInfoDataSource.changeUser(id, email,fullname)
+    }
 }

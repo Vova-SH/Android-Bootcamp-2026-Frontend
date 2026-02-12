@@ -1,5 +1,6 @@
 package ru.sicampus.bootcamp2026.ui.screen.register
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,9 +11,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
@@ -31,8 +34,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,6 +55,7 @@ fun RegistrationScreen(navController: NavController, onRegisterSuccess: () -> Un
 
     val viewModel: RegisterViewModel = viewModel()
     val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current;
 
     var name by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
@@ -88,12 +95,22 @@ fun RegistrationScreen(navController: NavController, onRegisterSuccess: () -> Un
                 confirmPassword = confirmPassword,
                 onConfirmPasswordChange = { confirmPassword = it },
                 onRegisterClick = {
-                    if (password != confirmPassword) {
-                        // TODO
-                        return@RegisterContentState
-                    }
-                    val fullName = "$surname $name $patronymic".trim()
-                    viewModel.register(email, password, fullName)
+                    viewModel.validateAndRegister(
+                        email = email,
+                        password = password,
+                        confirmPassword = confirmPassword,
+                        name = name,
+                        surname = surname,
+                        patronymic = patronymic,
+                        onValidationError = { errorMessage ->
+                            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+                        },
+                        onSuccess = {
+                            val fullName = "$surname $name $patronymic".trim()
+                            viewModel.register(email, password, fullName)
+                        }
+                    )
+
                 },
                 onLoginClick = { onLoginClick() }
             )
@@ -143,16 +160,19 @@ fun RegisterErrorState(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = errorMessage, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 32.dp))
-            //TODO
+            Text(text = errorMessage,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 32.dp),
+                style = MaterialTheme.typography.displayMedium
+            )
             Button(
-                onClick = onRetry, modifier = Modifier.fillMaxWidth(0.7f)
+                onClick = onBackToForm, modifier = Modifier.fillMaxWidth(0.7f)
             ) {
-                Text("Попробовать снова")
-            }
-            TextButton(onClick = onBackToForm) {
                 Text("Вернуться к форме")
             }
+//            TextButton(onClick = onBackToForm) {
+//                Text("Вернуться к форме")
+//            }
         }
     }
 }
@@ -194,37 +214,38 @@ private fun RegisterContentState(
     onConfirmPasswordChange: (String) -> Unit,
     onRegisterClick: () -> Unit,
     onLoginClick: () -> Unit
-    ){
+){
 
-    Box(
-        modifier = Modifier.fillMaxSize()
+    val allFieldsFilled = remember(
+        name,
+        surname,
+        patronymic,
+        email,
+        password,
+        confirmPassword
     ) {
+        name.isNotEmpty() &&
+                surname.isNotEmpty() &&
+                patronymic.isNotEmpty() &&
+                email.isNotEmpty() &&
+                password.isNotEmpty() &&
+                confirmPassword.isNotEmpty()
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(start = 32.dp, end = 32.dp, top = 96.dp, bottom = 48.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 32.dp, end = 32.dp, top = 96.dp, bottom = 48.dp),
             verticalArrangement = Arrangement.spacedBy(56.dp)
         ) {
-            // Заголовок "Регистрация"
-            Text(
-                text = "Регистрация",
-                fontSize = 24.sp,
-                color = Black,
-                fontFamily = Montserrat,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(40.dp)
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(40.dp)) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(32.dp)
                 ) {
-                    //  (Имя, Фамилия, Отчество, Почта)
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-
+                    // (Имя, Фамилия, Отчество, Почта)
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         InputField(
                             value = name,
                             onValueChange = onNameChange,
@@ -254,17 +275,17 @@ private fun RegisterContentState(
 
                         InputField(
                             value = email,
-                            onValueChange =onEmailChange,
-                            placeholder = "Почта",
+                            onValueChange = onEmailChange,
+                            placeholder = "Email",
                             containerColor = containerColor,
                             textColor = textColor,
                             modifier = Modifier.fillMaxWidth().height(51.dp)
                         )
                     }
 
-                    // (Пароль и подтверждение пароля)
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(vertical = 16.dp)
                     ) {
                         // Пароль
                         InputField(
@@ -277,7 +298,6 @@ private fun RegisterContentState(
                             modifier = Modifier.fillMaxWidth().height(51.dp)
                         )
 
-                        // Подтверждение пароля
                         InputField(
                             value = confirmPassword,
                             onValueChange = onConfirmPasswordChange,
@@ -290,41 +310,50 @@ private fun RegisterContentState(
                     }
                 }
 
-                // (кнопка и чекбокс)
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
-                ) {
-
-                    // Кнопка регистрации
+                // (кнопка и ссылка на вход)
+                Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
                     Box(
-                        modifier = Modifier.fillMaxWidth().height(51.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(51.dp)
                             .clip(RoundedCornerShape(30.dp))
-                            .background(SineyIney)
-                            .clickable {
-                                onRegisterClick()
-                            },
-                        contentAlignment = Alignment.CenterStart
+                            .background(
+                                if (allFieldsFilled) SineyIney else SineyIney.copy(alpha = 0.5f)
+                            )
+                            .clickable(
+                                enabled = allFieldsFilled,
+                                onClick = onRegisterClick
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Зарегистрироваться",
+                            text = "Создать аккаунт",
                             color = buttonTextColor,
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth().padding(start = 16.dp)
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
 
-                    // текст с ссылкой на вход
+                    // Текст с ссылкой на вход
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(text = "Уже есть аккаунт?", color = Black, style = MaterialTheme.typography.bodyMedium,)
+                        Text(
+                            text = "Уже есть аккаунт?",
+                            color = Black,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        Text(text = "Войти", style = MaterialTheme.typography.bodyMedium, color = SineyIney,
-                            modifier = Modifier.clickable { onLoginClick() })
+                        Text(
+                            text = "Войти",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = SineyIney,
+                            modifier = Modifier.clickable { onLoginClick() }
+                        )
                     }
                 }
             }
@@ -342,30 +371,36 @@ fun InputField(
     isPassword: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier.clip(RoundedCornerShape(30.dp)).background(containerColor)
-    ) {
-        if (value.isEmpty()) {
-            Text(
-                text = placeholder,
-                color = textColor,
-                modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp),
-                style = MaterialTheme.typography.displayMedium
-            )
-        }
+    val visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None
 
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(30.dp))
+            .background(containerColor)
+            .heightIn(min = 56.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
+            visualTransformation = visualTransformation,
+            singleLine = true,
             textStyle = TextStyle(
                 fontSize = 16.sp,
                 color = if (value.isEmpty()) textColor else Color.Black,
                 fontFamily = FontFamily.Default
             ),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth().height(51.dp)
-                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
         )
+
+        if (value.isEmpty()) {
+            Text(
+                text = placeholder,
+                color = textColor,
+                modifier = Modifier.padding(horizontal = 16.dp),
+                style = MaterialTheme.typography.displayMedium
+            )
+        }
     }
 }
 

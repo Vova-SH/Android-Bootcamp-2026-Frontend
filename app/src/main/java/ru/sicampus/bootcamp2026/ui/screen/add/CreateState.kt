@@ -4,6 +4,6 @@ sealed interface CreateState {
     data class Error( val reason: String ): CreateState
     data object Loading: CreateState
     data class Content(
-        val timeSlots: Unit
+        val users: Unit
     ): CreateState
 }

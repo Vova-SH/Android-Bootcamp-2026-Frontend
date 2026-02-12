@@ -1,6 +1,7 @@
 package ru.sicampus.bootcamp2026.data.source
 
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
@@ -9,6 +10,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.sicampus.bootcamp2026.data.dto.CreateEventDto
@@ -104,6 +106,52 @@ class EventInfoDataSource {
                 addAuthHeader()
                 contentType(ContentType.Application.Json)
                 setBody(requestBody)
+            }
+            return@withContext when {
+                result.status.isSuccess() -> {
+                    result.body<Unit>()
+                    Result.success(Unit)
+                }
+                result.status == HttpStatusCode.BadRequest -> {
+                    val errorMessage = result.body<String>()
+                    Result.failure(Exception("Ошибка: $errorMessage"))
+                }
+                else -> {
+                    Result.failure(
+                        Exception("Ошибка сервера: ${result.status}")
+                    )
+                }
+            }
+        }
+    }
+
+    suspend fun getMeetings(): Result<List<EventDto>> = withContext(Dispatchers.IO) {
+        runCatching {
+            val currentUser = AuthLocalDataSource.getCurrentUser()
+
+            if (currentUser == null || currentUser.id == null) {
+                throw Exception("Пользователь не авторизован")
+            }
+
+            val userId = currentUser.id
+
+            val result = Network.client.get("${Network.HOST}/api/meetings/organizer/$userId"){
+                addAuthHeader()
+            }
+            if (result.status != HttpStatusCode.OK){
+                error("Статус: ${result.status}")
+            }
+            result.body<List<EventDto>>()
+        }
+    }
+
+    suspend fun deleteMeeting(
+        meetingId: Int,
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val result = Network.client.delete("${Network.HOST}/api/meetings/$meetingId") {
+                addAuthHeader()
+                contentType(ContentType.Application.Json)
             }
             result.body<Unit>()
         }

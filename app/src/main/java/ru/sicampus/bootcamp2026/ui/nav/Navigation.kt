@@ -21,14 +21,20 @@ import ru.sicampus.bootcamp2026.ui.theme.Grey
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.runBlocking
 import ru.sicampus.bootcamp2026.ui.screen.calendar.CalendarScreen
 import ru.sicampus.bootcamp2026.ui.screen.home.HomeScreen
 import ru.sicampus.bootcamp2026.R
+import ru.sicampus.bootcamp2026.data.source.AuthLocalDataSource
 import ru.sicampus.bootcamp2026.ui.screen.auth.AuthScreen
 import ru.sicampus.bootcamp2026.ui.screen.add.AddScreen
+import ru.sicampus.bootcamp2026.ui.screen.calendar.CalendarViewModel
 import ru.sicampus.bootcamp2026.ui.screen.details.MeetingDetailScreen
 import ru.sicampus.bootcamp2026.ui.screen.home.HomeViewModel
 import ru.sicampus.bootcamp2026.ui.screen.list.ListScreen
+import ru.sicampus.bootcamp2026.ui.screen.mymeetings.MyMeetingViewModel
+import ru.sicampus.bootcamp2026.ui.screen.mymeetings.MyMeetingsScreen
+import ru.sicampus.bootcamp2026.ui.screen.profile.ProfileScreen
 import ru.sicampus.bootcamp2026.ui.screen.register.RegistrationScreen
 
 @Composable
@@ -38,14 +44,16 @@ fun Navigation() {
     val currentRoute = navBackStackEntry?.destination?.route
 
     val homeViewModel: HomeViewModel = viewModel()
+    val myMeetingViewModel: MyMeetingViewModel = viewModel()
+    val calendarViewModel: CalendarViewModel = viewModel()
     // TODO в отдельный Use Case
-//    val currentToken = runBlocking {AuthLocalDataSource.getToken()}
+//    val currentToken = runBlocking { AuthLocalDataSource.getToken()}
 //    if (currentToken == null ) RegisterRoute else HomeRoute
     Box(modifier = Modifier.fillMaxSize()) {
 
         NavHost(
             navController = navController,
-            startDestination = RegisterRoute,
+            startDestination = AuthRoute,
             modifier = Modifier.fillMaxSize()
         ) {
             composable<HomeRoute> {
@@ -58,7 +66,13 @@ fun Navigation() {
             }
 
             composable<CalendarRoute> {
-                CalendarScreen()
+                CalendarScreen(
+                    viewModel = calendarViewModel,
+                    homeViewModel = homeViewModel,
+                    onDetailClick = {
+                        navController.navigate(DetailsRoute)
+                    }
+                )
             }
             composable<RegisterRoute> {
                 RegistrationScreen(
@@ -88,6 +102,18 @@ fun Navigation() {
             composable<ListRoute> {
                 ListScreen()
             }
+            composable<MyMeetingRoute> {
+                MyMeetingsScreen(
+                    viewModel = myMeetingViewModel,
+                    homeViewModel = homeViewModel,
+                    onDetailClick = {
+                        navController.navigate(DetailsRoute)
+                    },
+                    onReturnToHome = {
+                        navController.popBackStack()
+                    }
+                )
+            }
             composable<DetailsRoute> {
                 MeetingDetailScreen(
                     viewModel = homeViewModel,
@@ -103,16 +129,26 @@ fun Navigation() {
                     }
                 )
             }
-//            composable("profile") {
-//                ProfileScreen()
-//            }
+            composable<ProfileRoute> {
+                ProfileScreen(
+                    onExitClick= {
+                        navController.navigate(AuthRoute){
+                            popUpTo(AuthRoute) { inclusive = true }
+                        }
+                    },
+                    onMeetClick = {
+                        navController.navigate(MyMeetingRoute)
+                    }
+                )
+            }
         }
 
         val showBottomBar = when (currentRoute) {
             "ru.sicampus.bootcamp2026.ui.nav.HomeRoute",
             "ru.sicampus.bootcamp2026.ui.nav.CalendarRoute",
             "ru.sicampus.bootcamp2026.ui.nav.ProfileRoute",
-            "ru.sicampus.bootcamp2026.ui.nav.ListRoute" -> true
+            "ru.sicampus.bootcamp2026.ui.nav.ListRoute",
+            "ru.sicampus.bootcamp2026.ui.nav.MyMeetingRoute" -> true
             else -> false
         }
 
