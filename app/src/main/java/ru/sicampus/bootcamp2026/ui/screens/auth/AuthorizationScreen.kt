@@ -54,6 +54,7 @@ import ru.sicampus.bootcamp2026.ui.theme.Blue
 import ru.sicampus.bootcamp2026.ui.theme.DarkGrey
 import ru.sicampus.bootcamp2026.ui.theme.LightGrey
 import ru.sicampus.bootcamp2026.ui.theme.White
+import androidx.core.net.toUri
 
 @Composable
 fun AuthorizationScreen(
@@ -65,9 +66,11 @@ fun AuthorizationScreen(
     val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
-        viewModel.actionFlow.collect { action ->
-            when(action) {
-                is AuthAction.OpenScreen -> navController.navigate(action.route)
+        viewModel.actionFlow.collect {
+            when(val action = it) {
+                is AuthAction.OpenScreen -> {
+                    navController.navigate(action.route.route.toUri())
+                }
             }
         }
     }
@@ -151,7 +154,8 @@ fun Content(
         shape = RoundedCornerShape(20.dp),
         label = { Text("Введите email",fontSize = 14.sp,
             fontFamily = FontFamily(Font(R.font.montserrat_regular)),
-            color = Blue) },
+            color = Blue)
+        },
         leadingIcon = { Icon(
             painter = painterResource(id = R.drawable.email), contentDescription = "Иконка",
             tint = DarkGrey,

@@ -1,15 +1,9 @@
 package ru.sicampus.bootcamp2026.data.source
-
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
-import ru.sicampus.bootcamp2026.App
-import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 object AuthLocalDataSource {
@@ -18,25 +12,25 @@ object AuthLocalDataSource {
 
     suspend fun getToken(): String? {
 
-        if (!isInit) {
-            _cashToken  = App.context.dataStore.data.map { preferences ->
-                preferences[TOKEN]
-            }.firstOrNull()
-            isInit = true
-        }
-        return _cashToken
+//        if (!isInit) {
+//            _cashToken  = App.context.dataStore.data.map { preferences ->
+//                preferences[TOKEN]
+//            }.firstOrNull()
+//            isInit = true
+//        }
+        return "_cashToken"
     }
 
     @OptIn(ExperimentalEncodingApi::class)
     suspend fun setToken(login: String, password: String) {
-        val decodePhrase = "$login:$password"
-        val token = "Basic ${Base64.encode(decodePhrase.toByteArray())}"
-        _cashToken = token
-        App.context.dataStore.updateData { pref ->
-            pref.toMutablePreferences().also { preferences ->
-                preferences[TOKEN] = token
-            }
-        }
+//        val decodePhrase = "$login:$password"
+//        val token = "Basic ${Base64.encode(decodePhrase.toByteArray())}"
+//        _cashToken = token
+//        App.context.dataStore.updateData { pref ->
+//            pref.toMutablePreferences().also { preferences ->
+//                preferences[TOKEN] = token
+//            }
+//        }
     }
 
     fun clearToken() {
