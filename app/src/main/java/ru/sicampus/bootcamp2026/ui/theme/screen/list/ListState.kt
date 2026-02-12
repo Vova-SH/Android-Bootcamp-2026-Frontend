@@ -1,8 +1,8 @@
-package ru.sicampus.bootcamp2026.ui.theme.screen
-
-import ru.sicampus.bootcamp2026.domain.entities.UserEntity
+package ru.sicampus.bootcamp2026.ui.theme.screen.auth.ru.sicampus.bootcamp2026.ui.theme.screen.list
 
 import kotlinx.collections.immutable.PersistentList
+import ru.sicampus.bootcamp2026.domain.entities.UserEntity
+
 sealed interface ListState {
     data class Error(val reason: String): ListState
     data object Loading: ListState

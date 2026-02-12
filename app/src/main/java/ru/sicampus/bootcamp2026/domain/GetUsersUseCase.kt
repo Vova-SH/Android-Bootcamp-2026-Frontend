@@ -17,6 +17,6 @@ class GetUsersUseCase(
     }
 
     private companion object {
-        const val COUNT = 20
+        const val COUNT = 2
     }
 }

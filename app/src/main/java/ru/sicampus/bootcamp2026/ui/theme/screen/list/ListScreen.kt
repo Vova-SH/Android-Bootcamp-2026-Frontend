@@ -1,4 +1,4 @@
-package ru.sicampus.bootcamp2026.ui.theme.screen
+package ru.sicampus.bootcamp2026.ui.theme.screen.auth.ru.sicampus.bootcamp2026.ui.theme.screen.list
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -21,10 +22,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.xr.glimmer.list.ListState
+import coil3.compose.AsyncImage
 import ru.sicampus.bootcamp2026.domain.entities.UserEntity
+
 
 @Composable
 fun ListScreen(
@@ -155,6 +160,11 @@ fun ItemUser(
         modifier = Modifier.padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        AsyncImage(
+            modifier = Modifier.size(48.dp).clip(CircleShape),
+            model = user.photoUrl,
+            contentDescription = null,
+        )
         Column {
             Text(user.name)
             Text(user.email)

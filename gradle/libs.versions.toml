@@ -13,6 +13,7 @@ composeBom = "2026.01.01"
 navigationCompose = "2.9.7"
 navigationRuntimeKtx = "2.9.7"
 uiText = "1.10.2"
+glimmer = "1.0.0-alpha05"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,6 +38,7 @@ ktor-client-logging = { group = "io.ktor", name="ktor-client-logging", version.r
 ktor-client-serialization = { group = "io.ktor", name="ktor-serialization-kotlinx-json", version.ref = "ktorClient" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-compose-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.ref = "uiText" }
+androidx-glimmer = { group = "androidx.xr.glimmer", name = "glimmer", version.ref = "glimmer" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,22 +1,18 @@
-package ru.sicampus.bootcamp2026.ui.theme.screen
+package ru.sicampus.bootcamp2026.ui.theme.screen.auth.ru.sicampus.bootcamp2026.ui.theme.screen.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import ru.sicampus.bootcamp2026.data.UserRepository
-import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
-import ru.sicampus.bootcamp2026.domain.GetUsersUseCase
-import androidx.lifecycle.viewModelScope
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ru.sicampus.bootcamp2026.data.UserRepository
+import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
+import ru.sicampus.bootcamp2026.domain.GetUsersUseCase
 import ru.sicampus.bootcamp2026.domain.entities.PagingUserListEntity
+
 
 class ListViewModel : ViewModel() {
     private val mutex = Mutex()

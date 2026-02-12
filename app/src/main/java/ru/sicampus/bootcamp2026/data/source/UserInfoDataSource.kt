@@ -30,7 +30,7 @@ class UserInfoDataSource {
 
     suspend fun getCurrentUser(): Result<UserDto> = withContext(Dispatchers.IO) {
         runCatching {
-            val result = Network.client.get("${Network.HOST}/api/users/current") {
+            val result = Network.client.get("${Network.HOST}/api/users") {
                 addAuthHeader()
             }
             if (result.status != HttpStatusCode.OK) {

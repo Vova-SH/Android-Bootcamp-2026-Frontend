@@ -25,7 +25,7 @@ class UserRepository(
                         id = userDto.id ?: return@mapNotNull null,
                         lastName = userDto.lastName ?: return@mapNotNull null,
                         login = userDto.login ?: return@mapNotNull null,
-                        phoneNumber = userDto.phoneNumber ?: return@mapNotNull null,
+                        phoneNumber = userDto.phoneNumber ?: "",
                         department = userDto.department ?: return@mapNotNull null,
                         position = userDto.position ?: return@mapNotNull null,
                         photoUrl = userDto.photoUrl ?: return@mapNotNull null,

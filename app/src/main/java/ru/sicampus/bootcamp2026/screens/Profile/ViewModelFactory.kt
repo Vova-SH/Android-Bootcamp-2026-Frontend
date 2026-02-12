@@ -1,5 +1,5 @@
-//package ru.sicampus.bootcamp2026.screens.Profile
-//
+package ru.sicampus.bootcamp2026.screens.Profile
+
 //import androidx.lifecycle.ViewModel
 //import androidx.lifecycle.ViewModelProvider
 //import ru.sicampus.bootcamp2026.data.UserRepository

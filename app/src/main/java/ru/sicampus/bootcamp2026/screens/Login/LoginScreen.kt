@@ -32,11 +32,12 @@ fun LoginScreen(
     var login by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(uiState) {
         if (uiState is LoginUiState.Success) {
             navController.navigate("list") {
-                popUpTo("auth") { inclusive = true }
+                popUpTo("login") { inclusive = true }
             }
         }
     }
@@ -82,7 +83,9 @@ fun LoginScreen(
         }
 
         Button(
-            onClick = { viewModel.login(login, password) },
+            onClick = {
+                viewModel.login(login, password)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -127,7 +130,6 @@ fun LoginScreen(
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginField(

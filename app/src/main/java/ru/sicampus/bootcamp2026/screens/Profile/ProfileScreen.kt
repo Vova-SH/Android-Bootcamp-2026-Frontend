@@ -1,4 +1,4 @@
-//package ru.sicampus.bootcamp2026.screens.Profile
+package ru.sicampus.bootcamp2026.screens.Profile
 //
 //import androidx.compose.foundation.background
 //import androidx.compose.foundation.layout.*
@@ -17,9 +17,10 @@
 //import androidx.lifecycle.viewmodel.compose.viewModel
 //import androidx.navigation.NavHostController
 //import coil3.compose.AsyncImage
+//import kotlinx.coroutines.launch
+//import ru.sicampus.bootcamp2026.data.source.AuthLocalDataSource
 //import ru.sicampus.bootcamp2026.domain.entities.UserEntity
 //import ru.sicampus.bootcamp2026.ui.theme.*
-//
 //@Composable
 //fun ProfileScreen(
 //    navController: NavHostController,
@@ -62,7 +63,7 @@
 //    onNavigateToSettings: () -> Unit,
 //    onLogout: () -> Unit
 //) {
-//    var selectedItem by remember { mutableStateOf(2) } // 2 = Профиль
+//    var selectedItem by remember { mutableStateOf(2) } //
 //
 //    Scaffold(
 //        bottomBar = {
@@ -73,7 +74,7 @@
 //                    when (index) {
 //                        0 -> onNavigateToCalendar()
 //                        1 -> onNavigateToMeetings()
-//                        2 -> Unit // Profile is already selected
+//                        2 -> Unit
 //                        3 -> onNavigateToSettings()
 //                    }
 //                }
@@ -172,7 +173,6 @@
 //
 //    Column(
 //        horizontalAlignment = Alignment.CenterHorizontally,
-//        modifier = Modifier.weight(1f)
 //    ) {
 //        TextButton(
 //            onClick = onClick,

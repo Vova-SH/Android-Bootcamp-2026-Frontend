@@ -14,7 +14,7 @@ data class UserDto (
     @SerialName("login")
     val login: String?,
     @SerialName("id")
-    val id: Int?,
+    val id: Long?,
     @SerialName("phoneNumber")
     val phoneNumber: String?,
     @SerialName("password")

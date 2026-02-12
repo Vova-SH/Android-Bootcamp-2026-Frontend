@@ -39,10 +39,10 @@ class AuthLocalDataSource() {
     private var _cacheToken: String? = null
     private var _cacheUserId: Int? = null
 
-    suspend fun setUserId(userId: Int) {
-        _cacheUserId = userId
+    suspend fun setUserId(userId: Long) {
+        _cacheUserId = userId?.toInt()
         App.context.dataStore.edit { preferences ->
-            preferences[USER_ID] = userId
+            preferences[USER_ID] = userId.toInt()
         }
     }
 
