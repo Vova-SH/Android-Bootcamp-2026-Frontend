@@ -41,7 +41,9 @@ fun MainScreen(
                     .padding(innerPadding)
             ) {
                 when (currentTab) {
-                    0 -> CalendarScreen()
+                    0 -> CalendarScreen(
+                        onNavigateToDetails = onNavigateToDetails
+                    )
                     1 -> HomeScreen(
                         onNavigateToCreate = onNavigateToCreate,
                         onNavigateToDetails = onNavigateToDetails,

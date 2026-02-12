@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 /**
@@ -119,6 +120,33 @@ class TokenDataStore(private val context: Context) {
         return context.dataStore.data.map { preferences ->
             preferences[EMAIL_KEY]
         }
+    }
+
+    /**
+     * Получение access токена синхронно (блокирующий вызов)
+     */
+    suspend fun getAccessTokenValue(): String? {
+        return context.dataStore.data.map { preferences ->
+            preferences[ACCESS_TOKEN_KEY]
+        }.first()
+    }
+
+    /**
+     * Получение refresh токена синхронно (блокирующий вызов)
+     */
+    suspend fun getRefreshTokenValue(): String? {
+        return context.dataStore.data.map { preferences ->
+            preferences[REFRESH_TOKEN_KEY]
+        }.first()
+    }
+
+    /**
+     * Получение времени истечения access токена синхронно
+     */
+    suspend fun getAccessTokenExpiresAtValue(): String? {
+        return context.dataStore.data.map { preferences ->
+            preferences[ACCESS_TOKEN_EXPIRES_AT_KEY]
+        }.first()
     }
 
     /**

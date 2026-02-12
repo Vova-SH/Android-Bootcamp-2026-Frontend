@@ -60,7 +60,11 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun refresh(): Result<AuthTokens> {
         return try {
-            val response = authApi.refresh("Bearer ${tokenDataStore.getRefreshToken()}")
+            val refreshToken = tokenDataStore.getRefreshTokenValue()
+            if (refreshToken.isNullOrEmpty()) {
+                return Result.Error(Exception("Refresh token is empty"))
+            }
+            val response = authApi.refresh("Bearer $refreshToken")
             val authTokens = response.toDomain()
             saveTokens(authTokens)
             Result.Success(authTokens)

@@ -1,5 +1,6 @@
 package ru.sicampus.bootcamp2026.ui.profile
 
+import android.graphics.Bitmap
 import java.util.UUID
 
 /**
@@ -35,6 +36,10 @@ data class ProfileUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val successMessage: String? = null,
+
+    // Загрузка аватара
+    val avatarLoadedBitmap: Bitmap? = null,
+    val avatarLoadingError: String? = null,
 
     // Навигация
     val shouldNavigateToLogin: Boolean = false

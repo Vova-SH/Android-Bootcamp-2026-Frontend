@@ -4,8 +4,8 @@
         <domain includeSubdomains="true">192.168.50.31</domain>
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">10.0.2.2</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
     </domain-config>
-    <trust-anchors>
-        <certificates src="system" />
-    </trust-anchors>
 </network-security-config>

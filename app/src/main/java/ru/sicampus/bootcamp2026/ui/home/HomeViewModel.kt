@@ -11,6 +11,7 @@ import ru.sicampus.bootcamp2026.domain.model.Meeting
 import ru.sicampus.bootcamp2026.domain.repository.InvitationRepository
 import ru.sicampus.bootcamp2026.domain.repository.MeetingRepository
 import ru.sicampus.bootcamp2026.domain.repository.ProfileRepository
+import ru.sicampus.bootcamp2026.domain.service.ImageLoaderService
 import ru.sicampus.bootcamp2026.domain.util.Result
 import javax.inject.Inject
 
@@ -21,7 +22,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val meetingRepository: MeetingRepository,
     private val invitationRepository: InvitationRepository,
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val imageLoaderService: ImageLoaderService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -48,10 +50,37 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = profileRepository.getProfile()) {
                 is Result.Success -> {
-                    _uiState.update { it.copy(username = result.data.username) }
+                    _uiState.update {
+                        it.copy(
+                            username = result.data.username,
+                            avatarUrl = result.data.avatarUrl
+                        )
+                    }
+                    // Загружаем изображение аватара если URL существует
+                    if (!result.data.avatarUrl.isNullOrBlank()) {
+                        loadAvatarImage(result.data.avatarUrl)
+                    }
                 }
                 is Result.Error -> {
-                    // Не критично, просто не обновим имя
+                    // Не критично, просто не обновим имя и аватарку
+                }
+                is Result.Loading -> {}
+            }
+        }
+    }
+
+    private fun loadAvatarImage(imageUrl: String) {
+        viewModelScope.launch {
+            val loadResult = imageLoaderService.loadImage(imageUrl)
+
+            when (loadResult) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(avatarBitmap = loadResult.data)
+                    }
+                }
+                is Result.Error -> {
+                    // Ошибка при загрузке изображения, но это не критично
                 }
                 is Result.Loading -> {}
             }
@@ -105,6 +134,9 @@ class HomeViewModel @Inject constructor(
     private fun refreshMeetings() {
         viewModelScope.launch {
             _uiState.update { it.copy(isRefreshing = true) }
+
+            // Также обновляем профиль при refresh
+            loadProfile()
 
             val meetingsResult = meetingRepository.getUserMeetings(
                 status = null,

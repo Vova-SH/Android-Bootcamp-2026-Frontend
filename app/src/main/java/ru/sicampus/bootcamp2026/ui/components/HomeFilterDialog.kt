@@ -33,7 +33,7 @@ fun HomeFilterDialog(
         null to "All meetings",
         MeetingStatus.SCHEDULED.name to "Scheduled",
         MeetingStatus.COMPLETED.name to "Completed",
-        MeetingStatus.CANCELED.name to "Canceled"
+        MeetingStatus.CANCELLED.name to "Cancelled"
     )
 
     Dialog(onDismissRequest = onDismiss) {
