@@ -26,7 +26,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun RegisterMainScreen(
     registerViewModel: RegisterScreenViewModel,
-    onRegisterSuccess: () -> Unit
+    onRegisterSuccess: () -> Unit,
+    onBack: () -> Unit
 ) {
     val uiState by registerViewModel.state.collectAsState()
 
@@ -48,6 +49,7 @@ fun RegisterMainScreen(
             onDepartmentChange = { registerViewModel.onDepartmentChange(it) },
             onPasswordChange = { registerViewModel.onPasswordChange(it) },
             onRegisterClicked = { registerViewModel.register() },
+            onBack = onBack,
             errorMessage = errorMessage,
             enabled = !isLoading
         )
@@ -83,6 +85,7 @@ fun RegisterForm(
     onDepartmentChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onRegisterClicked: () -> Unit,
+    onBack: () -> Unit,
     errorMessage: String? = null,
     enabled: Boolean = true
 ) {
@@ -146,6 +149,14 @@ fun RegisterForm(
             enabled = enabled
         ) {
             Text("Зарегистрироваться")
+        }
+
+        Button(
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled
+        ) {
+            Text("Назад")
         }
     }
 }

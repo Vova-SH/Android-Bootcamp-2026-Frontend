@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "ru.sicampus.bootcamp2026"
-        minSdk = 25
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -44,9 +44,11 @@ android {
 dependencies {
     implementation(project(":navigation"))
     implementation(project(":comon"))
+    implementation(project(":user_main"))
     implementation(project(":authorization"))
     implementation(project(":token_storage"))
     implementation(project(":registration"))
+    implementation(project(":meetings"))
 
 
     implementation(libs.hilt.android)

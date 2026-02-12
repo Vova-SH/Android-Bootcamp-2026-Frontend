@@ -4,7 +4,8 @@ import com.example.comon.ErrorResponseDto
 import com.example.comon.LoginResponseDto
 import com.example.comon.Network
 import com.example.comon.RegisterResult
-import com.example.registration.domain.UserRegisterEntity
+import com.example.comon.UserDto
+import com.example.comon.UserEntity
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -20,13 +21,13 @@ class RegisterNetworkDataSource @Inject constructor(
 ) {
 
 
-    suspend fun registerUser(user: UserRegisterEntity): RegisterResult =
+    suspend fun registerUser(user: UserEntity): RegisterResult =
         withContext(Dispatchers.IO) {
             try {
                 val response = network.client.post("${network.HOST}/users/registration") {
                     contentType(ContentType.Application.Json)
                     setBody(
-                        UserRegisterDto(
+                        UserDto(
                             fullName = user.fullName,
                             phoneNumber = user.phoneNumber,
                             department = user.department,

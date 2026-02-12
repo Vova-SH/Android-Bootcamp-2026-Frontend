@@ -1,6 +1,5 @@
 package com.example.registration.presentation
 
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.comon.RegisterResult
 import com.example.registration.domain.RegisterUserUseCase
-import com.example.registration.domain.UserRegisterEntity
+import com.example.comon.UserEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,7 +55,7 @@ class RegisterScreenViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = RegisterUiState.Loading
 
-            val user = UserRegisterEntity(
+            val user = UserEntity(
                 fullName = fullName,
                 phoneNumber = phoneNumber,
                 department = department,

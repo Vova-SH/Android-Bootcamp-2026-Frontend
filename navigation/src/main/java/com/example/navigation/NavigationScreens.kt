@@ -8,5 +8,5 @@ enum class NavigationScreens (
     AUTHORIZATION(routeName = "authorization"),
     REGISTER(routeName = "register"),
     MAIN(routeName = "main"),
-    PROFILE(routeName = "profile"),
+    ADD_NEW_MEETING(routeName = "add_new_meeting")
 }
