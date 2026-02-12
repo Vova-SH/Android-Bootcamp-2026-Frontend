@@ -1,3 +1,155 @@
 <resources>
-    <string name="app_name">Android-Bootcamp-2026-Frontend</string>
+    <string name="app_name" translatable="false">Planify</string>
+    <string name="btn_create">Создать</string>
+    <string name="btn_cancel">Отмена</string>
+    <string name="new_meet">Новая встреча</string>
+    <string name="create_new_meet">Создать новую встречу</string>
+    <string name="home">Главная</string>
+    <string name="chats">Чаты</string>
+    <string name="inbox">Почта</string>
+    <string name="profile">Профиль</string>
+    <string name="greeting">Привет, %s</string>
+    <string name="username">Пользователь</string>
+    <string name="schedule">Расписание</string>
+    <string name="mon">Пн</string>
+    <string name="tue">Вт</string>
+    <string name="wed">Ср</string>
+    <string name="thu">Чт</string>
+    <string name="fri">Пт</string>
+    <string name="sat">Сб</string>
+    <string name="sun">Вс</string>
+    <string name="n_waiting_answer">%s ожидает ответа</string>
+    <string name="glass_search_placeholder">Найти коллегу...</string>
+    <string name="day_schedule">День</string>
+    <string name="week_schedule">Неделя</string>
+    <string name="month_schedule">Месяц</string>
+    <string name="no_meetings_today">На сегодня у вас не назначено встреч</string>
+    <string name="free">Свободно</string>
+    <string name="contacts">Контактная информация</string>
+    <string name="email">Почта</string>
+    <string name="position">Должность</string>
+    <string name="department">Отдел</string>
+    <string name="log_out">Выйти из аккаунта</string>
+    <string name="app_theme">Тема приложения</string>
+    <string name="error">Что-то пошло не так...</string>
+
+    <string name="edit_profile">Редактировать профиль</string>
+
+    <string name="create_meeting_title">Создать</string>
+    <string name="create_meeting_title_desc">Выберите тип встречи для создания</string>
+    <string name="create_meeting">Создать встречу</string>
+    <string name="create_meeting_desc">Полная форма создания встречи</string>
+    <string name="fast_meeting">Быстрое приглашение</string>
+    <string name="fast_meeting_desc">Встреча с минимальной информацией</string>
+    <string name="book_slot">Забранировать слот</string>
+    <string name="book_slot_desc">Забронировать время без создания встречи</string>
+
+    <string name="title_info">Информация</string>
+    <string name="title_time">Время</string>
+    <string name="title_participants">Участники</string>
+    <string name="step1_of3">Шаг 1 из 3</string>
+    <string name="step2_of3">Шаг 2 из 3</string>
+    <string name="step3_of3">Шаг 3 из 3</string>
+
+    <string name="step1_main_info">Основная информация</string>
+    <string name="step1_name_of_meeting">Название встречи</string>
+    <string name="step1_name_of_meeting_placeholder">Например: Daily Sync</string>
+    <string name="step1_desc">Описание</string>
+    <string name="step1_desc_placeholder">Опишите цель встречи...</string>
+    <string name="step1_place">Место / Ссылка</string>
+    <string name="step1_place_placeholder">Конференц-зал или Zoom ссылка</string>
+    <string name="step1_date">Дата встречи</string>
+
+    <string name="step2_title">Выбор времени</string>
+    <string name="step2_desc">Встречи доступны только по часам. Выберите время начала встречи.</string>
+    <string name="is_busy">Занято</string>
+
+    <string name="step3_inviting">Приглашение участников</string>
+    <string name="step3_chosen">Выбрано:</string>
+    <string name="step3_search_placeholder">Поиск коллег по имени или отделу...</string>
+
+    <string name="meeting_detail">Детали встречи</string>
+
+    <string name="date">Дата</string>
+    <string name="time">Время</string>
+    <string name="place">Место</string>
+    <string name="owner">Организатор</string>
+    <string name="participants">Участники</string>
+    <string name="accepted">Принято</string>
+    <string name="not_accepted">Не принято</string>
+
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="click_to_change_photo">Нажмите, чтобы изменить фото</string>
+
+    <string name="first_name">Имя</string>
+    <string name="last_name">Фамилия</string>
+    <string name="phone_number">Номер телефона</string>
+
+    <string name="first_name_placeholder">Введите имя...</string>
+    <string name="last_name_placeholder">Введите фамилию...</string>
+    <string name="phone_number_placeholder">Введите номер телефона...</string>
+    <string name="department_placeholder">Введите отдел...</string>
+    <string name="email_placeholder">Введите почту...</string>
+
+    <string name="settings">Настройки</string>
+    <string name="dark_theme">Темная тема</string>
+    <string name="dark_theme_desc">Меняет цветовое оформление</string>
+    <string name="notifications">Уведомления</string>
+    <string name="notifications_desc">Включить уведомления о встречах</string>
+
+    <string name="password">Пароль</string>
+    <string name="welcome_back">С возвращением</string>
+    <string name="log_in_to_continue">Войдите для продолжения работы</string>
+    <string name="forget_password">Забыли пароль?</string>
+    <string name="have_not_account">Нет аккаунта?</string>
+    <string name="sign_in">Зарегистрироваться</string>
+
+    <string name="email_example">example@company.com</string>
+    <string name="enter_password">Введите пароль</string>
+
+    <string name="enter">Войти</string>
+
+    <string name="incoming">Входящие</string>
+    <string name="sent">Отправленные</string>
+    <string name="sent_one">Отправлено</string>
+    <string name="waiting_for_response">Ожидают ответа</string>
+    <string name="accept">Принять</string>
+    <string name="decline">Отклонить</string>
+    <string name="ok">ok</string>
+    <string name="CANCEL">ОТМЕНА</string>
+    <string name="OK">OK</string>
+
+    <string name="authentication_required">Требуется авторизация</string>
+    <string name="authenticate_again">Пожалуйста, авторизируйтесь снова</string>
+
+
+    <string name="smn_invited_you_to_meeting">пригласил(а) вас на встречу</string>
+    <string name="smn_accepted_your_invite">принял приглашение на встречу</string>
+    <string name="was_updated">была обновлена</string>
+    <string name="meeting">Встреча</string>
+    <string name="suggest_reschedule_meeting">предлагает перенести встречу</string>
+
+    <string name="welcome">Добро пожаловать</string>
+    <string name="register_to_start">Зарегистрируйтесь для начала работы</string>
+
+    <string name="register">Начать</string>
+
+    <string name="firstName">Имя</string>
+    <string name="firstName_placeholder">Введите имя</string>
+
+    <string name="lastName">Фамилия</string>
+    <string name="lastName_placeholder">Введите фалимию</string>
+
+    <string name="position_placeholder">Введите должность</string>
+
+    <string name="username_reg">Имя пользователя</string>
+    <string name="username_placeholder">Введите имя пользователя</string>
+
+    <string name="repeat_password">Подтвердите пароль</string>
+    <string name="repeat_password_placeholder">Повторите пароль</string>
+
+    <string name="cant_create">Невозжно создать встречу</string>
+    <string name="cant_create_placeholder">Выберите время в настоящем</string>
+
 </resources>

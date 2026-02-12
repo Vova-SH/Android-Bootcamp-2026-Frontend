@@ -1,0 +1,48 @@
+package com.example.planify.main.common.themes.dimens
+
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+
+data class Dimens(
+    val bottomBarHeight: Dp = 88.dp,
+    val topBarHeight: Dp = 132.dp,
+    val iconSize: Dp = 36.dp,
+    val cornerRadius: Dp = 16.dp,
+    val upcomingEventBannerHeight: Dp = 128.dp,
+    val dayCardHeight: Dp = 80.dp,
+    val iconBottomBarWidth: Dp = 76.dp,
+    val navIndicatorHeight: Dp = 4.dp,
+    val elevation: Dp = 6.dp,
+    val searchBarHeight: Dp = 36.dp,
+    val blur: Dp = 18.dp,
+    val topNavBarHeight: Dp = 48.dp,
+    val floatingActionButtonRadius: Dp = 72.dp,
+    val meetingCardHeight: Dp = 188.dp,
+    val dateScrollBarHeight: Dp = 60.dp,
+    val emptyTimeSlot: Dp = 60.dp,
+    val calendarCellSize: Dp = 56.dp,
+    val logOutButtonHeight: Dp = 56.dp,
+    val profileCardHeight1: Dp = 256.dp,
+    val profileCardHeight2: Dp = 248.dp,
+    val profileEditButtonHeight: Dp = 36.dp,
+    val typeOfMeetingCardHeight: Dp = 80.dp,
+    val createMeetingBottomButtonHeight: Dp = 56.dp,
+    val createMeetingBottomBarHeight: Dp = 116.dp,
+    val createMeetingCompleteStatusBarHeight: Dp = 20.dp,
+    val dotSize: Dp = 6.dp,
+    val pillWidth: Dp = 22.dp,
+    val createMeetingTimeSlotHeight: Dp = 48.dp,
+    val createMeetingParticipantCardHeight: Dp = 80.dp,
+    val topBarDetailsHeight: Dp = 100.dp,
+    val editProfileBottomBarButtonHeight: Dp = 56.dp,
+    val editProfileCardHeight: Dp = 200.dp,
+    val authButtonHeight: Dp = 56.dp,
+    val inboxBoxTopNavBarHeight: Dp = 72.dp,
+    val meetingInboxCardHeight: Dp = 280.dp,
+    val buttonMeetingInboxCardHeight: Dp = 44.dp,
+    val meetingInboxCardHeightShort: Dp = 160.dp,
+    val dotCalendarSize: Dp = 4.dp,
+    val notificationCardHeight: Dp = 100.dp,
+    val dotContainerSize: Dp = 18.dp,
+    val dotCalendarContainerSize: Dp = 14.dp
+)
