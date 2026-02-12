@@ -52,6 +52,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -79,6 +83,7 @@ sealed class MeetingsUiState {
 @Composable
 fun MainMeetScreen(navController: NavHostController) {
     val ds = remember { DataLocator.userInfoDataSource }
+    val invDs = remember { DataLocator.invitationDataSource }
     val scope = rememberCoroutineScope()
 
     var uiState by remember { mutableStateOf<MeetingsUiState>(MeetingsUiState.Loading) }
@@ -87,8 +92,15 @@ fun MainMeetScreen(navController: NavHostController) {
     LaunchedEffect(Unit) {
         scope.launch {
             try {
-                val meetings = ds.loadAllMeetings()
-                uiState = MeetingsUiState.Success(meetings)
+                val user = ds.loadCurrentUser()
+                val meetings = ds.loadMeetingsForCurrentUser()
+                val invitations = invDs.getInvitations(user.id.toInt()).getOrThrow()
+                val declinedIds = invitations
+                    .filter { it.responseStatus.equals(com.example.meet.data.dto.InvitationResponseStatus.DECLINED, true) }
+                    .map { it.meetingId }
+                    .toSet()
+                val filtered = meetings.filterNot { declinedIds.contains(it.id) }
+                uiState = MeetingsUiState.Success(filtered)
             } catch (e: Exception) {
                 uiState = MeetingsUiState.Error("Не удалось загрузить встречи: ${e.message}")
             }
@@ -315,7 +327,9 @@ fun MainMeetScreen(navController: NavHostController) {
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(state.meetings) { meeting ->
-                                EnhancedMeetingCard(meeting = meeting)
+                                EnhancedMeetingCard(meeting = meeting) {
+                                    navController.navigate("meeting_details/${meeting.id}")
+                                }
                             }
                         }
                     }
@@ -326,7 +340,7 @@ fun MainMeetScreen(navController: NavHostController) {
 }
 
 @Composable
-private fun EnhancedMeetingCard(meeting: MeetingDto) {
+private fun EnhancedMeetingCard(meeting: MeetingDto, onClick: () -> Unit) {
     val statusColor = when (meeting.status) {
         "SCHEDULED", "PLANNED" -> MaterialTheme.colorScheme.primary
         "COMPLETED" -> MaterialTheme.colorScheme.tertiary
@@ -351,6 +365,11 @@ private fun EnhancedMeetingCard(meeting: MeetingDto) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = LocalIndication.current,
+                onClick = onClick
+            )
             .shadow(
                 elevation = 2.dp,
                 shape = RoundedCornerShape(12.dp),

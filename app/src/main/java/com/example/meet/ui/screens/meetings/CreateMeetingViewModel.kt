@@ -3,13 +3,11 @@ package com.example.meet.ui.screens.meetings
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.meet.data.dto.UserDto
-import com.example.meet.data.source.DataLocator.userInfoDataSource
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.serialization.ExperimentalSerializationApi
 
-@ExperimentalSerializationApi
 class CreateMeetingViewModel : ViewModel() {
     private val _searchQuery = MutableLiveData("")
     val searchQuery: LiveData<String> = _searchQuery
@@ -20,45 +18,35 @@ class CreateMeetingViewModel : ViewModel() {
     private val _selectedParticipants = MutableLiveData<List<UserDto>>(emptyList())
     val selectedParticipants: LiveData<List<UserDto>> = _selectedParticipants
 
-    private val _isLoading = MutableLiveData(false)
-    val isLoading: LiveData<Boolean> = _isLoading
-
-    private var allUsersCache: List<UserDto> = emptyList()
-
-    init {
-        loadAllUsers()
-    }
-
-    fun loadAllUsers() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                allUsersCache = userInfoDataSource.loadAllUsers()
-                _searchResults.value = allUsersCache
-            } catch (_: Exception) {
-
-                _searchResults.value = emptyList()
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
+    private val _allUsers = MutableLiveData<List<UserDto>>(emptyList())
+    val allUsers: LiveData<List<UserDto>> = _allUsers
 
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
+    }
 
-        viewModelScope.launch {
-            if (query.isBlank()) {
-                _searchResults.value = allUsersCache
-            } else {
-                try {
-                    val filteredUsers = userInfoDataSource.searchUsers(query)
-                    _searchResults.value = filteredUsers
-                } catch (_: Exception) {
-                    _searchResults.value = emptyList()
-                }
-            }
+    fun searchUsers(query: String) {
+        if (query.isBlank()) {
+            _searchResults.value = emptyList()
+            return
         }
+
+        val filtered = _allUsers.value?.filter { user ->
+            user.fullName.contains(query, ignoreCase = true) ||
+                    user.email.contains(query, ignoreCase = true) ||
+                    user.position?.contains(query, ignoreCase = true) == true ||
+                    user.department?.contains(query, ignoreCase = true) == true
+        } ?: emptyList()
+
+        _searchResults.value = filtered
+    }
+
+    fun clearSearchResults() {
+        _searchResults.value = emptyList()
+    }
+
+    fun setAllUsers(users: List<UserDto>) {
+        _allUsers.value = users
     }
 
     fun addParticipant(user: UserDto) {
@@ -71,9 +59,5 @@ class CreateMeetingViewModel : ViewModel() {
     fun removeParticipant(user: UserDto) {
         val current = _selectedParticipants.value ?: emptyList()
         _selectedParticipants.value = current.filter { it.id != user.id }
-    }
-
-    fun clearSelectedParticipants() {
-        _selectedParticipants.value = emptyList()
     }
 }

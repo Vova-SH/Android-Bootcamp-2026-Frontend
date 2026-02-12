@@ -6,6 +6,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.meet.Screen
 import com.example.meet.ui.screens.auth.LoginScreen
 import com.example.meet.ui.screens.auth.RegisterScreen
@@ -15,6 +17,8 @@ import com.example.meet.ui.screens.main.NotificationsScreen
 import com.example.meet.ui.screens.main.ScheduleScreen
 import com.example.meet.ui.screens.main.SplashScreen
 import com.example.meet.ui.screens.meetings.CreateMeetingScreen
+import com.example.meet.ui.screens.meetings.MeetingDetailsScreen
+import com.example.meet.ui.screens.list.InvitationDetailsScreen
 import com.example.meet.ui.screens.profile.InfoProfileScreen
 import com.example.meet.ui.screens.profile.ProfileScreen
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -60,6 +64,24 @@ fun AppNavigation(
         }
         composable(Screen.CreateMeeting.route) {
             CreateMeetingScreen(navController = navController)
+        }
+        composable(
+            route = Screen.MeetingDetails.route,
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("id")
+            if (id != null) {
+                MeetingDetailsScreen(navController = navController, meetingId = id)
+            }
+        }
+        composable(
+            route = Screen.InvitationDetails.route,
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("id")
+            if (id != null) {
+                InvitationDetailsScreen(navController = navController, invitationId = id)
+            }
         }
     }
 }

@@ -14,6 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -24,8 +27,9 @@ import androidx.navigation.NavHostController
 import com.example.meet.R
 import kotlinx.coroutines.launch
 import com.example.meet.data.dto.MeetingDto
+import com.example.meet.data.dto.InvitationDto
+import com.example.meet.data.dto.InvitationResponseStatus
 import com.example.meet.data.source.DataLocator
-import com.example.meet.ui.theme.BlackGroundColor
 import kotlinx.serialization.ExperimentalSerializationApi
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -33,14 +37,24 @@ import java.time.format.DateTimeParseException
 
 sealed class InvitationsListUiState {
     data object Loading : InvitationsListUiState()
-    data class Success(val meetings: List<MeetingDto>) : InvitationsListUiState()
+    data class Success(
+        val pending: List<InvitationWithMeeting>,
+        val accepted: List<InvitationWithMeeting>,
+        val declined: List<InvitationWithMeeting>
+    ) : InvitationsListUiState()
     data class Error(val message: String) : InvitationsListUiState()
 }
+
+data class InvitationWithMeeting(
+    val invitation: InvitationDto,
+    val meeting: MeetingDto?
+)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSerializationApi::class)
 @Composable
 fun InvitationsListScreen(navController: NavHostController) {
     val ds = remember { DataLocator.userInfoDataSource }
+    val invDs = remember { DataLocator.invitationDataSource }
     val scope = rememberCoroutineScope()
 
     var uiState by remember { mutableStateOf<InvitationsListUiState>(InvitationsListUiState.Loading) }
@@ -48,20 +62,33 @@ fun InvitationsListScreen(navController: NavHostController) {
     LaunchedEffect(Unit) {
         scope.launch {
             try {
-                val meetings = ds.loadMeetingsForCurrentUser()
-                uiState = InvitationsListUiState.Success(meetings)
+                val user = ds.loadCurrentUser()
+                val invitations = invDs.getInvitations(user.id.toInt()).getOrThrow()
+                val allMeetings = ds.loadAllMeetings()
+                val meetingMap = allMeetings.associateBy { it.id }
+                val mapped = invitations.map { inv ->
+                    InvitationWithMeeting(invitation = inv, meeting = meetingMap[inv.meetingId])
+                }
+                val pending = mapped.filter { it.invitation.responseStatus.equals(InvitationResponseStatus.PENDING, true) }
+                val accepted = mapped.filter { it.invitation.responseStatus.equals(InvitationResponseStatus.ACCEPTED, true) }
+                val declined = mapped.filter { it.invitation.responseStatus.equals(InvitationResponseStatus.DECLINED, true) }
+                uiState = InvitationsListUiState.Success(
+                    pending = pending,
+                    accepted = accepted,
+                    declined = declined
+                )
             } catch (e: Exception) {
                 uiState = InvitationsListUiState.Error("Не удалось загрузить приглашения: ${e.message}")
             }
         }
     }
 
-    val primaryDarkBlue = MaterialTheme.colorScheme.primary
-    val onPrimary = MaterialTheme.colorScheme.onPrimary
-    val surfaceColor = MaterialTheme.colorScheme.background
-    val errorColor = MaterialTheme.colorScheme.error
-    val errorContainer = MaterialTheme.colorScheme.errorContainer
-    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+    val primaryDarkBlue = colorScheme.primary
+    val onPrimary = colorScheme.onPrimary
+    val surfaceColor = colorScheme.background
+    val errorColor = colorScheme.error
+    val errorContainer = colorScheme.errorContainer
+    val onSurfaceVariant = colorScheme.onSurfaceVariant
 
     Scaffold(
         topBar = {
@@ -167,8 +194,21 @@ fun InvitationsListScreen(navController: NavHostController) {
                         onClick = {
                             scope.launch {
                                 try {
-                                    val meetings = ds.loadMeetingsForCurrentUser()
-                                    uiState = InvitationsListUiState.Success(meetings)
+                                    val user = ds.loadCurrentUser()
+                                    val invitations = invDs.getInvitations(user.id.toInt()).getOrThrow()
+                                    val allMeetings = ds.loadAllMeetings()
+                                    val meetingMap = allMeetings.associateBy { it.id }
+                                    val mapped = invitations.map { inv ->
+                                        InvitationWithMeeting(invitation = inv, meeting = meetingMap[inv.meetingId])
+                                    }
+                                    val pending = mapped.filter { it.invitation.responseStatus.equals(InvitationResponseStatus.PENDING, true) }
+                                    val accepted = mapped.filter { it.invitation.responseStatus.equals(InvitationResponseStatus.ACCEPTED, true) }
+                                    val declined = mapped.filter { it.invitation.responseStatus.equals(InvitationResponseStatus.DECLINED, true) }
+                                    uiState = InvitationsListUiState.Success(
+                                        pending = pending,
+                                        accepted = accepted,
+                                        declined = declined
+                                    )
                                 } catch (e: Exception) {
                                     uiState = InvitationsListUiState.Error("Не удалось загрузить приглашения: ${e.message}")
                                 }
@@ -185,9 +225,56 @@ fun InvitationsListScreen(navController: NavHostController) {
                 }
 
                 is InvitationsListUiState.Success -> {
-                    InvitationsContent(
-                        meetings = state.meetings,
-                        primaryDarkBlue = primaryDarkBlue
+                    InvitationsGroupedContent(
+                        pending = state.pending,
+                        accepted = state.accepted,
+                        declined = state.declined,
+                        navController = navController,
+                        primaryDarkBlue = primaryDarkBlue,
+                        onAccept = { item ->
+                            scope.launch {
+                                try {
+                                    invDs.updateInvitationResponse(item.invitation.id.toInt(), InvitationResponseStatus.ACCEPTED)
+                                    val user = ds.loadCurrentUser()
+                                    val invitations = invDs.getInvitations(user.id.toInt()).getOrThrow()
+                                    val allMeetings = ds.loadAllMeetings()
+                                    val meetingMap = allMeetings.associateBy { it.id }
+                                    val mapped = invitations.map { inv ->
+                                        InvitationWithMeeting(invitation = inv, meeting = meetingMap[inv.meetingId])
+                                    }
+                                    val pending = mapped.filter { it.invitation.responseStatus.equals(InvitationResponseStatus.PENDING, true) }
+                                    val accepted = mapped.filter { it.invitation.responseStatus.equals(InvitationResponseStatus.ACCEPTED, true) }
+                                    val declined = mapped.filter { it.invitation.responseStatus.equals(InvitationResponseStatus.DECLINED, true) }
+                                    uiState = InvitationsListUiState.Success(pending, accepted, declined)
+                                } catch (e: Exception) {
+                                    uiState = InvitationsListUiState.Error("Не удалось принять приглашение: ${e.message}")
+                                }
+                            }
+                        },
+                        onDecline = { item, comment ->
+                            scope.launch {
+                                try {
+                                    invDs.updateInvitationResponse(
+                                        invitationId = item.invitation.id.toInt(),
+                                        responseStatus = InvitationResponseStatus.DECLINED,
+                                        comment = comment
+                                    )
+                                    val user = ds.loadCurrentUser()
+                                    val invitations = invDs.getInvitations(user.id.toInt()).getOrThrow()
+                                    val allMeetings = ds.loadAllMeetings()
+                                    val meetingMap = allMeetings.associateBy { it.id }
+                                    val mapped = invitations.map { inv ->
+                                        InvitationWithMeeting(invitation = inv, meeting = meetingMap[inv.meetingId])
+                                    }
+                                    val pending = mapped.filter { it.invitation.responseStatus.equals(InvitationResponseStatus.PENDING, true) }
+                                    val accepted = mapped.filter { it.invitation.responseStatus.equals(InvitationResponseStatus.ACCEPTED, true) }
+                                    val declined = mapped.filter { it.invitation.responseStatus.equals(InvitationResponseStatus.DECLINED, true) }
+                                    uiState = InvitationsListUiState.Success(pending, accepted, declined)
+                                } catch (e: Exception) {
+                                    uiState = InvitationsListUiState.Error("Не удалось отклонить приглашение: ${e.message}")
+                                }
+                            }
+                        }
                     )
                 }
             }
@@ -196,10 +283,17 @@ fun InvitationsListScreen(navController: NavHostController) {
 }
 
 @Composable
-private fun InvitationsContent(
-    meetings: List<MeetingDto>,
-    primaryDarkBlue: Color
+private fun InvitationsGroupedContent(
+    pending: List<InvitationWithMeeting>,
+    accepted: List<InvitationWithMeeting>,
+    declined: List<InvitationWithMeeting>,
+    navController: NavHostController,
+    primaryDarkBlue: Color,
+    onAccept: (InvitationWithMeeting) -> Unit,
+    onDecline: (InvitationWithMeeting, String?) -> Unit
 ) {
+    val totalCount = pending.size + accepted.size + declined.size
+    val allActiveCount = pending.size
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -207,37 +301,67 @@ private fun InvitationsContent(
     ) {
         item {
             InvitationsHeaderSection(
-                meetingsCount = meetings.size,
+                meetingsCount = totalCount,
+                activeMeetingsCount = allActiveCount,
                 primaryDarkBlue = primaryDarkBlue
             )
         }
-
-        if (meetings.isEmpty()) {
+        if (totalCount == 0) {
             item {
                 EmptyInvitationsSection(
                     primaryDarkBlue = primaryDarkBlue
                 )
             }
         } else {
-            items(meetings) { meeting ->
-                InvitationCard(
-                    meeting = meeting,
-                    primaryDarkBlue = primaryDarkBlue
+            item {
+                SectionHeader(title = "Ожидание", primaryDarkBlue = primaryDarkBlue, count = pending.size)
+            }
+            items(pending) { item ->
+                InvitationItem(
+                    item = item,
+                    primaryDarkBlue = primaryDarkBlue,
+                    onAccept = { onAccept(item) },
+                    onDecline = { i, comment -> onDecline(i, comment) },
+                    onClick = { navController.navigate("invitation_details/${item.invitation.id}") }
+                )
+            }
+            item { Spacer(modifier = Modifier.height(8.dp)) }
+            item {
+                SectionHeader(title = "Принятые", primaryDarkBlue = primaryDarkBlue, count = accepted.size)
+            }
+            items(accepted) { item ->
+                InvitationItem(
+                    item = item,
+                    primaryDarkBlue = primaryDarkBlue,
+                    onAccept = {},
+                    onDecline = { _, _ -> },
+                    onClick = { navController.navigate("invitation_details/${item.invitation.id}") }
+                )
+            }
+            item { Spacer(modifier = Modifier.height(8.dp)) }
+            item {
+                SectionHeader(title = "Отклоненные", primaryDarkBlue = primaryDarkBlue, count = declined.size)
+            }
+            items(declined) { item ->
+                InvitationItem(
+                    item = item,
+                    primaryDarkBlue = primaryDarkBlue,
+                    onAccept = {},
+                    onDecline = { _, _ -> },
+                    onClick = { navController.navigate("invitation_details/${item.invitation.id}") }
                 )
             }
         }
-
         item {
             Spacer(modifier = Modifier.height(80.dp))
         }
     }
-
-
 }
 
 @Composable
 private fun InvitationsHeaderSection(
     meetingsCount: Int,
+    activeMeetingsCount: Int,
     primaryDarkBlue: Color
 ) {
     Card(
@@ -249,8 +373,8 @@ private fun InvitationsHeaderSection(
                 clip = true
             ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
+            containerColor = colorScheme.surface,
+            contentColor = colorScheme.onSurface
         ),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -272,9 +396,9 @@ private fun InvitationsHeaderSection(
                     color = primaryDarkBlue
                 )
                 Text(
-                    text = "Всего активных: $meetingsCount",
+                    text = "Всего активных: $activeMeetingsCount",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = colorScheme.onSurfaceVariant
                 )
             }
 
@@ -308,8 +432,8 @@ private fun EmptyInvitationsSection(
                 clip = true
             ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
+            containerColor = colorScheme.surface,
+            contentColor = colorScheme.onSurface
         ),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -349,7 +473,7 @@ private fun EmptyInvitationsSection(
                 Text(
                     text = "Вас пока не пригласили на встречи",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
             }
@@ -358,35 +482,46 @@ private fun EmptyInvitationsSection(
 }
 
 @Composable
-private fun InvitationCard(
-    meeting: MeetingDto,
-    primaryDarkBlue: Color
+private fun InvitationItem(
+    item: InvitationWithMeeting,
+    primaryDarkBlue: Color,
+    onAccept: (InvitationWithMeeting) -> Unit,
+    onDecline: (InvitationWithMeeting, String?) -> Unit,
+    onClick: () -> Unit
 ) {
-    val statusColor = when (meeting.status) {
-        "SCHEDULED", "PLANNED" -> MaterialTheme.colorScheme.primary
-        "COMPLETED" -> MaterialTheme.colorScheme.tertiary
-        "CANCELLED" -> MaterialTheme.colorScheme.error
-        else -> MaterialTheme.colorScheme.secondary
+    var showDeclineDialog by remember { mutableStateOf(false) }
+    var declineComment by remember { mutableStateOf("") }
+    val meeting = item.meeting
+    val statusColor = when (item.invitation.responseStatus.uppercase()) {
+        InvitationResponseStatus.PENDING -> colorScheme.primary
+        InvitationResponseStatus.ACCEPTED -> colorScheme.tertiary
+        InvitationResponseStatus.DECLINED -> colorScheme.error
+        else -> colorScheme.secondary
     }
 
-    val priorityColor = when (meeting.meetingPriority) {
-        "HIGH" -> MaterialTheme.colorScheme.error
-        "MEDIUM" -> MaterialTheme.colorScheme.primary
-        "LOW" -> MaterialTheme.colorScheme.secondary
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    val priorityColor = when (meeting?.meetingPriority) {
+        "HIGH" -> colorScheme.error
+        "MEDIUM" -> colorScheme.primary
+        "LOW" -> colorScheme.secondary
+        else -> colorScheme.onSurfaceVariant
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = LocalIndication.current,
+                onClick = onClick
+            )
             .shadow(
                 elevation = 4.dp,
                 shape = RoundedCornerShape(16.dp),
                 clip = true
             ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
+            containerColor = colorScheme.surface,
+            contentColor = colorScheme.onSurface
         ),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -408,7 +543,6 @@ private fun InvitationCard(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -423,17 +557,17 @@ private fun InvitationCard(
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
-                            text = meeting.title,
+                            text = meeting?.title ?: "Встреча #${item.invitation.meetingId}",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = primaryDarkBlue
                         )
 
-                        if (meeting.description?.isNotBlank() == true) {
+                        if (meeting?.description?.isNotBlank() == true) {
                             Text(
                                 text = meeting.description,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -447,11 +581,11 @@ private fun InvitationCard(
                             .padding(horizontal = 10.dp, vertical = 6.dp)
                     ) {
                         Text(
-                            text = when (meeting.status) {
-                                "SCHEDULED", "PLANNED" -> "Ожидает"
-                                "COMPLETED" -> "Завершена"
-                                "CANCELLED" -> "Отменена"
-                                else -> meeting.status
+                            text = when (item.invitation.responseStatus.uppercase()) {
+                                InvitationResponseStatus.PENDING -> "Ожидание"
+                                InvitationResponseStatus.ACCEPTED -> "Принято"
+                                InvitationResponseStatus.DECLINED -> "Отклонено"
+                                else -> item.invitation.responseStatus
                             },
                             style = MaterialTheme.typography.labelSmall,
                             color = statusColor,
@@ -459,7 +593,6 @@ private fun InvitationCard(
                         )
                     }
                 }
-
 
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -478,7 +611,7 @@ private fun InvitationCard(
                         Text(
                             text = formatMeetingTime(meeting),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = colorScheme.onSurface
                         )
                     }
 
@@ -493,11 +626,11 @@ private fun InvitationCard(
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Text(
-                                text = when (meeting.meetingPriority) {
+                                text = when (meeting?.meetingPriority) {
                                     "HIGH" -> "Высокий приоритет"
                                     "MEDIUM" -> "Средний приоритет"
                                     "LOW" -> "Низкий приоритет"
-                                    else -> meeting.meetingPriority
+                                    else -> meeting?.meetingPriority ?: "Неизвестно"
                                 },
                                 style = MaterialTheme.typography.labelSmall,
                                 color = priorityColor,
@@ -511,36 +644,112 @@ private fun InvitationCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Button(
-                        onClick = { /* Принять приглашение */ },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = primaryDarkBlue,
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text("Принять")
-                    }
-
-                    OutlinedButton(
-                        onClick = { /* Отклонить приглашение */ },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = primaryDarkBlue
-                        ),
-                        border = BorderStroke(1.dp, primaryDarkBlue),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text("Отклонить")
+                    val showActions = item.invitation.responseStatus.equals(InvitationResponseStatus.PENDING, true)
+                    if (showActions) {
+                        Button(
+                            onClick = { onAccept(item) },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = primaryDarkBlue,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Text("Принять")
+                        }
+                        OutlinedButton(
+                            onClick = {
+                                if (meeting?.meetingPriority == "HIGH") {
+                                    showDeclineDialog = true
+                                } else {
+                                    onDecline(item, null)
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = primaryDarkBlue
+                            ),
+                            border = BorderStroke(1.dp, primaryDarkBlue),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Text("Отклонить")
+                        }
                     }
                 }
             }
         }
     }
+
+    if (showDeclineDialog) {
+        AlertDialog(
+            onDismissRequest = { },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDecline(item, declineComment.ifBlank { null })
+                }) {
+                    Text("Отклонить")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                }) {
+                    Text("Отмена")
+                }
+            },
+            title = { Text("Причина отклонения приглашения") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Напишите причину отклонения приглашения (необязательно)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colorScheme.onSurfaceVariant
+                    )
+                    OutlinedTextField(
+                        value = declineComment,
+                        onValueChange = { declineComment = it },
+                        label = { Text("Описание") },
+                        placeholder = { Text("Напишите причину отклонения приглашения") },
+                        singleLine = false,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
 }
 
-private fun formatMeetingTime(meeting: MeetingDto): String {
+@Composable
+private fun SectionHeader(title: String, primaryDarkBlue: Color, count: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp, horizontal = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = primaryDarkBlue
+        )
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(colorScheme.background)
+                .padding(horizontal = 10.dp, vertical = 4.dp)
+        ) {
+            Text(
+                text = count.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                color = primaryDarkBlue
+            )
+        }
+    }
+}
+
+private fun formatMeetingTime(meeting: MeetingDto?): String {
     fun parseTime(value: String): String {
         val patterns = listOf(
             "yyyy-MM-dd'T'HH:mm:ss",
@@ -559,5 +768,5 @@ private fun formatMeetingTime(meeting: MeetingDto): String {
         return value
     }
 
-    return "${parseTime(meeting.startTime)} - ${parseTime(meeting.endTime)}"
+    return if (meeting != null) "${parseTime(meeting.startTime)} - ${parseTime(meeting.endTime)}" else "Время не указано"
 }

@@ -12,9 +12,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -44,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.meet.R
@@ -54,6 +60,9 @@ import com.example.meet.data.source.DataLocator
 import com.example.meet.data.source.Network
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 data class ProfileData(
     val user: UserDto,
@@ -70,6 +79,7 @@ sealed class ProfileUiState {
 @Composable
 fun ProfileScreen(navController: NavHostController) {
     val ds = remember { DataLocator.userInfoDataSource }
+    val invDs = remember { DataLocator.invitationDataSource }
     val scope = rememberCoroutineScope()
 
     var uiState by remember { mutableStateOf<ProfileUiState>(ProfileUiState.Loading) }
@@ -93,7 +103,8 @@ fun ProfileScreen(navController: NavHostController) {
                     Text(
                         "Профиль",
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White
                     )
                 },
                 navigationIcon = {
@@ -108,8 +119,8 @@ fun ProfileScreen(navController: NavHostController) {
                             }
                         },
                         colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.background
                         )
                     ) {
                         Icon(
@@ -123,8 +134,8 @@ fun ProfileScreen(navController: NavHostController) {
                     IconButton(
                         onClick = { navController.navigate(Screen.InfoProfile.route) },
                         colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.background
                         )
                     ) {
                         Icon(
@@ -198,21 +209,34 @@ fun ProfileScreen(navController: NavHostController) {
                 }
 
                 is ProfileUiState.Success -> {
-                    ProfileContent(data = state.data)
+                    ProfileContent(data = state.data, navController = navController)
                 }
             }
         }
     }
 }
 
+@ExperimentalSerializationApi
 @Composable
-private fun ProfileContent(data: ProfileData) {
+private fun ProfileContent(data: ProfileData, navController: NavHostController) {
     val user = data.user
     val meetings = data.meetings
+    val invDs = remember { DataLocator.invitationDataSource }
+    var statusByMeetingId by remember { mutableStateOf<Map<Long, String>>(emptyMap()) }
+    LaunchedEffect(user.id) {
+        runCatching {
+            val invitations = invDs.getInvitations(user.id.toInt()).getOrThrow()
+            statusByMeetingId = invitations.associate { it.meetingId to it.responseStatus }
+        }
+    }
 
     val upcoming = meetings.count { it.status == "PLANNED" || it.status == "SCHEDULED" }
     val finished = meetings.count { it.status == "COMPLETED" }
-    val cancelled = meetings.count { it.status == "CANCELLED" }
+    val cancelledBase = meetings.count { it.status == "CANCELLED" }
+    val declinedInvites = meetings.count {
+        statusByMeetingId[it.id]?.equals(com.example.meet.data.dto.InvitationResponseStatus.DECLINED, true) == true
+    }
+    val cancelled = cancelledBase + declinedInvites
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -238,7 +262,11 @@ private fun ProfileContent(data: ProfileData) {
         }
 
         item {
-            RecentActivitySection(meetings = meetings.take(3))
+            RecentActivitySection(
+                meetings = meetings.take(3),
+                navController = navController,
+                invitationStatusByMeetingId = statusByMeetingId
+            )
         }
     }
 }
@@ -313,7 +341,7 @@ private fun StatisticsSection(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.background,
             contentColor = MaterialTheme.colorScheme.onSurface
         ),
         shape = RoundedCornerShape(16.dp),
@@ -321,7 +349,7 @@ private fun StatisticsSection(
     ) {
         Column(
             modifier = Modifier.padding(vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
                 text = "Статистика встреч",
@@ -332,49 +360,36 @@ private fun StatisticsSection(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                StatCard(
-                    count = totalMeetings.toString(),
-                    label = "Всего",
+                StatRow(
                     iconId = R.drawable.ic_all,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.weight(1f)
+                    label = "Всего встреч",
+                    count = totalMeetings.toString(),
+                    iconColor = MaterialTheme.colorScheme.primary
                 )
 
-                StatCard(
-                    count = upcoming.toString(),
-                    label = "Запланировано",
+                StatRow(
                     iconId = R.drawable.ic_planned,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.weight(1f)
+                    label = "Запланировано",
+                    count = upcoming.toString(),
+                    iconColor = MaterialTheme.colorScheme.primary
                 )
-            }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                StatCard(
-                    count = finished.toString(),
-                    label = "Завершено",
+                StatRow(
                     iconId = R.drawable.ic_already,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier.weight(1f)
+                    label = "Завершено",
+                    count = finished.toString(),
+                    iconColor = MaterialTheme.colorScheme.tertiary
                 )
 
-                StatCard(
-                    count = cancelled.toString(),
-                    label = "Отменено",
+                StatRow(
                     iconId = R.drawable.ic_close,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.weight(1f)
+                    label = "Отменено",
+                    count = cancelled.toString(),
+                    iconColor = MaterialTheme.colorScheme.error
                 )
             }
         }
@@ -382,61 +397,49 @@ private fun StatisticsSection(
 }
 
 @Composable
-private fun StatCard(
-    count: String,
-    label: String,
+private fun StatRow(
     iconId: Int,
-    color: Color,
-    modifier: Modifier = Modifier
+    label: String,
+    count: String,
+    iconColor: Color
 ) {
-    Card(
-        modifier = modifier
-            .shadow(
-                elevation = 2.dp,
-                shape = RoundedCornerShape(12.dp),
-                clip = true
-            ),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        ),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(color.copy(alpha = 0.1f)),
+                    .background(iconColor.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     painter = painterResource(id = iconId),
                     contentDescription = null,
-                    tint = color,
+                    tint = iconColor,
                     modifier = Modifier.size(20.dp)
                 )
             }
 
             Text(
-                text = count,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = color
-            )
-
-            Text(
                 text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
+
+        Text(
+            text = count,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = iconColor
+        )
     }
 }
 
@@ -445,7 +448,7 @@ private fun DetailsSection(user: UserDto) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.background,
             contentColor = MaterialTheme.colorScheme.onSurface
         ),
         shape = RoundedCornerShape(16.dp),
@@ -530,11 +533,15 @@ private fun DetailItem(
 }
 
 @Composable
-private fun RecentActivitySection(meetings: List<MeetingDto>) {
+private fun RecentActivitySection(
+    meetings: List<MeetingDto>,
+    navController: NavHostController,
+    invitationStatusByMeetingId: Map<Long, String>
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.background,
             contentColor = MaterialTheme.colorScheme.onSurface
         ),
         shape = RoundedCornerShape(16.dp),
@@ -576,20 +583,25 @@ private fun RecentActivitySection(meetings: List<MeetingDto>) {
                         painter = painterResource(id = R.drawable.ic_edit),
                         contentDescription = "Нет встреч",
                         modifier = Modifier.size(48.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        tint = MaterialTheme.colorScheme.background
                     )
                     Text(
                         text = "Нет недавних встреч",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.background
                     )
                 }
             } else {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     meetings.forEach { meeting ->
-                        MeetingActivityItem(meeting = meeting)
+                        MeetingCardProfile(
+                            meeting = meeting,
+                            invitationStatus = invitationStatusByMeetingId[meeting.id],
+                            onClick = { navController.navigate("meeting_details/${meeting.id}") }
+                        )
                     }
                 }
             }
@@ -598,76 +610,194 @@ private fun RecentActivitySection(meetings: List<MeetingDto>) {
 }
 
 @Composable
-private fun MeetingActivityItem(meeting: MeetingDto) {
-    val statusColor = when (meeting.status) {
-        "SCHEDULED", "PLANNED" -> MaterialTheme.colorScheme.primary
-        "COMPLETED" -> MaterialTheme.colorScheme.tertiary
-        "CANCELLED" -> MaterialTheme.colorScheme.error
-        else -> MaterialTheme.colorScheme.secondary
+private fun MeetingCardProfile(
+    meeting: MeetingDto,
+    invitationStatus: String?,
+    onClick: () -> Unit
+) {
+    val statusColor = if (invitationStatus != null) {
+        when (invitationStatus.uppercase()) {
+            com.example.meet.data.dto.InvitationResponseStatus.PENDING -> MaterialTheme.colorScheme.primary
+            com.example.meet.data.dto.InvitationResponseStatus.ACCEPTED -> MaterialTheme.colorScheme.tertiary
+            com.example.meet.data.dto.InvitationResponseStatus.DECLINED -> MaterialTheme.colorScheme.error
+            else -> MaterialTheme.colorScheme.secondary
+        }
+    } else {
+        when (meeting.status) {
+            "SCHEDULED", "PLANNED" -> MaterialTheme.colorScheme.primary
+            "COMPLETED" -> MaterialTheme.colorScheme.tertiary
+            "CANCELLED" -> MaterialTheme.colorScheme.error
+            else -> MaterialTheme.colorScheme.secondary
+        }
+    }
+
+    val priorityColor = when (meeting.meetingPriority) {
+        "HIGH" -> MaterialTheme.colorScheme.error
+        "MEDIUM" -> MaterialTheme.colorScheme.primary
+        "LOW" -> MaterialTheme.colorScheme.secondary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    val formattedTime = try {
+        val (start, end) = parseMeetingDateTime(meeting) ?: throw Exception()
+        formatMeetingTime(start, end)
+    } catch (_: Exception) {
+        "${meeting.startTime} — ${meeting.endTime}"
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = LocalIndication.current,
+                onClick = onClick
+            )
+            .shadow(
+                elevation = 2.dp,
+                shape = RoundedCornerShape(12.dp),
+                clip = false
+            ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
         ),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Status indicator
+
             Box(
                 modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(2.dp))
                     .background(statusColor)
             )
 
+            Spacer(modifier = Modifier.width(12.dp))
+
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
                     text = meeting.title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
 
-                Text(
-                    text = "${meeting.startTime} - ${meeting.endTime}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_clock),
+                        contentDescription = "Время",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = formattedTime,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
 
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(statusColor.copy(alpha = 0.1f))
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            ) {
-                Text(
-                    text = when (meeting.status) {
-                        "SCHEDULED", "PLANNED" -> "Запланировано"
-                        "COMPLETED" -> "Завершено"
-                        "CANCELLED" -> "Отменено"
-                        else -> meeting.status
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = statusColor,
-                    fontWeight = FontWeight.Medium
-                )
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(priorityColor.copy(alpha = 0.1f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = when (meeting.meetingPriority) {
+                                "HIGH" -> "Высокий"
+                                "MEDIUM" -> "Средний"
+                                "LOW" -> "Низкий"
+                                else -> meeting.meetingPriority
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = priorityColor,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
+                meeting.description?.takeIf { it.isNotBlank() }?.let { description ->
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(statusColor.copy(alpha = 0.1f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Text(
+                        text = if (invitationStatus != null) {
+                            when (invitationStatus.uppercase()) {
+                                com.example.meet.data.dto.InvitationResponseStatus.PENDING -> "Ожидание"
+                                com.example.meet.data.dto.InvitationResponseStatus.ACCEPTED -> "Принято"
+                                com.example.meet.data.dto.InvitationResponseStatus.DECLINED -> "Отклонено"
+                                else -> invitationStatus
+                            }
+                        } else when (meeting.status) {
+                            "SCHEDULED", "PLANNED" -> "Запланировано"
+                            "COMPLETED" -> "Завершено"
+                            "CANCELLED" -> "Отменено"
+                            else -> meeting.status
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = statusColor,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
     }
+}
+
+private fun parseMeetingDateTime(meeting: MeetingDto): Pair<LocalDateTime, LocalDateTime>? {
+    val patterns = listOf(
+        "yyyy-MM-dd'T'HH:mm:ss",
+        "yyyy-MM-dd'T'HH:mm",
+        "yyyy-MM-dd HH:mm:ss",
+        "yyyy-MM-dd HH:mm"
+    ).map { DateTimeFormatter.ofPattern(it) }
+
+    fun parse(value: String): LocalDateTime? {
+        for (formatter in patterns) {
+            try {
+                return LocalDateTime.parse(value, formatter)
+            } catch (_: DateTimeParseException) {
+            }
+        }
+        return null
+    }
+
+    val start = parse(meeting.startTime)
+    val end = parse(meeting.endTime)
+    if (start != null && end != null) return start to end
+    return null
+}
+
+private fun formatMeetingTime(start: LocalDateTime, end: LocalDateTime): String {
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    return "${start.format(timeFormatter)} - ${end.format(timeFormatter)}"
 }
