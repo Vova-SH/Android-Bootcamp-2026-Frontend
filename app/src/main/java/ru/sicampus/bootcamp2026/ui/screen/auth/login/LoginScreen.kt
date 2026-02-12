@@ -1,5 +1,6 @@
 package ru.sicampus.bootcamp2026.ui.screen.auth.login
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -76,6 +76,7 @@ fun LoginScreen(
 }
 
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 private fun Content(
     viewModel: LoginViewModel,
@@ -141,35 +142,18 @@ private fun Content(
 
                 InputField(
                     title = "Логин",
-                    value = inputLogin,
-                    onValueChange = {
-                        inputLogin = it
-                        viewModel.onIntent(LoginIntent.TextInput(inputLogin, inputPassword))
-                    },
+                    state = viewModel.loginState,
                     placeholderText = "Введите логин",
-                    keyboardActions = KeyboardActions(
-                        onNext = {
-                            focusPasswordRequester.requestFocus()
-                        }
-                    )
+                    imeAction = ImeAction.Next
                 )
 
                 InputField(
                     title = "Пароль",
-                    value = inputPassword,
-                    onValueChange = {
-                        inputPassword = it
-                        viewModel.onIntent(LoginIntent.TextInput(inputLogin, inputPassword))
-                    },
+                    state = viewModel.passwordState,
                     placeholderText = "Введите пароль",
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Done,
                     modifier = Modifier.focusRequester(focusPasswordRequester).fillMaxWidth(),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            viewModel.onIntent(LoginIntent.Send(inputLogin, inputPassword))
-                        }
-                    ),
                     isPassword = true
                 )
 

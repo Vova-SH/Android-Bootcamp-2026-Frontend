@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class PagingEmployeeListDTO(
     @SerialName("content")
-    val content: List<EmployeeDTO>? = null,
+    val content: List<EmployeeListDTO>? = null,
     @SerialName("last")
     val last: Boolean? = null
 )

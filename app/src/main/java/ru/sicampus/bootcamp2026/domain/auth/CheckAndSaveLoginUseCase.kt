@@ -1,6 +1,6 @@
 package ru.sicampus.bootcamp2026.domain.auth
 
-import ru.sicampus.bootcamp2026.data.AuthRepository
+import ru.sicampus.bootcamp2026.data.repository.AuthRepository
 
 class CheckAndSaveLoginUseCase(
     private val authRepository: AuthRepository,

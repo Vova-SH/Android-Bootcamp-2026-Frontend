@@ -10,6 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -20,9 +21,13 @@ import ru.sicampus.bootcamp2026.R
 import ru.sicampus.bootcamp2026.ui.nav.AppRoute
 import ru.sicampus.bootcamp2026.ui.nav.bottom.BottomNavigation
 import ru.sicampus.bootcamp2026.ui.nav.bottom.NavGraph
+import ru.sicampus.bootcamp2026.ui.screen.modal.AddMeetingScreen
+import ru.sicampus.bootcamp2026.ui.screen.modal.ModalScreen
+import ru.sicampus.bootcamp2026.ui.screen.modal.rememberModalScreenController
 import ru.sicampus.bootcamp2026.ui.screen.profile.ProfileIntent
 import ru.sicampus.bootcamp2026.ui.screen.profile.ProfileViewModel
 
+@Preview
 @Composable
 fun MainScreen() {
     val bottomNavController = rememberNavController()
@@ -32,6 +37,8 @@ fun MainScreen() {
     val activity = LocalActivity.current as ComponentActivity
     val profileVm = viewModel<ProfileViewModel>(activity)
     val isEditMode by profileVm.isEditMode.collectAsState()
+
+    val modalController = rememberModalScreenController()
 
     Box(modifier = Modifier.fillMaxSize()) {
         NavGraph(bottomNavController)
@@ -46,27 +53,26 @@ fun MainScreen() {
                     if (!isEditMode) {
                         FloatingActionButton(
                             iconId = R.drawable.ic_edit,
-                            onClick = { profileVm.onIntent(ProfileIntent.SetEditMode) }
+                            onClick = {
+                                val currentState = profileVm.uiState.value
+                                if (currentState is ru.sicampus.bootcamp2026.ui.screen.profile.ProfileState.Content) {
+                                    profileVm.prepareEditMode(currentState.user)
+                                } else {
+                                    profileVm.onIntent(ProfileIntent.SetEditMode)
+                                }
+                            }
                         )
                     }
                 }
 
-                destination?.hasRoute<AppRoute.InboxRoute>() == true -> {
+                destination?.hasRoute<AppRoute.InboxRoute>() == true || destination?.hasRoute<AppRoute.MeetingsRoute>() == true -> {
                     FloatingActionButton(
                         iconId = R.drawable.ic_add,
                         onClick = {
+                            modalController.show()
                         }
                     )
                 }
-
-                destination?.hasRoute<AppRoute.MeetingsRoute>() == true -> {
-                    FloatingActionButton(
-                        iconId = R.drawable.ic_add,
-                        onClick = {
-                        }
-                    )
-                }
-
             }
         }
         Box(
@@ -75,6 +81,12 @@ fun MainScreen() {
                 .zIndex(1f)
         ) {
             BottomNavigation(bottomNavController)
+        }
+
+        ModalScreen(
+            controller = modalController
+        ) { hide ->
+            AddMeetingScreen(onClose = hide)
         }
     }
 }

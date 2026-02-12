@@ -1,7 +1,7 @@
 package ru.sicampus.bootcamp2026.ui.screen.meetings
 
 import kotlinx.collections.immutable.PersistentList
-import ru.sicampus.bootcamp2026.domain.entities.EmployeeEntity
+import ru.sicampus.bootcamp2026.domain.entities.EmployeeListEntity
 
 sealed interface EmployeeSearchState {
     data class Error(
@@ -16,6 +16,6 @@ sealed interface EmployeeSearchState {
     sealed interface Item{
         data object Loading : Item
         data object Error: Item
-        data class Employee(val entity: EmployeeEntity) : Item
+        data class Employee(val entity: EmployeeListEntity) : Item
     }
 }

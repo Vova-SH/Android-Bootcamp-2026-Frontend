@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.sicampus.bootcamp2026.ui.theme.Black
@@ -22,6 +23,8 @@ fun AppButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    fontSize: TextUnit = 20.sp,
+    fontWeight: FontWeight = FontWeight.Medium,
     enabled: Boolean = true,
     activeColors: ButtonColors = ButtonDefaults.buttonColors(
         containerColor = Black,
@@ -43,8 +46,8 @@ fun AppButton(
     ) {
         Text(
             text = text,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Medium,
+            fontSize = fontSize,
+            fontWeight = fontWeight,
         )
     }
 }

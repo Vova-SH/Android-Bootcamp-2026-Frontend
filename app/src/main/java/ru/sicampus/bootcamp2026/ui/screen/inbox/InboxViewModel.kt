@@ -5,15 +5,22 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import ru.sicampus.bootcamp2026.data.InboxRepository
-import ru.sicampus.bootcamp2026.data.source.InboxDataSource
+import ru.sicampus.bootcamp2026.data.repository.InvitationRepository
+import ru.sicampus.bootcamp2026.data.source.InvitationDataSource
 import ru.sicampus.bootcamp2026.domain.inbox.GetActiveInvitationsListUseCase
 
 class InboxViewModel() : ViewModel(){
     private val getActiveInvitationsListUseCase by lazy {
         GetActiveInvitationsListUseCase(
-            repository = InboxRepository(
-                inboxDataSource = InboxDataSource()
+            repository = InvitationRepository(
+                invitationDataSource = InvitationDataSource()
+            )
+        )
+    }
+    private val answerInvitationUseCase by lazy {
+        ru.sicampus.bootcamp2026.domain.inbox.AnswerInvitationUseCase(
+            repo = InvitationRepository(
+                invitationDataSource = InvitationDataSource()
             )
         )
     }
@@ -38,16 +45,23 @@ class InboxViewModel() : ViewModel(){
             )
         }
     }
-
-
-
-
-
+    private fun answerInvitation(id: Int, isAccepted: Boolean) {
+        viewModelScope.launch {
+            answerInvitationUseCase(id, isAccepted).fold(
+                onSuccess = {
+                    getData()
+                },
+                onFailure = { e ->
+                    _uiState.value = InboxState.Error(e.message ?: "Unknown error")
+                }
+            )
+        }
+    }
 
     fun onIntent(intent: InboxIntent) {
         when (intent) {
-            is InboxIntent.AcceptInvitation -> TODO()
-            is InboxIntent.DeclineInvitation -> TODO()
+            is InboxIntent.AcceptInvitation -> answerInvitation(intent.invitationId, true)
+            is InboxIntent.DeclineInvitation -> answerInvitation(intent.invitationId, false)
             is InboxIntent.LoadInvitations -> getData()
         }
     }

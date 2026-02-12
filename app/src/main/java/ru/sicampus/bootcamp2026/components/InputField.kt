@@ -6,8 +6,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.OutputTransformation
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -23,43 +24,51 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.sicampus.bootcamp2026.ui.theme.Black
 import ru.sicampus.bootcamp2026.ui.theme.PrimaryGray
 import ru.sicampus.bootcamp2026.ui.theme.SecondaryGray
 
 @Composable
 fun InputField(
-    title: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholderText: String,
     modifier: Modifier = Modifier,
+    title: String,
+    state: TextFieldState,
+    placeholderText: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Next,
-    keyboardActions: KeyboardActions? = null,
     enabled: Boolean = true,
     onFocusChanged: ((Boolean) -> Unit)? = null,
     error: String? = null,
-    isPassword: Boolean = false
+    isPassword: Boolean = false,
+    iconId: Int? = null
 ) {
     val passwordVisible = remember { mutableStateOf(false) }
+    val outputTransformation = if (isPassword && !passwordVisible.value) {
+        OutputTransformation {
+            replace(0, length, "•".repeat(length))
+        }
+    } else null
 
-    Column(modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Text(
             text = title,
             fontSize = 14.sp,
             modifier = Modifier.padding(start = 4.dp)
         )
-
         TextField(
-            value = value,
-            onValueChange = onValueChange,
+            state = state,
+            outputTransformation = outputTransformation,
             modifier = modifier
                 .fillMaxWidth()
                 .height(60.dp)
@@ -67,23 +76,18 @@ fun InputField(
                     onFocusChanged?.invoke(focusState.isFocused)
                 },
             placeholder = {
-                Text(
-                    text = placeholderText
-                )
+                placeholderText?.let { text ->
+                    Text(text = text)
+                }
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = keyboardType,
                 imeAction = imeAction
             ),
-            keyboardActions = keyboardActions ?: KeyboardActions.Default,
             enabled = enabled,
-            singleLine = true,
+
+            lineLimits = androidx.compose.foundation.text.input.TextFieldLineLimits.SingleLine,
             isError = error != null,
-            visualTransformation = if (isPassword && !passwordVisible.value) {
-                PasswordVisualTransformation()
-            } else {
-                VisualTransformation.None
-            },
             trailingIcon = {
                 if (isPassword) {
                     IconButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
@@ -96,13 +100,24 @@ fun InputField(
                             tint = PrimaryGray
                         )
                     }
+                } else {
+                    iconId?.let {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(iconId),
+                            contentDescription = null,
+                            tint = Black
+                        )
+                    }
                 }
             },
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = SecondaryGray,
                 focusedContainerColor = SecondaryGray,
+                disabledContainerColor = SecondaryGray,
+                disabledTextColor = Black,
                 unfocusedPlaceholderColor = PrimaryGray,
                 focusedPlaceholderColor = PrimaryGray,
+                disabledPlaceholderColor = PrimaryGray,
                 errorContainerColor = SecondaryGray,
                 errorIndicatorColor = MaterialTheme.colorScheme.error,
                 focusedIndicatorColor = Color.Transparent,

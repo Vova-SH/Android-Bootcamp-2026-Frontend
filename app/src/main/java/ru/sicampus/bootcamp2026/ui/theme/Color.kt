@@ -18,6 +18,11 @@ val White = Color(0xFFFFFFFF)
 val PrimaryGray = Color(0xFF7F7F7F)
 val SecondaryGray = Color(0xFFF5F5F5)
 
+val Red = Color(0xFFFF6262)
+val Violet = Color(0xFFA662FF)
+val Orange = Color(0xFFFF9E62)
+val Blue = Color(0xFF6282FF)
+
 val BgGradientBottom = Brush.verticalGradient(
     colors = listOf(
         Color.White.copy(alpha = 0f),

@@ -1,5 +1,6 @@
 package ru.sicampus.bootcamp2026.data.source
 
+import android.util.Log
 import io.ktor.client.call.body
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
@@ -29,8 +30,10 @@ class ProfileDataSource {
                 setBody(updateProfileRequestDTO)
             }
             if (result.status != HttpStatusCode.OK) {
+                Log.d("KTOR", "Response status: $updateProfileRequestDTO")
                 error("Error: ${result.status}")
             }
+
         }
     }
 }

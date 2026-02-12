@@ -1,5 +1,6 @@
 package ru.sicampus.bootcamp2026.ui.screen.auth.register
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -61,6 +61,7 @@ fun RegisterScreen(
 }
 
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 private fun Content(
     viewModel: RegisterViewModel,
@@ -119,94 +120,57 @@ private fun Content(
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
 
-                val fields by viewModel.fields.collectAsState()
-
                 Spacer(modifier = Modifier.height(112.dp))
 
                 InputField(
                     title = "ФИО",
-                    value = fields.name,
-                    onValueChange = {
-                        viewModel.onIntent(RegisterIntent.FieldChanged(fields.copy(name = it)))
-                    },
+                    state = viewModel.nameState,
                     placeholderText = "Фамилия Имя Отчество",
-                    onFocusChanged = {
-                        viewModel.onFieldFocusChanged("name", it)
-                    },
+                    onFocusChanged = { viewModel.onFieldFocusChanged("name", it) },
                     error = state.fieldErrors["name"]
                 )
 
                 InputField(
                     title = "Логин",
-                    value = fields.username,
-                    onValueChange = {
-                        viewModel.onIntent(RegisterIntent.FieldChanged(fields.copy(username = it)))
-                    },
+                    state = viewModel.usernameState,
                     placeholderText = "Придумайте логин",
-                    onFocusChanged = {
-                        viewModel.onFieldFocusChanged("username", it)
-                    },
+                    onFocusChanged = { viewModel.onFieldFocusChanged("username", it) },
                     error = state.fieldErrors["username"]
                 )
 
                 InputField(
                     title = "Пароль",
-                    value = fields.password,
-                    onValueChange = {
-                        viewModel.onIntent(RegisterIntent.FieldChanged(fields.copy(password = it)))
-                    },
+                    state = viewModel.passwordState,
                     placeholderText = "Придумайте пароль",
-                    onFocusChanged = {
-                        viewModel.onFieldFocusChanged("password", it)
-                    },
+                    onFocusChanged = { viewModel.onFieldFocusChanged("password", it) },
                     error = state.fieldErrors["password"],
                     isPassword = true
                 )
 
                 InputField(
                     title = "Должность",
-                    value = fields.position,
-                    onValueChange = {
-                        viewModel.onIntent(RegisterIntent.FieldChanged(fields.copy(position = it)))
-                    },
+                    state = viewModel.positionState,
                     placeholderText = "Укажите должность",
-                    onFocusChanged = {
-                        viewModel.onFieldFocusChanged("position", it)
-                    },
+                    onFocusChanged = { viewModel.onFieldFocusChanged("position", it) },
                     error = state.fieldErrors["position"]
                 )
 
                 InputField(
                     title = "Почта",
-                    value = fields.email,
-                    onValueChange = {
-                        viewModel.onIntent(RegisterIntent.FieldChanged(fields.copy(email = it)))
-                    },
+                    state = viewModel.emailState,
                     placeholderText = "example@mail.ru",
                     keyboardType = KeyboardType.Email,
-                    onFocusChanged = {
-                        viewModel.onFieldFocusChanged("email", it)
-                    },
+                    onFocusChanged = { viewModel.onFieldFocusChanged("email", it) },
                     error = state.fieldErrors["email"]
                 )
 
                 InputField(
                     title = "Телефон",
-                    value = fields.phoneNumber,
-                    onValueChange = {
-                        viewModel.onIntent(RegisterIntent.FieldChanged(fields.copy(phoneNumber = it)))
-                    },
+                    state = viewModel.phoneState,
                     placeholderText = "+7 (___) ___-__-__",
                     keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Done,
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            viewModel.onIntent(RegisterIntent.Submit)
-                        }
-                    ),
-                    onFocusChanged = {
-                        viewModel.onFieldFocusChanged("phoneNumber", it)
-                    },
+                    onFocusChanged = { viewModel.onFieldFocusChanged("phoneNumber", it) },
                     error = state.fieldErrors["phoneNumber"]
                 )
 

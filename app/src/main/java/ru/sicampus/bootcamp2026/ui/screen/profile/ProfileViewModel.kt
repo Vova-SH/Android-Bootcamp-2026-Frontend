@@ -1,16 +1,18 @@
 package ru.sicampus.bootcamp2026.ui.screen.profile
 
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import ru.sicampus.bootcamp2026.data.AuthRepository
-import ru.sicampus.bootcamp2026.data.ProfileRepository
+import ru.sicampus.bootcamp2026.data.repository.AuthRepository
+import ru.sicampus.bootcamp2026.data.repository.ProfileRepository
 import ru.sicampus.bootcamp2026.data.source.AuthLocalDataSource
 import ru.sicampus.bootcamp2026.data.source.AuthNetworkDataSource
 import ru.sicampus.bootcamp2026.data.source.ProfileDataSource
 import ru.sicampus.bootcamp2026.domain.auth.LogoutEmployeeUseCase
+import ru.sicampus.bootcamp2026.domain.entities.EmployeeEntity
 import ru.sicampus.bootcamp2026.domain.entities.ProfileUpdateEntity
 import ru.sicampus.bootcamp2026.domain.profile.EditProfileUseCase
 import ru.sicampus.bootcamp2026.domain.profile.GetProfileUseCase
@@ -35,8 +37,20 @@ class ProfileViewModel : ViewModel() {
     private val _uiState : MutableStateFlow<ProfileState> = MutableStateFlow(ProfileState.Loading)
     val uiState = _uiState.asStateFlow()
 
+    val nameState = TextFieldState()
+    val positionState = TextFieldState()
+    val emailState = TextFieldState()
+    val phoneState = TextFieldState()
+
     init {
         getEmployeeData()
+    }
+    fun prepareEditMode(user: EmployeeEntity) {
+        nameState.edit { replace(0, length, user.name) }
+        positionState.edit { replace(0, length, user.position) }
+        emailState.edit { replace(0, length, user.email) }
+        phoneState.edit { replace(0, length, user.phoneNumber) }
+        onIntent(ProfileIntent.SetEditMode)
     }
     private val logoutEmployeeUseCase by lazy {
         LogoutEmployeeUseCase(

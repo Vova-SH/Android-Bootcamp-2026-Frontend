@@ -1,4 +1,4 @@
-package ru.sicampus.bootcamp2026.data
+package ru.sicampus.bootcamp2026.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
