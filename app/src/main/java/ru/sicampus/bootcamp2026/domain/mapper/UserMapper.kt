@@ -28,6 +28,15 @@ object UserMapper {
         )
     }
 
+    fun toDto(domain: UserMini): UserMiniDto {
+        return UserMiniDto(
+            id = domain.id,
+            firstName = domain.firstName,
+            secondName = domain.secondName,
+            photoUrl = domain.photoUrl
+        )
+    }
+
     fun toDomain(dto: UserMiniDto): UserMini {
         return UserMini(
             id = dto.id,

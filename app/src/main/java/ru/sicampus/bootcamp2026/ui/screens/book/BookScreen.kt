@@ -1,12 +1,9 @@
 package ru.sicampus.bootcamp2026.ui.screens.book
 
-
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.content.Context
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,19 +11,28 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
@@ -43,7 +49,9 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,9 +72,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import ru.sicampus.bootcamp2026.R
-import ru.sicampus.bootcamp2026.ui.root.nav.ItemsNav
 import ru.sicampus.bootcamp2026.ui.root.theme.BackgroundColor
 import ru.sicampus.bootcamp2026.ui.root.theme.BlueMain
 import ru.sicampus.bootcamp2026.ui.root.theme.GrayTextColor
@@ -77,293 +86,530 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun BookScreen(navHostController: NavHostController) {
-    var currentDate = remember { mutableStateOf(LocalDate.now()) }
-    val currentTime = remember { mutableStateOf(LocalTime.now()) }
-    val endTime = remember { mutableStateOf(currentTime.value.plusHours(1))}
-    val labelText = remember { mutableStateOf("") }
-    val descText = remember { mutableStateOf("") }
-    val cabinet = remember { mutableStateOf("") }
-    val personCounter = remember { mutableStateOf(0) }
-    var showDateP = remember { mutableStateOf(false) }
-    var showTimeP = remember { mutableStateOf(false) }
-    if (currentTime.value.minute != 0) currentTime.value = currentTime.value.plusHours(1).minusMinutes(currentTime.value.minute.toLong())
+fun BookScreen(
+    navHostController: NavHostController,
+    context: Context,
+    vm: BookViewModel = viewModel(factory = BookViewModelFactory.create(context))
+) {
+    val state by vm.state.collectAsState()
+
+    val showDatePicker = remember { mutableStateOf(false) }
+    val showStartTimePicker = remember { mutableStateOf(false) }
+    val showEndTimePicker = remember { mutableStateOf(false) }
+
+    val lazyListState = rememberLazyListState()
+
+    LaunchedEffect(state.isSuccess) {
+        if (state.isSuccess) {
+            navHostController.popBackStack()
+            vm.clearSuccess()
+        }
+    }
     Box(contentAlignment = Alignment.Center) {
-        Column(
+        LazyColumn(
             Modifier.fillMaxSize().background(BackgroundColor),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(Modifier.height(50.dp).fillMaxWidth().shadow(3.dp, RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp)).background(Color.White)) {
-                Row(Modifier.fillMaxWidth()) {
-                    TextButton(onClick = {
-                        navHostController.navigate(ItemsNav.BottomNavItems[0].route)
-                    }, modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.cancel), color = GrayTextColor,
-                            modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start,
-                            fontSize = 16.sp
-                        )
-                    }
-                    Text(
-                        stringResource(R.string.new_meet),
-                        Modifier.align(Alignment.CenterVertically).weight(2f),
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    TextButton(onClick = {
-                        navHostController.navigate(ItemsNav.BottomNavItems[0].route)
-                    }, modifier = Modifier.weight(1f)) {
-                        Text(
-                            stringResource(R.string.success), color = BlueMain,
-                            modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.End,
-                            fontSize = 16.sp
-                        )
-                    }
-                }
-            }
-
-
-            Text(
-                stringResource(R.string.main_word),
-                Modifier.fillMaxWidth().padding(start = 16.dp, top = 16.dp, bottom = 10.dp),
-                color = GrayTextColor,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
-            )
-            CustomTextField2(
-                value = labelText.value, onValueChange = { labelText.value = it },
-                placeholder = stringResource(R.string.label), modifier = Modifier.padding(horizontal = 16.dp).shadow(3.dp, RoundedCornerShape(15.dp)),
-                height = 50
-            )
-            CustomTextField2(
-                value = descText.value,
-                onValueChange = { descText.value = it },
-                placeholder = stringResource(R.string.description),
-                modifier = Modifier.height(110.dp).padding(start = 16.dp, end = 16.dp, top = 8.dp)
-                    .shadow(3.dp, RoundedCornerShape(15.dp)),
-                height = 110
-            )
-            Text(
-                stringResource(R.string.date_and_place),
-                modifier = Modifier.fillMaxWidth().padding(top = 25.dp, start = 16.dp),
-                color = GrayTextColor,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
-            )
-            DatePickerForBook(currentDate, currentTime, cabinet =  cabinet, enabled1 =  showDateP, enabled2 =  showTimeP,
-                endTime =  endTime)
-            Text(
-                stringResource(R.string.participant),
-                modifier = Modifier.fillMaxWidth().padding(top = 20.dp, start = 16.dp),
-                color = GrayTextColor,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
-            )
-            Box(
-                Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 7.dp)
-                    .height(55.dp)
-                    .shadow(3.dp, RoundedCornerShape(15.dp)).clip(RoundedCornerShape(15.dp)).background(Color.White)
-            ) {
-                Row(
-                    Modifier.fillMaxSize().padding(vertical = 16.dp, horizontal = 14.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+            item {
+                Box(
+                    Modifier.height(50.dp).fillMaxWidth()
+                        .shadow(3.dp, RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp))
+                        .background(Color.White)
                 ) {
-                    Row() {
-                        Image(
-                            painterResource(R.drawable.plus), "",
-                            modifier = Modifier.align(Alignment.CenterVertically)
-                        )
-                        Spacer(Modifier.size(10.dp))
+                    Row(Modifier.fillMaxWidth()) {
+                        TextButton(
+                            onClick = {
+                                navHostController.popBackStack()
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.cancel),
+                                color = GrayTextColor,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Start,
+                                fontSize = 16.sp
+                            )
+                        }
                         Text(
-                            stringResource(R.string.add_participant), fontSize = 16.sp, color = Color.Black.copy(0.6f),
-                            modifier = Modifier.align(Alignment.CenterVertically)
+                            stringResource(R.string.new_meet),
+                            Modifier.align(Alignment.CenterVertically).weight(2f),
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        TextButton(
+                            onClick = {
+                                vm.createMeeting()
+                            },
+                            modifier = Modifier.weight(1f),
+                            enabled = !state.isLoading && validateMeeting(state)
+                        ) {
+                            if (state.isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp,
+                                    color = BlueMain
+                                )
+                            } else {
+                                Text(
+                                    stringResource(R.string.success),
+                                    color = if (validateMeeting(state)) BlueMain else GrayTextColor,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.End,
+                                    fontSize = 16.sp
+                                )
+                            }
+                        }
+                    }
+                }
+                state.errorMessage?.let { error ->
+                    Text(
+                        text = error,
+                        color = Color.Red,
+                        fontSize = 14.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+
+                Text(
+                    stringResource(R.string.main_word),
+                    Modifier.fillMaxWidth().padding(start = 16.dp, top = 16.dp, bottom = 10.dp),
+                    color = GrayTextColor,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
+                )
+                CustomTextField2(
+                    value = state.title,
+                    onValueChange = vm::onTitleChange,
+                    placeholder = stringResource(R.string.label),
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                        .shadow(3.dp, RoundedCornerShape(15.dp)),
+                    height = 50
+                )
+                CustomTextField2(
+                    value = state.description,
+                    onValueChange = vm::onDescriptionChange,
+                    placeholder = stringResource(R.string.description),
+                    modifier = Modifier.height(110.dp)
+                        .padding(start = 16.dp, end = 16.dp, top = 8.dp)
+                        .shadow(3.dp, RoundedCornerShape(15.dp)),
+                    height = 110
+                )
+
+                Text(
+                    stringResource(R.string.date_and_place),
+                    modifier = Modifier.fillMaxWidth().padding(top = 25.dp, start = 16.dp),
+                    color = GrayTextColor,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
+                )
+                DatePickerForBook(
+                    currentDate = state.selectedDate,
+                    currentTime = state.selectedStartTime,
+                    cabinet = state.cabinet,
+                    onCabinetChange = vm::onCabinetChange,
+                    onDateClick = { showDatePicker.value = true },
+                    onStartTimeClick = { showStartTimePicker.value = true },
+                    onEndTimeClick = { showEndTimePicker.value = true },
+                    endTime = state.selectedEndTime
+                )
+                Text(
+                    stringResource(R.string.participant),
+                    modifier = Modifier.fillMaxWidth().padding(top = 20.dp, start = 16.dp),
+                    color = GrayTextColor,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
+                )
+                Box(
+                    Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 7.dp)
+                        .height(70.dp)
+                        .shadow(3.dp, RoundedCornerShape(15.dp))
+                        .clip(RoundedCornerShape(15.dp))
+                        .background(Color.White)
+                ) {
+                    Column(Modifier.fillMaxSize()) {
+                        Row(
+                            Modifier.fillMaxSize().padding(vertical = 16.dp, horizontal = 14.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "${state.selectedUsers.size} из 20",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            Box(Modifier.weight(1f)) {
+                                CustomTextField2(
+                                    value = state.searchQuery,
+                                    onValueChange = vm::onSearchQueryChange,
+                                    placeholder = stringResource(R.string.search),
+                                    height = 40,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(5.dp))
+                if (state.selectedUsers.isNotEmpty()) {
+                    val selectedUserDetails =
+                        state.searchResults.filter { it.id in state.selectedUsers }
+                    if (selectedUserDetails.isNotEmpty()) {
+                        Text(
+                            "Выбранные участники:",
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(start = 16.dp, bottom = 8.dp),
+                            color = GrayTextColor,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
+                        )
+                        FlowRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            selectedUserDetails.forEach { user ->
+                                Card(
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = BlueMain.copy(alpha = 0.1f)
+                                    ),
+                                    modifier = Modifier.padding(2.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(
+                                            horizontal = 8.dp,
+                                            vertical = 4.dp
+                                        )
+                                    ) {
+                                        AsyncImage(
+                                            model = user.photoUrl,
+                                            contentDescription = "",
+                                            modifier = Modifier.size(24.dp).clip(CircleShape),
+                                            error = painterResource(R.drawable.ic_launcher_foreground)
+                                        )
+                                        Spacer(Modifier.width(6.dp))
+                                        Text(
+                                            "${user.firstName} ${user.secondName}",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Normal
+                                        )
+                                        Spacer(Modifier.width(4.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .size(16.dp)
+                                                .clickable { vm.removeParticipant(user.id) }
+                                        ) {
+                                            Text(
+                                                "×",
+                                                fontSize = 14.sp,
+                                                color = Color.Red,
+                                                modifier = Modifier.align(Alignment.Center)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
+                    }
+                }
+
+                if (state.isLoading && state.searchResults.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(100.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = BlueMain)
+                    }
+                } else if (state.searchResults.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 100.dp, max = 400.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
+                        state = lazyListState
+                    ) {
+                        items(state.searchResults) { user ->
+                            val isSelected = user.id in state.selectedUsers
+
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (isSelected) BlueMain.copy(alpha = 0.1f) else Color.White
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                                    .border(
+                                        width = if (isSelected) 2.dp else 1.dp,
+                                        color = if (isSelected) BlueMain else Color.LightGray.copy(
+                                            alpha = 0.3f
+                                        ),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ),
+                                onClick = {
+                                    if (isSelected) {
+                                        vm.removeParticipant(user.id)
+                                    } else {
+                                        if (state.selectedUsers.size < 20) {
+                                            vm.addParticipant(user)
+                                        }
+                                    }
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    AsyncImage(
+                                        model = user.photoUrl,
+                                        contentDescription = "${user.firstName} ${user.secondName}",
+                                        modifier = Modifier.size(40.dp).clip(CircleShape),
+                                        error = painterResource(R.drawable.ic_launcher_foreground)
+                                    )
+                                    Spacer(Modifier.width(12.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            "${user.firstName} ${user.secondName}",
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 16.sp
+                                        )
+                                    }
+                                    if (isSelected) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .background(BlueMain, CircleShape)
+                                        ) {
+                                            Text(
+                                                "✓",
+                                                color = Color.White,
+                                                fontSize = 12.sp,
+                                                modifier = Modifier.align(Alignment.Center)
+                                            )
+                                        }
+                                    } else {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .border(
+                                                    width = 2.dp,
+                                                    color = Color.LightGray,
+                                                    shape = CircleShape
+                                                )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        item {
+                            if (state.isLoading && state.searchResults.isNotEmpty()) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = BlueMain)
+                                }
+                            } else if (!state.isLastPage && state.searchQuery.isNotEmpty()) {
+                                LaunchedEffect(lazyListState) {
+                                    if (lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ==
+                                        lazyListState.layoutInfo.totalItemsCount - 1
+                                    ) {
+                                        vm.searchUsers()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if (state.searchQuery.isNotEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(100.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Пользователи не найдены",
+                            color = GrayTextColor,
+                            fontSize = 14.sp
                         )
                     }
-                    Text(
-                        "${personCounter.value} из 100",
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
                 }
             }
         }
-        if (showDateP.value) {
-            showTimeP.value = false
+
+        if (showDatePicker.value) {
             DatePickerModal(
-                onDateSelected = { currentDate.value = Instant.ofEpochMilli(it?:1).atZone(ZoneId.systemDefault()).toLocalDate()},
-                onDismiss = { showDateP.value = false }
+                initialDate = state.selectedDate,
+                onDateSelected = { selectedDate ->
+                    selectedDate?.let {
+                        vm.onDateChange(Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate())
+                    }
+                    showDatePicker.value = false
+                },
+                onDismiss = { showDatePicker.value = false }
             )
         }
-        if (showTimeP.value) {
-            showDateP.value = false
-            Box(Modifier.shadow(3.dp, RoundedCornerShape(15.dp)).clip(RoundedCornerShape(15.dp)).background(Color.White), contentAlignment = Alignment.Center) {
-                TimePicker1(
-                    currentTime = currentTime,
-                    onDismiss = { showTimeP.value = false },
-                    onCon = {
-                        showTimeP.value = false }
-                )
-            }
+
+        if (showStartTimePicker.value) {
+            TimePickerModal(
+                initialTime = state.selectedStartTime,
+                onTimeSelected = { hour, minute ->
+                    vm.onStartTimeChange(LocalTime.of(hour, minute))
+                    val newStartTime = LocalTime.of(hour, minute)
+                    if (newStartTime >= state.selectedEndTime) {
+                        vm.onEndTimeChange(newStartTime.plusHours(1))
+                    }
+                    showStartTimePicker.value = false
+                },
+                onDismiss = { showStartTimePicker.value = false }
+            )
+        }
+
+        if (showEndTimePicker.value) {
+            TimePickerModal(
+                initialTime = state.selectedEndTime,
+                onTimeSelected = { hour, minute ->
+                    vm.onEndTimeChange(LocalTime.of(hour, minute))
+                    showEndTimePicker.value = false
+                },
+                onDismiss = { showEndTimePicker.value = false }
+            )
         }
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TimePicker1(
-    currentTime: MutableState<LocalTime>,
-    onDismiss: () -> Unit,
-    onCon: () -> Unit
-) {
 
-    val timePickerState = rememberTimePickerState(
-        initialHour = currentTime.value.hour,
-        initialMinute = currentTime.value.minute,
-        is24Hour = true,
-    )
-
-    Column(Modifier.fillMaxWidth(0.9f)) {
-        TimePicker(
-            state = timePickerState,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            colors = TimePickerDefaults.colors(clockDialColor = Color.White,
-                selectorColor = BlueMain.copy(0.8f),
-                timeSelectorSelectedContainerColor = Color(0xff155DFC).copy(0.4f),
-                timeSelectorUnselectedContainerColor = Color.White)
-        )
-        Row(Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 15.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel), color = GrayTextColor)
-            }
-            TextButton(onClick = {currentTime.value = currentTime.value.withHour(timePickerState.hour)
-                .withMinute(timePickerState.minute)
-                onCon()
-            }) {
-                Text(stringResource(R.string.confirm), color = BlueMain)
-            }
-        }
-    }
+private fun validateMeeting(state: BookUiState): Boolean {
+    return state.title.isNotBlank() &&
+            state.description.isNotBlank() &&
+            state.selectedStartTime < state.selectedEndTime &&
+            state.cabinet.isNotBlank() &&
+            state.cabinet != "Не выбрано"
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerModal(
-    onDateSelected: (Long?) -> Unit,
-    onDismiss: () -> Unit
+fun DatePickerForBook(
+    currentDate: LocalDate,
+    currentTime: LocalTime,
+    cabinet: String,
+    onCabinetChange: (String) -> Unit,
+    endTime: LocalTime,
+    onDateClick: () -> Unit,
+    onStartTimeClick: () -> Unit,
+    onEndTimeClick: () -> Unit
 ) {
-    val datePickerState = rememberDatePickerState()
-
-    DatePickerDialog(colors = DatePickerDefaults.colors(containerColor = Color.White,
-        dayInSelectionRangeContentColor = Color.White),
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = {
-                onDateSelected(datePickerState.selectedDateMillis)
-                onDismiss()
-            }) {
-                Text(stringResource(R.string.ok), color = BlueMain)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel), color = Color(0xff6E6C6C))
-            }
-        }
+    Box(
+        Modifier
+            .padding(start = 16.dp, end = 16.dp, top = 10.dp)
+            .shadow(3.dp, RoundedCornerShape(15.dp))
+            .clip(RoundedCornerShape(15.dp))
+            .background(Color.White)
     ) {
-        DatePicker(state = datePickerState, colors = DatePickerDefaults.colors(containerColor = Color.White,
-            selectedDayContainerColor = BlueMain.copy(0.8f),
-            todayDateBorderColor = BlueMain.copy(0.8f),
-            todayContentColor = BlueMain.copy(0.8f)))
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun DatePickerForBook(currentDate: MutableState<LocalDate>,
-                      currentTime: MutableState<LocalTime>,
-                      endTime: MutableState<LocalTime>,
-                      cabinet: MutableState<String>,
-                      enabled1: MutableState<Boolean>,
-                      enabled2: MutableState<Boolean>) {
-//    val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-//    val currentDateAndTime = sdf.format(currentTime.value)
-    endTime.value = currentTime.value.plusHours(1)
-    Box(Modifier
-        .padding(start = 16.dp, end = 16.dp, top = 10.dp)
-        .shadow(3.dp, RoundedCornerShape(15.dp))
-        .clip(RoundedCornerShape(15.dp))
-        .background(Color.White)) {
-        Column() {
-            Row(Modifier.fillMaxWidth().padding(start = 15.dp), horizontalArrangement =
-                Arrangement.SpaceBetween) {
-                Column() {
-                    Text(stringResource(R.string.date), fontSize = 12.sp,
+        Column {
+            Row(
+                Modifier.fillMaxWidth().padding(start = 15.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        stringResource(R.string.date),
+                        fontSize = 12.sp,
                         color = GrayTextColor,
                         modifier = Modifier.padding(top = 10.dp),
                         fontWeight = FontWeight.SemiBold
                     )
-                    Text("${currentDate.value.dayOfMonth}.${currentDate.value.monthValue}.${currentDate.value.year}",
-                        fontSize = 14.sp, modifier = Modifier.padding(top = 5.dp, bottom = 2.dp),
-                        fontWeight = FontWeight.SemiBold)
+                    Text(
+                        "${currentDate.dayOfMonth}.${currentDate.monthValue}.${currentDate.year}",
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(top = 5.dp, bottom = 2.dp),
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
-                IconButton(onClick = {
-                    enabled1.value = !enabled1.value
-                },
-                    modifier = Modifier.align(Alignment.CenterVertically)){
+                IconButton(
+                    onClick = onDateClick,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                ) {
                     Icon(Icons.Outlined.DateRange, "")
                 }
             }
             HorizontalDivider(color = Color(0xffD9D9D9), thickness = 1.dp)
             Row(Modifier.height(48.dp)) {
-                Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.weight(1f)) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.weight(1f)
+                ) {
                     Column(Modifier.padding(top = 5.dp, start = 14.dp)) {
-                        Text(stringResource(R.string.start), fontSize = 12.sp,
+                        Text(
+                            stringResource(R.string.start),
+                            fontSize = 12.sp,
                             color = GrayTextColor,
-                            fontWeight = FontWeight.SemiBold)
-                        Text(currentTime.value.format(DateTimeFormatter.ofPattern(
-                            "HH:mm", Locale("ru")
-                        )), fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.padding(top = 4.dp, bottom = 2.dp))
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            currentTime.format(DateTimeFormatter.ofPattern("HH:mm", Locale("ru"))),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)
+                        )
                     }
-                    IconButton(onClick = {enabled2.value = !enabled2.value}) {
-                        Icon(painterResource(R.drawable.clock), "",
-                            Modifier.size(16.dp))
+                    IconButton(onClick = onStartTimeClick) {
+                        Icon(
+                            painterResource(R.drawable.clock),
+                            "",
+                            Modifier.size(16.dp)
+                        )
                     }
                 }
                 VerticalDivider()
                 Row(Modifier.weight(1f)) {
-                    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.weight(1f)) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Column(Modifier.padding(top = 5.dp, start = 14.dp)) {
-                            Text(stringResource(R.string.end), fontSize = 12.sp,
+                            Text(
+                                stringResource(R.string.end),
+                                fontSize = 12.sp,
                                 color = GrayTextColor,
-                                fontWeight = FontWeight.SemiBold)
-                            Text(endTime.value.format(DateTimeFormatter.ofPattern(
-                                "HH:mm", Locale("ru")
-                            )), fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(top = 4.dp, bottom = 2.dp))
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                endTime.format(DateTimeFormatter.ofPattern("HH:mm", Locale("ru"))),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)
+                            )
                         }
-                        IconButton(onClick = {enabled2.value = !enabled2.value}) {
-                            Icon(painterResource(R.drawable.clock), "",
-                                Modifier.size(16.dp))
+                        IconButton(onClick = onEndTimeClick) {
+                            Icon(
+                                painterResource(R.drawable.clock),
+                                "",
+                                Modifier.size(16.dp)
+                            )
                         }
                     }
                 }
             }
             HorizontalDivider()
-            Row() {
+            Row {
                 Column(Modifier.padding(start = 5.dp, top = 4.dp)) {
-                    Text(stringResource(R.string.cabinet), fontSize = 12.sp,
+                    Text(
+                        stringResource(R.string.cabinet),
+                        fontSize = 12.sp,
                         color = GrayTextColor,
-                        fontWeight = FontWeight.SemiBold)
+                        fontWeight = FontWeight.SemiBold
+                    )
                     CustomTextField3(
-                        value = cabinet.value,
-                        onValueChange = {cabinet.value = it},
+                        value = cabinet,
+                        onValueChange = onCabinetChange,
                         placeholder = "Не выбрано",
-                        height =  30,
+                        height = 30,
                         modifier = Modifier.padding(end = 5.dp)
                     )
                 }
@@ -372,6 +618,109 @@ fun DatePickerForBook(currentDate: MutableState<LocalDate>,
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimePickerModal(
+    initialTime: LocalTime,
+    onTimeSelected: (Int, Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val timePickerState = rememberTimePickerState(
+        initialHour = initialTime.hour,
+        initialMinute = initialTime.minute,
+        is24Hour = true,
+    )
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.5f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .shadow(3.dp, RoundedCornerShape(15.dp))
+                .clip(RoundedCornerShape(15.dp))
+                .background(Color.White),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            TimePicker(
+                state = timePickerState,
+                colors = TimePickerDefaults.colors(
+                    clockDialColor = Color.White,
+                    selectorColor = BlueMain.copy(0.8f),
+                    timeSelectorSelectedContainerColor = Color(0xff155DFC).copy(0.4f),
+                    timeSelectorUnselectedContainerColor = Color.White
+                )
+            )
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 15.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.cancel), color = GrayTextColor)
+                }
+                TextButton(onClick = {
+                    onTimeSelected(timePickerState.hour, timePickerState.minute)
+                }) {
+                    Text(stringResource(R.string.confirm), color = BlueMain)
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerModal(
+    initialDate: LocalDate,
+    onDateSelected: (Long?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = initialDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    )
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.5f)),
+        contentAlignment = Alignment.Center
+    ) {
+        DatePickerDialog(
+            colors = DatePickerDefaults.colors(
+                containerColor = Color.White,
+                dayInSelectionRangeContentColor = Color.White
+            ),
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                TextButton(onClick = {
+                    onDateSelected(datePickerState.selectedDateMillis)
+                }) {
+                    Text(stringResource(R.string.ok), color = BlueMain)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.cancel), color = Color(0xff6E6C6C))
+                }
+            }
+        ) {
+            DatePicker(
+                state = datePickerState,
+                colors = DatePickerDefaults.colors(
+                    containerColor = Color.White,
+                    selectedDayContainerColor = BlueMain.copy(0.8f),
+                    todayDateBorderColor = BlueMain.copy(0.8f),
+                    todayContentColor = BlueMain.copy(0.8f)
+                )
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CustomTextField2(
@@ -446,7 +795,7 @@ fun CustomTextField2(
                         if (value.isEmpty()) {
                             Text(
                                 text = placeholder,
-                                color =GrayTextColor,
+                                color = GrayTextColor,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -458,6 +807,7 @@ fun CustomTextField2(
         }
     }
 }
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CustomTextField3(
@@ -532,7 +882,7 @@ fun CustomTextField3(
                         if (value.isEmpty()) {
                             Text(
                                 text = placeholder,
-                                color =GrayTextColor,
+                                color = GrayTextColor,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -544,6 +894,3 @@ fun CustomTextField3(
         }
     }
 }
-
-
-

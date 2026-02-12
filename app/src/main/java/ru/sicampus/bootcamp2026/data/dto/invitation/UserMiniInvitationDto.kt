@@ -10,5 +10,5 @@ data class UserMiniInvitationDto(
     @SerialName("secondName") val secondName: String,
     @SerialName("photoUrl") val photoUrl: String,
     @SerialName("status") val status: String,
-    @SerialName("respondedAt") val respondedAt: String
+    @SerialName("respondedAt") val respondedAt: String?=null
 )

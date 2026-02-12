@@ -13,18 +13,20 @@ import kotlinx.coroutines.withContext
 import ru.sicampus.bootcamp2026.core.Constants
 import ru.sicampus.bootcamp2026.data.dto.auth.RegisterRequest
 import ru.sicampus.bootcamp2026.data.dto.user.UserDto
+import ru.sicampus.bootcamp2026.utils.SettingsUtils
 
 class AuthNetworkDataSource {
 
     // login
-    suspend fun checkAuth(token: String?): Result<Boolean> = withContext(Dispatchers.IO) {
+    suspend fun checkAuth(token: String?, email: String, password: String, settingsUtils: SettingsUtils): Result<Boolean> = withContext(Dispatchers.IO) {
         runCatching {
-            val response = ApiClient.client.get(Constants.LOGIN_ENDPOINT) {
-                header(HttpHeaders.Authorization, token)
-            }
+            val response = ApiClient.client.get(Constants.LOGIN_ENDPOINT)
 
             when (response.status) {
-                HttpStatusCode.OK -> true
+                HttpStatusCode.OK -> {
+                    settingsUtils.setProfileData(response.body<UserDto>().id, email, password)
+                    true
+                }
                 HttpStatusCode.Unauthorized -> error("Логин или пароль неправильные")
                 else -> error("Ошибка сервера: ${response.status} ${response.bodyAsText()}")
             }

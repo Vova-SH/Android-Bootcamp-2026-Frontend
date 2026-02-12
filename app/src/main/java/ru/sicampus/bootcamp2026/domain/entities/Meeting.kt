@@ -9,9 +9,9 @@ data class Meeting(
     val title: String,
     val address: String,
     val description: String? = null,
-    val date: String,
-    val timeStart: LocalDateTime,
-    val timeEnd: LocalDateTime,
+    val date: LocalDate,
+    val timeStart: LocalTime,
+    val timeEnd: LocalTime,
     val organizer: UserMini,
     val participants: List<UserMiniInvitation> = emptyList(),
     val createdAt: LocalDateTime

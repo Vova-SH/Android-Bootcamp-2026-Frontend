@@ -149,7 +149,6 @@ fun SignUpScreen(
 
     LaunchedEffect(uiState) {
         if (uiState.isSignUpSuccess) {
-            SettingsUtils(context).setProfileData(uiState.email, uiState.password)
             context.startActivity(
                 Intent(context, RootActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

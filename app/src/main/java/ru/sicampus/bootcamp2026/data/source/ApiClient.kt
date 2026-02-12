@@ -7,7 +7,9 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.header
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -37,6 +39,9 @@ object ApiClient {
             defaultRequest {
                 url(Constants.BASE_URL)
                 contentType(ContentType.Application.Json)
+                AuthLocalDataSource.token?.let { token ->
+                    header(HttpHeaders.Authorization, token)
+                }
             }
         }
     }

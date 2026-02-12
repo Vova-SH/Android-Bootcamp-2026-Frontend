@@ -14,7 +14,7 @@ object SignUpViewModelFactory {
     fun create(context: Context): ViewModelProvider.Factory = viewModelFactory {
         initializer {
             val authNetworkDataSource = AuthNetworkDataSource()
-            val authLocalDataSource = AuthLocalDataSource()
+            val authLocalDataSource = AuthLocalDataSource
             val settingsUtils = SettingsUtils(context)
             val authRepository = AuthRepository(authNetworkDataSource, authLocalDataSource, settingsUtils)
             val loginUseCase = RegisterUseCase(authRepository)

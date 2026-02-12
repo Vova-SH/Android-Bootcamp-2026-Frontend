@@ -7,4 +7,6 @@ sealed interface ProfileState {
     object Error: ProfileState
     object EditData : ProfileState
 
+    object Search : ProfileState
+
 }

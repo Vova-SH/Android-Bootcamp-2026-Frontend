@@ -4,7 +4,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import ru.sicampus.bootcamp2026.data.dto.user.UserMiniDto
 import ru.sicampus.bootcamp2026.data.dto.invitation.UserMiniInvitationDto
-import java.time.LocalDateTime
 
 @Serializable
 data class MeetingDto(

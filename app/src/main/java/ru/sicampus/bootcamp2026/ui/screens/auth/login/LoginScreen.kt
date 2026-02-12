@@ -57,7 +57,6 @@ import androidx.navigation.NavHostController
 import ru.sicampus.bootcamp2026.R
 import ru.sicampus.bootcamp2026.ui.root.RootActivity
 import ru.sicampus.bootcamp2026.ui.root.theme.BlueMain
-import ru.sicampus.bootcamp2026.utils.SettingsUtils
 import android.util.Patterns
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
@@ -118,9 +117,6 @@ fun LoginScreen(
 
     LaunchedEffect(uiState.isLoginSuccess) {
         if (uiState.isLoginSuccess) {
-            // Сохраняем данные
-            SettingsUtils(context).setProfileData(uiState.email, uiState.password)
-
             context.startActivity(
                 Intent(context, RootActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

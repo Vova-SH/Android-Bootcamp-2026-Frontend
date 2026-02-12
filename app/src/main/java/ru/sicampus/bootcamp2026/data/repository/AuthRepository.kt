@@ -1,5 +1,6 @@
 package ru.sicampus.bootcamp2026.data.repository
 
+import ru.sicampus.bootcamp2026.data.dto.user.UserDto
 import ru.sicampus.bootcamp2026.data.source.AuthNetworkDataSource
 import ru.sicampus.bootcamp2026.data.source.AuthLocalDataSource
 import ru.sicampus.bootcamp2026.domain.entities.User
@@ -16,7 +17,8 @@ class AuthRepository(
         authLocalDataSource.setToken(email, password)
 
         return authNetworkDataSource.checkAuth(
-            authLocalDataSource.token ?: return Result.success(false)
+            authLocalDataSource.token ?: return Result.success(false),
+            email, password, settingsUtils
         ).onSuccess { isLogin ->
             if (!isLogin) authLocalDataSource.clearToken()
         }.onFailure {
@@ -31,7 +33,7 @@ class AuthRepository(
         secondName: String
     ): Result<User> {
         return authNetworkDataSource.register(email, password, firstName, secondName).map { userDto ->
-            settingsUtils.setProfileData(email, password)
+            settingsUtils.setProfileData(userDto.id, email, password)
             UserMapper.toEntity(userDto)
         }
     }

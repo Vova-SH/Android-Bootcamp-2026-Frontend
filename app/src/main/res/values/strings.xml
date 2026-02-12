@@ -21,7 +21,7 @@
     <string name="main_word">Основное</string>
     <string name="description">Описание или повестка</string>
     <string name="date_and_place">Время и место</string>
-    <string name="participant">участник</string>
+    <string name="participant">Участники</string>
     <string name="date">Дата</string>
     <string name="start">Начало</string>
     <string name="end">Конец</string>

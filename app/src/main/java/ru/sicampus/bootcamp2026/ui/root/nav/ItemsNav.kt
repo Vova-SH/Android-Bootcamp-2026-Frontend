@@ -23,6 +23,10 @@ object ItemsNav {
         BottomNavItem(
             label = "book",
             route = "booking"
+        ),
+        BottomNavItem(
+            label = "details",
+            route = "details"
         )
     )
 
