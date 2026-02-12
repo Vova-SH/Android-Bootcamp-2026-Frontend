@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,6 +49,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.data.UserRepository
+import ru.sicampus.bootcamp2026.data.dto.InvitationDto
 import ru.sicampus.bootcamp2026.data.source.MeetingDto
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -55,32 +57,32 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainHomeScreen(navController: NavController, userRepository: UserRepository? = null) {
+fun InviteScreen(navController: NavController, userRepository: UserRepository? = null) {
     var selectedDate by remember { mutableStateOf<Long?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
-    var meetings by remember { mutableStateOf(emptyList<MeetingDto>()) }
+    var invitations by remember { mutableStateOf(emptyList<InvitationDto>()) }
+    var currentUserId by remember { mutableStateOf(1L) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
+
     val coroutineScope = rememberCoroutineScope()
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val displayDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("ru"))
 
     val datePickerState = rememberDatePickerState()
 
-    LaunchedEffect(selectedDate) {
-        if (selectedDate != null && userRepository != null) {
+    LaunchedEffect(Unit) {
+        if (userRepository != null) {
             isLoading = true
             errorMessage = ""
-            val dateString = dateFormat.format(Date(selectedDate!!))
 
             coroutineScope.launch {
-                val result = userRepository.getMeetingsByDate(dateString)
-                result.onSuccess { meetingsList ->
-                    meetings = meetingsList
+                val result = userRepository.getInvitationsByPersonId(currentUserId)
+                result.onSuccess { invitationsList ->
+                    invitations = invitationsList
                 }.onFailure { exception ->
-                    errorMessage = "Ошибка загрузки: ${exception.message}"
-                    meetings = emptyList()
+                    invitations = emptyList()
+                    errorMessage = "Ошибка загрузки приглашений: ${exception.message}"
                 }
                 isLoading = false
             }
@@ -109,7 +111,7 @@ fun MainHomeScreen(navController: NavController, userRepository: UserRepository?
     }
 
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController) },
+        bottomBar = { BottomNavigation(navController) },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
@@ -118,9 +120,9 @@ fun MainHomeScreen(navController: NavController, userRepository: UserRepository?
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            HeaderSection()
+            Header()
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
             // DatePicker кнопка
             Button(
@@ -145,7 +147,7 @@ fun MainHomeScreen(navController: NavController, userRepository: UserRepository?
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
             if (errorMessage.isNotEmpty()) {
                 Text(
@@ -154,148 +156,189 @@ fun MainHomeScreen(navController: NavController, userRepository: UserRepository?
                     modifier = Modifier.padding(horizontal = 16.dp),
                     fontSize = 14.sp
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(Modifier.height(8.dp))
             }
 
             if (isLoading) {
+                Text("Загрузка приглашений...")
+            } else if (invitations.isNotEmpty()) {
                 Text(
-                    text = "Загрузка расписания...",
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    fontSize = 16.sp
-                )
-            } else if (meetings.isNotEmpty()) {
-                Text(
-                    text = if (selectedDate != null) "Мероприятия на выбранную дату" else "Мероприятия на сегодня",
+                    text = "Мои приглашения",
                     modifier = Modifier.padding(start = 16.dp),
-                    fontSize = 20.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Medium
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(Modifier.height(12.dp))
 
                 Column(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    meetings.forEach { meeting ->
-                        ScheduleCard(
-                            title = meeting.title,
-                            time = meeting.endTime
+                    invitations.forEach { invitation ->
+                        InviteCard(
+                            title = "Приглашение от ${invitation.personName}",
+                            date = "Встреча #${invitation.meetingId}",
+                            status = invitation.status
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-fun HeaderSection() {
+fun Header() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(140.dp)
+            .height(180.dp)
             .background(MaterialTheme.colorScheme.primary)
             .padding(20.dp)
     ) {
         Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+            }
+            Spacer(Modifier.height(24.dp))
             Text(
-                text = "Расписание",
+                text = "Приглашения",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(8.dp))
             Text(
                 text = "Выберите дату для просмотра",
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onPrimary
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
         }
     }
 }
 
 @Composable
-fun ScheduleCard(
+fun InviteCard(
     title: String,
-    time: String,
+    date: String,
+    status: String
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(76.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = title,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(title, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Spacer(Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("📅", modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(date)
+            }
+            Spacer(Modifier.height(8.dp))
+
+            // Показываем статус
+            Text(
+                text = "Статус: $status",
+                color = when (status) {
+                    "PENDING" -> Color(0xFFF57C00)
+                    "ACCEPTED" -> Color(0xFF388E3C)
+                    "DECLINED" -> Color(0xFFD32F2F)
+                    else -> Color.Gray
+                }
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            if (status == "PENDING") {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("⏰", modifier = Modifier.size(14.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Spacer(Modifier.width(4.dp))
-                        Text(time, fontSize = 11.sp)
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("👤", modifier = Modifier.size(14.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Spacer(Modifier.width(4.dp))
-                            //Text(members, fontSize = 11.sp)
-                    }
+                    ActionButton(
+                        text = "Принять",
+                        color = Color(0xFF33C75A),
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            // TODO: отправить запрос на принятие
+                        }
+                    )
+                    ActionButton(
+                        text = "Отклонить",
+                        color = Color(0xFFE53935),
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            // TODO: отправить запрос на отклонение
+                        }
+                    )
                 }
             }
-//            if (confirmed) {
-//                Surface(
-//                    shape = RoundedCornerShape(20.dp),
-//                    color = Color(0xFFCCFCD1)
-//                ) {
-//                    Text(
-//                        text = "Подтверждено",
-//                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-//                        fontSize = 11.sp,
-//                        color = Color(0xFF0A6E20)
-//                    )
-//                }
-//            }
         }
     }
 }
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.primary
+fun ActionButton(
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.height(40.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = color),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(100.dp)
     ) {
+        Text(text)
+    }
+}
+
+@Composable
+fun ActionButton(
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = {},
+        modifier = modifier.height(40.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = color),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(100.dp)
+    ) {
+        Text(text)
+    }
+}
+
+@Composable
+fun BottomNavigation(navController: NavController) {
+    NavigationBar(containerColor = MaterialTheme.colorScheme.primary) {
         NavigationBarItem(
-            selected = true,
-            onClick = {},
+            selected = false,
+            onClick = {
+                navController.navigate("main") {
+                    popUpTo("main") { inclusive = true }
+                }
+            },
             icon = { Text("📅") },
             label = { Text("Расписание") }
         )
         NavigationBarItem(
-            selected = false,
-            onClick = {
-                navController.navigate("meetings") {
-                    popUpTo("meetings") { inclusive = true }
-                }
-            },
+            selected = true,
+            onClick = {},
             icon = { Text("✉️") },
             label = { Text("Приглашения") }
         )
@@ -310,11 +353,11 @@ fun BottomNavigationBar(navController: NavController) {
     }
 }
 
-@Preview(showBackground = true, widthDp = 1280, heightDp = 520)
+@Preview(showBackground = true, widthDp = 360, heightDp = 640)
 @Composable
-fun MainHomePreview() {
+fun InvitePreview() {
     val navController = rememberNavController()
     MaterialTheme {
-        MainHomeScreen(navController)
+        InviteScreen(navController)
     }
 }

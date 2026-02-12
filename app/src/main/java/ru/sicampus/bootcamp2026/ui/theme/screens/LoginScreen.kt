@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import coil3.compose.AsyncImage
+import kotlinx.coroutines.launch
 import ru.sicampus.bootcamp2026.data.UserRepository
 import ru.sicampus.bootcamp2026.data.dto.UserDto
 import ru.sicampus.bootcamp2026.data.source.UserInfoDataSource
@@ -49,12 +50,16 @@ fun LoginScreen(
     navController: NavController,
     userRepository: UserRepository
 ) {
-
-    var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    val coroutineScope = rememberCoroutineScope()
+    var email by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        UserRepository.getUsers(userRepository)
+        val result = userRepository.getUsers()
     }
 
     Box(
@@ -79,11 +84,8 @@ fun LoginScreen(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primary
             ) {
-                AsyncImage(
-                    model = "https://i.pinimg.com/736x/8c/da/a0/8cdaa0d82bc09570f348d96657324d87.jpg",
-                    contentDescription = "Profile image",
-                    modifier = Modifier.size(100.dp)
-                )
+                // Простая заглушка вместо AsyncImage
+                Text(text = "A", modifier = Modifier.size(100.dp))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -106,9 +108,9 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Username") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 singleLine = true,
@@ -132,18 +134,42 @@ fun LoginScreen(
 
             Button(
                 onClick = {
-                    if (email.isNotBlank() && password.isNotBlank()) {
-                        navController.navigate("main") {
-                            popUpTo("login") { inclusive = true }
-                        }
+                    if (username.isBlank() || password.isBlank()) {
+                        errorMessage = "Заполните все поля"
+                        return@Button
+                    }
+
+                    coroutineScope.launch {
+                        isLoading = true
+                        errorMessage = ""
+
+                        userRepository.login(username, password)
+                            .onSuccess {
+                                isLoading = false
+                                navController.navigate("main") { popUpTo("login") { inclusive = true } }
+                            }
+                            .onFailure { exception ->
+                                isLoading = false
+                                errorMessage = "Ошибка: ${exception.message ?: "Неизвестная ошибка"}"
+                            }
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(100.dp)
+                enabled = !isLoading,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Войти")
+                if (isLoading) {
+                    Text("Загрузка...")
+                } else {
+                    Text("Войти")
+                }
+            }
+
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = "Неверный логин или пароль",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -166,9 +192,8 @@ fun LoginScreen(
 @Composable
 fun PreviewLoginScreen() {
     val navController = rememberNavController()
-
     val fakeDataSource = object : UserInfoDataSource() {
-        override suspend fun getUser(): Result<List<UserDto>> {
+        override suspend fun getAllUsers(): Result<List<UserDto>> {
             return Result.success(emptyList())
         }
     }

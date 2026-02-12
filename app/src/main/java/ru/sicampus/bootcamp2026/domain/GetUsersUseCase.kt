@@ -8,6 +8,6 @@ class GetUsersUseCase(
     private val userRepository: UserRepository
 ) {
     suspend operator fun invoke(): Result<List<UserEntity>> {
-        return UserRepository.getUsers(userRepository)
+        return userRepository.getUsers()
     }
 }
