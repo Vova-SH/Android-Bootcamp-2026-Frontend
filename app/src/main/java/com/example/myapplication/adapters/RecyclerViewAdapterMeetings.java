@@ -9,28 +9,32 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.R;
-import com.example.myapplication.models.recycler.Meeting;
+import com.example.myapplication.api.ApiClient;
+import com.example.myapplication.models.api.Meeting;
+import com.example.myapplication.models.api.UserResponse;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 class RecyclerViewHolderMeetings extends RecyclerView.ViewHolder {
 
-    TextView title, owner, status, time;
+    TextView title, description, owner, data, time;
     public RecyclerViewHolderMeetings(@NonNull View itemView) {
         super(itemView);
         title = itemView.findViewById(R.id.title);
+        description = itemView.findViewById(R.id.description);
         owner = itemView.findViewById(R.id.owner);
-        status = itemView.findViewById(R.id.status);
+        data = itemView.findViewById(R.id.data);
         time = itemView.findViewById(R.id.time);
     }
 }
 public class RecyclerViewAdapterMeetings extends RecyclerView.Adapter<RecyclerViewHolderMeetings>{
 
-    private List<Meeting> meetings;
-
-    public RecyclerViewAdapterMeetings(List<Meeting> meetings) {
-        this.meetings = meetings;
-    }
+    private List<Meeting> meetings = new ArrayList<>();
 
     @NonNull
     @Override
@@ -43,14 +47,50 @@ public class RecyclerViewAdapterMeetings extends RecyclerView.Adapter<RecyclerVi
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewHolderMeetings holder, int position) {
         Meeting meeting = meetings.get(position);
+
         holder.title.setText(meeting.getTitle());
-        holder.owner.setText("Владелец: " + meeting.getOwnerName());
-        holder.status.setText(meeting.getStatus());
-        holder.time.setText(meeting.getTime());
+        holder.description.setText(meeting.getDescription());
+
+
+        String credentials = "tatyanin:example_pass";
+        String base64Credentials = android.util.Base64.encodeToString(
+                credentials.getBytes(),
+                android.util.Base64.NO_WRAP
+        );
+        String authHeader = "Basic " + base64Credentials;
+
+        ApiClient.getApiService()
+                .getUserById(meeting.getOrganizerId(), authHeader)
+                .enqueue(new Callback<UserResponse>() {
+                             @Override
+                             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+                                 String owner = "default";
+                                 owner = response.body().getName();
+                                 holder.owner.setText(owner);
+                             }
+
+                             @Override
+                             public void onFailure(Call<UserResponse> call, Throwable t) {
+                             }
+                         });
+
+        holder.data.setText(meeting.getDate());
+        holder.time.setText(meeting.getStartTime());
     }
 
     @Override
     public int getItemCount() {
         return meetings.size();
+    }
+
+    public void addMeetings(List<Meeting> newMeetings) {
+        int startPos = meetings.size();
+        meetings.addAll(newMeetings);
+        notifyItemRangeInserted(startPos, newMeetings.size());
+    }
+
+    public void clear() {
+        meetings.clear();
+        notifyDataSetChanged();
     }
 }
